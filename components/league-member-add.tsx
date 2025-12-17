@@ -81,6 +81,8 @@ export function LeagueMemberAdd({ leagueId, userId, existingMemberIds, onMembers
     const supabase = createClient()
 
     try {
+      console.log("[v0] Adding members:", selectedFriends)
+
       // メンバーを追加
       const members = selectedFriends.map((friendId) => ({
         league_id: leagueId,
@@ -90,28 +92,46 @@ export function LeagueMemberAdd({ leagueId, userId, existingMemberIds, onMembers
       const { error } = await supabase.from("league_members").insert(members)
       if (error) throw error
 
-      // リーグメンバー同士を自動でフレンド追加
       const allMemberIds = [...existingMemberIds, ...selectedFriends]
       const friendPairs: { requester_id: string; addressee_id: string; status: string }[] = []
 
-      for (const newMemberId of selectedFriends) {
-        for (const existingId of existingMemberIds) {
-          if (newMemberId !== existingId) {
-            friendPairs.push({
-              requester_id: newMemberId < existingId ? newMemberId : existingId,
-              addressee_id: newMemberId < existingId ? existingId : newMemberId,
-              status: "accepted",
-            })
-          }
+      // すべてのメンバーの組み合わせを生成
+      for (let i = 0; i < allMemberIds.length; i++) {
+        for (let j = i + 1; j < allMemberIds.length; j++) {
+          const id1 = allMemberIds[i]
+          const id2 = allMemberIds[j]
+          // 小さいIDを常にrequester_idにして重複を防ぐ
+          friendPairs.push({
+            requester_id: id1 < id2 ? id1 : id2,
+            addressee_id: id1 < id2 ? id2 : id1,
+            status: "accepted",
+          })
         }
       }
 
-      if (friendPairs.length > 0) {
-        await supabase.from("friendships").upsert(friendPairs, {
+      console.log("[v0] Creating friend relationships:", friendPairs.length, "pairs")
+      console.log("[v0] All member IDs:", allMemberIds)
+      console.log("[v0] Current user ID:", userId)
+
+      let successCount = 0
+      let failCount = 0
+
+      for (const pair of friendPairs) {
+        const { error: friendError } = await supabase.from("friendships").upsert([pair], {
           onConflict: "requester_id,addressee_id",
-          ignoreDuplicates: true,
+          ignoreDuplicates: false,
         })
+
+        if (friendError) {
+          console.error(`[v0] Failed pair: ${pair.requester_id} <-> ${pair.addressee_id}`, friendError.message)
+          failCount++
+        } else {
+          console.log(`[v0] Success pair: ${pair.requester_id} <-> ${pair.addressee_id}`)
+          successCount++
+        }
       }
+
+      console.log(`[v0] Friend creation complete: ${successCount} success, ${failCount} failed`)
 
       setSelectedFriends([])
       setOpen(false)

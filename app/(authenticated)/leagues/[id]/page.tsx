@@ -162,6 +162,10 @@ export default async function LeagueDetailPage({
               <span className="font-medium">{league.starting_points.toLocaleString()}</span>
             </div>
             <div>
+              <span className="text-muted-foreground">返し: </span>
+              <span className="font-medium">{league.return_points?.toLocaleString() || "30,000"}</span>
+            </div>
+            <div>
               <span className="text-muted-foreground">対局数: </span>
               <span className="font-medium">{games?.length || 0}戦</span>
             </div>

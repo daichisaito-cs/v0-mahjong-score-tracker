@@ -14,10 +14,13 @@ function isValidUUID(str: string): boolean {
 
 export default async function GameDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ league?: string; session?: string }>
 }) {
   const { id } = await params
+  const { league: leagueParam, session: sessionParam } = await searchParams
   const supabase = await createClient()
 
   const { data: userData, error } = await supabase.auth.getUser()
@@ -72,6 +75,15 @@ export default async function GameDetailPage({
       (league, index, self) => league && index === self.findIndex((l) => l?.id === league?.id),
     )
 
+    let sessionData = null
+    if (sessionParam) {
+      try {
+        sessionData = JSON.parse(decodeURIComponent(sessionParam))
+      } catch (err) {
+        console.error("[v0] Failed to parse session data:", err)
+      }
+    }
+
     return (
       <div className="space-y-6 pb-20 md:pb-0 max-w-2xl mx-auto">
         <div>
@@ -84,6 +96,8 @@ export default async function GameDetailPage({
           currentUserName={myProfile?.display_name || "自分"}
           leagues={(uniqueLeagues as any[]) || []}
           friends={friends}
+          defaultLeagueId={leagueParam}
+          sessionData={sessionData}
         />
       </div>
     )

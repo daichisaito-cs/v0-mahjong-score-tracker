@@ -10,12 +10,26 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Users } from "lucide-react"
+import { Users, AlertCircle } from "lucide-react"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import Link from "next/link"
 
 interface Friend {
   id: string
   display_name: string
   friend_code: string
+}
+
+interface Rule {
+  id: string
+  name: string
+  game_type: string
+  starting_points: number
+  return_points: number
+  uma_first: number
+  uma_second: number
+  uma_third: number
+  uma_fourth: number
 }
 
 interface LeagueCreateFormProps {
@@ -25,27 +39,37 @@ interface LeagueCreateFormProps {
 export function LeagueCreateForm({ userId }: LeagueCreateFormProps) {
   const [name, setName] = useState("")
   const [description, setDescription] = useState("")
-  const [gameType, setGameType] = useState<"four_player" | "three_player">("four_player")
   const [isLoading, setIsLoading] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // ウマ設定
-  const [umaFirst, setUmaFirst] = useState("30")
-  const [umaSecond, setUmaSecond] = useState("10")
-  const [umaThird, setUmaThird] = useState("-10")
-  const [umaFourth, setUmaFourth] = useState("-30")
-  const [startingPoints, setStartingPoints] = useState("25000")
+  const [rules, setRules] = useState<Rule[]>([])
+  const [selectedRuleId, setSelectedRuleId] = useState<string>("")
+  const [loadingRules, setLoadingRules] = useState(true)
 
   const [friends, setFriends] = useState<Friend[]>([])
   const [selectedFriends, setSelectedFriends] = useState<string[]>([])
   const [loadingFriends, setLoadingFriends] = useState(true)
 
   useEffect(() => {
+    const fetchRules = async () => {
+      const supabase = createClient()
+      const { data } = await supabase.from("rules").select("*").order("created_at", { ascending: false })
+
+      setRules(data || [])
+      if (data && data.length > 0) {
+        setSelectedRuleId(data[0].id)
+      }
+      setLoadingRules(false)
+    }
+
+    fetchRules()
+  }, [])
+
+  useEffect(() => {
     const fetchFriends = async () => {
       const supabase = createClient()
 
-      // 承認済みフレンドを取得
       const { data: friendships } = await supabase
         .from("friendships")
         .select("requester_id, addressee_id")
@@ -57,10 +81,8 @@ export function LeagueCreateForm({ userId }: LeagueCreateFormProps) {
         return
       }
 
-      // フレンドのIDを抽出
       const friendIds = friendships.map((f) => (f.requester_id === userId ? f.addressee_id : f.requester_id))
 
-      // フレンドのプロフィールを取得
       const { data: profiles } = await supabase
         .from("profiles")
         .select("id, display_name, friend_code")
@@ -91,58 +113,113 @@ export function LeagueCreateForm({ userId }: LeagueCreateFormProps) {
       return
     }
 
+    if (!selectedRuleId) {
+      setError("ルールを選択してください")
+      setIsLoading(false)
+      return
+    }
+
     const supabase = createClient()
 
     try {
+      const selectedRule = rules.find((r) => r.id === selectedRuleId)
+      if (!selectedRule) {
+        throw new Error("ルールが見つかりません")
+      }
+
+      console.log("[v0] Creating league with:", {
+        name: name.trim(),
+        description: description.trim(),
+        rule_id: selectedRuleId,
+        game_type: selectedRule.game_type,
+        owner_id: userId,
+      })
+
       const { data: league, error: leagueError } = await supabase
         .from("leagues")
         .insert({
           name: name.trim(),
           description: description.trim() || null,
-          game_type: gameType,
-          uma_first: Number.parseInt(umaFirst) || 30,
-          uma_second: Number.parseInt(umaSecond) || 10,
-          uma_third: Number.parseInt(umaThird) || -10,
-          uma_fourth: Number.parseInt(umaFourth) || -30,
-          starting_points: Number.parseInt(startingPoints) || 25000,
+          rule_id: selectedRuleId,
+          game_type: selectedRule.game_type, // game_typeを追加
           owner_id: userId,
         })
         .select()
         .single()
 
-      if (leagueError) throw leagueError
+      if (leagueError) {
+        console.error("[v0] League creation error:", leagueError)
+        throw leagueError
+      }
+
+      console.log("[v0] League created:", league)
 
       const members = [
         { league_id: league.id, user_id: userId },
         ...selectedFriends.map((friendId) => ({ league_id: league.id, user_id: friendId })),
       ]
 
-      const { error: memberError } = await supabase.from("league_members").insert(members)
-      if (memberError) throw memberError
+      console.log("[v0] Inserting members:", members)
 
-      if (selectedFriends.length > 1) {
+      const { error: memberError } = await supabase.from("league_members").insert(members)
+      if (memberError) {
+        console.error("[v0] Member insertion error:", memberError)
+        throw memberError
+      }
+
+      if (selectedFriends.length > 0) {
+        const allMemberIds = [userId, ...selectedFriends]
         const friendPairs: { requester_id: string; addressee_id: string; status: string }[] = []
-        for (let i = 0; i < selectedFriends.length; i++) {
-          for (let j = i + 1; j < selectedFriends.length; j++) {
+
+        // すべてのメンバーペアを作成
+        for (let i = 0; i < allMemberIds.length; i++) {
+          for (let j = i + 1; j < allMemberIds.length; j++) {
+            const [smaller, larger] =
+              allMemberIds[i] < allMemberIds[j]
+                ? [allMemberIds[i], allMemberIds[j]]
+                : [allMemberIds[j], allMemberIds[i]]
+
             friendPairs.push({
-              requester_id: selectedFriends[i],
-              addressee_id: selectedFriends[j],
+              requester_id: smaller,
+              addressee_id: larger,
               status: "accepted",
             })
           }
         }
-        // エラーは無視（既にフレンドの場合など）
-        await supabase
-          .from("friendships")
-          .upsert(friendPairs, { onConflict: "requester_id,addressee_id", ignoreDuplicates: true })
+
+        if (friendPairs.length > 0) {
+          await supabase.from("friendships").upsert(friendPairs, {
+            onConflict: "requester_id,addressee_id",
+            ignoreDuplicates: true,
+          })
+        }
       }
 
       setIsSubmitted(true)
       window.location.href = `/leagues/${league.id}`
     } catch (err) {
+      console.error("[v0] League creation full error:", err)
       setError(err instanceof Error ? err.message : "作成に失敗しました")
       setIsLoading(false)
     }
+  }
+
+  if (loadingRules) {
+    return <p className="text-muted-foreground">読み込み中...</p>
+  }
+
+  if (rules.length === 0) {
+    return (
+      <Alert>
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription className="space-y-3">
+          <p>リーグを作成するには、先にルールを作成する必要があります。</p>
+          <Link href="/rules/new">
+            <Button>ルールを作成</Button>
+          </Link>
+        </AlertDescription>
+      </Alert>
+    )
   }
 
   return (
@@ -175,6 +252,50 @@ export function LeagueCreateForm({ userId }: LeagueCreateFormProps) {
               disabled={isLoading || isSubmitted}
             />
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">ルール選択</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-2">
+            <Label htmlFor="rule">使用するルール *</Label>
+            <select
+              id="rule"
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              value={selectedRuleId}
+              onChange={(e) => setSelectedRuleId(e.target.value)}
+              disabled={isLoading || isSubmitted}
+            >
+              {rules.map((rule) => (
+                <option key={rule.id} value={rule.id}>
+                  {rule.name} ({rule.game_type === "four_player" ? "四麻" : "三麻"})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* ルール詳細プレビュー */}
+          {selectedRuleId && (
+            <div className="rounded-lg border border-border bg-muted/50 p-4 space-y-2">
+              <p className="text-sm font-medium">ルール詳細</p>
+              <div className="text-sm text-muted-foreground space-y-1">
+                <p>
+                  ウマ: {rules.find((r) => r.id === selectedRuleId)?.uma_first} /{" "}
+                  {rules.find((r) => r.id === selectedRuleId)?.uma_second} /{" "}
+                  {rules.find((r) => r.id === selectedRuleId)?.uma_third}
+                  {rules.find((r) => r.id === selectedRuleId)?.game_type === "four_player" &&
+                    ` / ${rules.find((r) => r.id === selectedRuleId)?.uma_fourth}`}
+                </p>
+                <p>
+                  持ち点: {rules.find((r) => r.id === selectedRuleId)?.starting_points.toLocaleString()} 返し:{" "}
+                  {rules.find((r) => r.id === selectedRuleId)?.return_points.toLocaleString()}
+                </p>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -220,109 +341,6 @@ export function LeagueCreateForm({ userId }: LeagueCreateFormProps) {
               フレンドがいません。マイページからフレンドを追加してください。
             </p>
           )}
-        </CardContent>
-      </Card>
-
-      {/* ゲームタイプ */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">対局タイプ</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-3">
-            <Button
-              type="button"
-              variant={gameType === "four_player" ? "default" : "outline"}
-              className="flex-1"
-              disabled={isLoading || isSubmitted}
-              onClick={() => {
-                setGameType("four_player")
-                setUmaFirst("30")
-                setUmaSecond("10")
-                setUmaThird("-10")
-                setUmaFourth("-30")
-              }}
-            >
-              四人麻雀
-            </Button>
-            <Button
-              type="button"
-              variant={gameType === "three_player" ? "default" : "outline"}
-              className="flex-1"
-              disabled={isLoading || isSubmitted}
-              onClick={() => {
-                setGameType("three_player")
-                setUmaFirst("30")
-                setUmaSecond("0")
-                setUmaThird("-30")
-                setUmaFourth("0")
-              }}
-            >
-              三人麻雀
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* ルール設定 */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">ルール設定</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-2">
-            <Label>ウマ</Label>
-            <div className="grid grid-cols-4 gap-2">
-              <div>
-                <Label className="text-xs text-muted-foreground">1位</Label>
-                <Input
-                  type="number"
-                  value={umaFirst}
-                  onChange={(e) => setUmaFirst(e.target.value)}
-                  disabled={isLoading || isSubmitted}
-                />
-              </div>
-              <div>
-                <Label className="text-xs text-muted-foreground">2位</Label>
-                <Input
-                  type="number"
-                  value={umaSecond}
-                  onChange={(e) => setUmaSecond(e.target.value)}
-                  disabled={isLoading || isSubmitted}
-                />
-              </div>
-              <div>
-                <Label className="text-xs text-muted-foreground">3位</Label>
-                <Input
-                  type="number"
-                  value={umaThird}
-                  onChange={(e) => setUmaThird(e.target.value)}
-                  disabled={isLoading || isSubmitted}
-                />
-              </div>
-              {gameType === "four_player" && (
-                <div>
-                  <Label className="text-xs text-muted-foreground">4位</Label>
-                  <Input
-                    type="number"
-                    value={umaFourth}
-                    onChange={(e) => setUmaFourth(e.target.value)}
-                    disabled={isLoading || isSubmitted}
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="startingPoints">持ち点</Label>
-            <Input
-              id="startingPoints"
-              type="number"
-              value={startingPoints}
-              onChange={(e) => setStartingPoints(e.target.value)}
-              disabled={isLoading || isSubmitted}
-            />
-          </div>
         </CardContent>
       </Card>
 

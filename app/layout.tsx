@@ -7,7 +7,7 @@ import "./globals.css"
 const notoSansJP = Noto_Sans_JP({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "雀績 - 麻雀成績管理",
+  title: "Janki - 麻雀成績管理",
   description: "友達との麻雀の記録を簡単につけて、成績を可視化できるアプリ",
     generator: 'v0.app'
 }

@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { ProfileForm } from "@/components/profile-form"
 import { FriendSection } from "@/components/friend-section"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export default async function MyPage() {
   const supabase = await createClient()
@@ -64,25 +65,36 @@ export default async function MyPage() {
     <div className="space-y-6 pb-20 md:pb-0 max-w-2xl mx-auto">
       <div>
         <h1 className="text-2xl font-bold text-foreground">マイページ</h1>
-        <p className="text-muted-foreground">プロフィールとフレンド</p>
+        <p className="text-muted-foreground">プロフィールとフレンド管理</p>
       </div>
 
-      {/* プロフィール編集 */}
-      <ProfileForm
-        initialData={{
-          displayName: profile?.display_name || "",
-          email: profile?.email || userData.user.email || "",
-        }}
-      />
+      <Tabs defaultValue="profile" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="profile">プロフィール</TabsTrigger>
+          <TabsTrigger value="friends">フレンド</TabsTrigger>
+        </TabsList>
 
-      {/* フレンドセクション */}
-      <FriendSection
-        currentUserId={userData.user.id}
-        friendCode={profile?.friend_code || ""}
-        friends={friends}
-        pendingRequests={pendingRequests || []}
-        sentRequests={sentRequests || []}
-      />
+        <TabsContent value="profile" className="space-y-6">
+          <ProfileForm
+            initialData={{
+              displayName: profile?.display_name || "",
+              email: profile?.email || userData.user.email || "",
+              avatarUrl: profile?.avatar_url || null,
+            }}
+            currentEmail={userData.user.email || ""}
+          />
+        </TabsContent>
+
+        <TabsContent value="friends" className="space-y-6">
+          <FriendSection
+            currentUserId={userData.user.id}
+            friendCode={profile?.friend_code || ""}
+            friends={friends}
+            pendingRequests={pendingRequests || []}
+            sentRequests={sentRequests || []}
+          />
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

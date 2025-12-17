@@ -13,19 +13,86 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Home, List, Trophy, User, Menu, LogOut, Plus } from "lucide-react"
+import { Home, List, Trophy, User, LogOut, Plus, Settings } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useEffect, useState } from "react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 const navigation = [
   { name: "ホーム", href: "/dashboard", icon: Home },
   { name: "対局一覧", href: "/games", icon: List },
   { name: "リーグ", href: "/leagues", icon: Trophy },
+  { name: "ルール", href: "/rules", icon: Settings },
   { name: "マイページ", href: "/mypage", icon: User },
 ]
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
+  const [pendingCount, setPendingCount] = useState(0)
+  const [profile, setProfile] = useState<{ display_name: string; avatar_url: string | null } | null>(null)
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const supabase = createClient()
+      const { data: userData } = await supabase.auth.getUser()
+      if (!userData.user) return
+
+      const { data } = await supabase
+        .from("profiles")
+        .select("display_name, avatar_url")
+        .eq("id", userData.user.id)
+        .single()
+      if (data) setProfile(data)
+    }
+
+    fetchProfile()
+
+    const handleProfileUpdate = (event: CustomEvent) => {
+      setProfile(event.detail)
+    }
+
+    window.addEventListener("profile-updated", handleProfileUpdate as EventListener)
+
+    const fetchPendingRequests = async () => {
+      const supabase = createClient()
+      const { data: userData } = await supabase.auth.getUser()
+      if (!userData.user) return
+
+      const { data, error } = await supabase
+        .from("friendships")
+        .select("id")
+        .eq("addressee_id", userData.user.id)
+        .eq("status", "pending")
+
+      if (!error && data) {
+        setPendingCount(data.length)
+      }
+    }
+
+    fetchPendingRequests()
+
+    const supabase = createClient()
+    const channel = supabase
+      .channel("friend-requests")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "friendships",
+        },
+        () => {
+          fetchPendingRequests()
+        },
+      )
+      .subscribe()
+
+    return () => {
+      window.removeEventListener("profile-updated", handleProfileUpdate as EventListener)
+      supabase.removeChannel(channel)
+    }
+  }, [])
 
   const handleSignOut = async () => {
     const supabase = createClient()
@@ -39,52 +106,45 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <header className="sticky top-0 z-50 border-b border-border bg-card">
         <div className="container mx-auto px-4 h-14 flex items-center justify-between">
           <Link href="/dashboard" className="text-lg font-bold text-primary">
-            雀績
+            Janki
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-1">
-            {navigation.map((item) => {
-              const isActive = pathname.startsWith(item.href)
-              return (
-                <Link key={item.name} href={item.href}>
-                  <Button
-                    variant={isActive ? "secondary" : "ghost"}
-                    size="sm"
-                    className={cn("gap-2", isActive && "bg-secondary text-secondary-foreground")}
-                  >
-                    <item.icon className="h-4 w-4" />
-                    {item.name}
-                  </Button>
-                </Link>
-              )
-            })}
-          </nav>
-
           <div className="flex items-center gap-2">
             <Link href="/games/new">
               <Button size="sm" className="gap-2">
                 <Plus className="h-4 w-4" />
-                <span className="hidden sm:inline">対局を記録</span>
+                対局を記録
               </Button>
             </Link>
 
-            {/* Mobile Menu */}
+            {/* Desktop Profile Menu */}
             <DropdownMenu>
-              <DropdownMenuTrigger asChild className="md:hidden">
-                <Button variant="ghost" size="icon">
-                  <Menu className="h-5 w-5" />
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={profile?.avatar_url || undefined} />
+                    <AvatarFallback>{profile?.display_name?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
+                  </Avatar>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                {navigation.map((item) => (
-                  <DropdownMenuItem key={item.name} asChild>
-                    <Link href={item.href} className="flex items-center gap-2">
-                      <item.icon className="h-4 w-4" />
-                      {item.name}
-                    </Link>
-                  </DropdownMenuItem>
-                ))}
+                {navigation.map((item) => {
+                  const showBadge = item.href === "/mypage" && pendingCount > 0
+                  return (
+                    <DropdownMenuItem key={item.name} asChild>
+                      <Link href={item.href} className="flex items-center gap-2">
+                        <item.icon className="h-4 w-4" />
+                        {item.name}
+                        {showBadge && (
+                          <span className="ml-auto h-5 w-5 rounded-full bg-destructive text-white text-xs flex items-center justify-center">
+                            {pendingCount}
+                          </span>
+                        )}
+                      </Link>
+                    </DropdownMenuItem>
+                  )
+                })}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
                   <LogOut className="h-4 w-4 mr-2" />
@@ -92,17 +152,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-
-            {/* Desktop Logout */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleSignOut}
-              className="hidden md:flex gap-2 text-muted-foreground"
-            >
-              <LogOut className="h-4 w-4" />
-              ログアウト
-            </Button>
           </div>
         </div>
       </header>
@@ -115,17 +164,23 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div className="flex items-center justify-around h-16">
           {navigation.map((item) => {
             const isActive = pathname.startsWith(item.href)
+            const showBadge = item.href === "/mypage" && pendingCount > 0
             return (
               <Link
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  "flex flex-col items-center gap-1 px-3 py-2 text-xs",
+                  "flex flex-col items-center gap-1 px-3 py-2 text-xs relative",
                   isActive ? "text-primary" : "text-muted-foreground",
                 )}
               >
                 <item.icon className="h-5 w-5" />
                 {item.name}
+                {showBadge && (
+                  <span className="absolute top-1 right-1 h-4 w-4 rounded-full bg-destructive text-white text-[10px] flex items-center justify-center">
+                    {pendingCount}
+                  </span>
+                )}
               </Link>
             )
           })}

@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Users, Search, UserPlus, Check, X, Copy, Clock } from "lucide-react"
+import { Users, Search, UserPlus, Check, X, Copy, Clock, TrendingUp, Mail } from "lucide-react"
+import Link from "next/link"
 
 type Friend = {
   id: string
@@ -54,6 +55,10 @@ export function FriendSection({ currentUserId, friendCode, friends, pendingReque
   const [localPendingRequests, setLocalPendingRequests] = useState(pendingRequests)
   const [localSentRequests, setLocalSentRequests] = useState(sentRequests)
   const [localFriends, setLocalFriends] = useState(friends)
+
+  const [inviteEmail, setInviteEmail] = useState("")
+  const [isInviting, setIsInviting] = useState(false)
+  const [inviteMessage, setInviteMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
 
   const supabase = createClient()
 
@@ -166,6 +171,35 @@ export function FriendSection({ currentUserId, friendCode, friends, pendingReque
     }
   }
 
+  const sendEmailInvite = async () => {
+    if (!inviteEmail.trim()) return
+
+    setIsInviting(true)
+    setInviteMessage(null)
+
+    const inviteUrl = `${window.location.origin}/auth/sign-up?inviter=${currentUserId}`
+
+    // TODO: 本番環境では実際のメール送信APIを使用
+    // 現在はクリップボードにコピーする仮実装
+    const message = `Jankiに招待します！\n\nこのリンクから登録すると、自動的にフレンド登録されます：\n${inviteUrl}\n\nメールアドレス: ${inviteEmail}`
+
+    try {
+      await navigator.clipboard.writeText(inviteUrl)
+      setInviteMessage({
+        type: "success",
+        text: `招待リンクをコピーしました。${inviteEmail}に送信してください。`,
+      })
+      setInviteEmail("")
+    } catch (error) {
+      setInviteMessage({
+        type: "error",
+        text: "招待リンクのコピーに失敗しました",
+      })
+    }
+
+    setIsInviting(false)
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -185,6 +219,32 @@ export function FriendSection({ currentUserId, friendCode, friends, pendingReque
             </Button>
           </div>
           <p className="text-xs text-muted-foreground mt-1">このIDを友達に共有してフレンド申請を受け取りましょう</p>
+        </div>
+
+        <div className="space-y-3">
+          <Label className="flex items-center gap-2">
+            <Mail className="w-4 h-4" />
+            メールで招待
+          </Label>
+          <div className="flex gap-2">
+            <Input
+              type="email"
+              placeholder="friend@example.com"
+              value={inviteEmail}
+              onChange={(e) => setInviteEmail(e.target.value)}
+            />
+            <Button onClick={sendEmailInvite} disabled={isInviting || !inviteEmail.trim()}>
+              <Mail className="w-4 h-4" />
+            </Button>
+          </div>
+          {inviteMessage && (
+            <p className={`text-sm ${inviteMessage.type === "success" ? "text-green-600" : "text-destructive"}`}>
+              {inviteMessage.text}
+            </p>
+          )}
+          <p className="text-xs text-muted-foreground">
+            招待リンクをクリップボードにコピーします。友達にメールやメッセージで送信してください。
+          </p>
         </div>
 
         {/* フレンド検索 */}
@@ -286,11 +346,19 @@ export function FriendSection({ currentUserId, friendCode, friends, pendingReque
           ) : (
             <div className="space-y-2">
               {localFriends.map((friend) => (
-                <div key={friend.id} className="flex items-center justify-between p-3 border border-border rounded-lg">
-                  <div>
-                    <p className="font-medium">{friend.display_name}</p>
-                    <p className="text-xs text-muted-foreground font-mono">{friend.friend_code}</p>
-                  </div>
+                <div
+                  key={friend.id}
+                  className="flex items-center justify-between p-3 border border-border rounded-lg hover:bg-accent/5 transition-colors group"
+                >
+                  <Link href={`/users/${friend.id}`} className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <div>
+                        <p className="font-medium group-hover:text-chart-1 transition-colors">{friend.display_name}</p>
+                        <p className="text-xs text-muted-foreground font-mono">{friend.friend_code}</p>
+                      </div>
+                      <TrendingUp className="w-4 h-4 text-muted-foreground group-hover:text-chart-1 transition-colors" />
+                    </div>
+                  </Link>
                   <Button
                     size="sm"
                     variant="ghost"

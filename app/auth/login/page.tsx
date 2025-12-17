@@ -43,7 +43,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         <div className="flex flex-col gap-6">
           <Link href="/" className="text-center">
-            <h1 className="text-2xl font-bold text-primary">雀績</h1>
+            <h1 className="text-2xl font-bold text-primary">Janki</h1>
           </Link>
           <Card>
             <CardHeader>

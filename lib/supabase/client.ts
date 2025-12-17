@@ -25,3 +25,5 @@ export function createClient() {
 
   return newClient
 }
+
+export { createClient as createBrowserClient }
