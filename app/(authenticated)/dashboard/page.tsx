@@ -123,8 +123,6 @@ export default function DashboardPage() {
     }
   })
 
-  console.log("[v0] pointsHistory:", pointsHistory)
-
   return (
     <div className="space-y-6 pb-20 md:pb-0">
       {/* Welcome Section */}
