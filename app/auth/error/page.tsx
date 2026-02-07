@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { BrandLogo } from "@/components/brand-logo"
 import Link from "next/link"
 
 export default async function AuthErrorPage({
@@ -13,8 +14,8 @@ export default async function AuthErrorPage({
     <div className="flex min-h-screen w-full items-center justify-center p-6 bg-background">
       <div className="w-full max-w-sm">
         <div className="flex flex-col gap-6">
-          <Link href="/" className="text-center">
-            <h1 className="text-2xl font-bold text-primary">Janki</h1>
+          <Link href="/" className="flex justify-center" aria-label="Janki">
+            <BrandLogo className="h-10 w-auto" priority />
           </Link>
           <Card>
             <CardHeader>

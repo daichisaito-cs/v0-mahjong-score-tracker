@@ -14,15 +14,36 @@ export default async function GamesPage() {
   }
 
   const { data: myResults } = await supabase.from("game_results").select("game_id").eq("user_id", userData.user.id)
+  const { data: memberLeagues } = await supabase
+    .from("league_members")
+    .select("league_id")
+    .eq("user_id", userData.user.id)
+  const { data: ownedLeagues } = await supabase.from("leagues").select("id").eq("owner_id", userData.user.id)
 
   const gameIds = myResults?.map((r) => r.game_id) || []
+  const leagueIds = Array.from(
+    new Set([...(memberLeagues?.map((m) => m.league_id) || []), ...(ownedLeagues?.map((l) => l.id) || [])]),
+  )
 
   let games: any[] = []
+  const orConditions: string[] = []
+  orConditions.push(`created_by.eq.${userData.user.id}`)
   if (gameIds.length > 0) {
+    orConditions.push(`id.in.(${gameIds.join(",")})`)
+  }
+  if (leagueIds.length > 0) {
+    orConditions.push(`league_id.in.(${leagueIds.join(",")})`)
+  }
+
+  if (orConditions.length > 0) {
     const { data } = await supabase
       .from("games")
       .select(`
         *,
+        creator:profiles!games_created_by_fkey (
+          display_name,
+          avatar_url
+        ),
         game_results (
           id,
           game_id,
@@ -31,10 +52,12 @@ export default async function GamesPage() {
           rank,
           raw_score,
           point,
-          created_at
+          bonus_points,
+          created_at,
+          profiles (display_name, avatar_url)
         )
       `)
-      .in("id", gameIds)
+      .or(orConditions.join(","))
       .order("played_at", { ascending: false })
     games = data || []
   }

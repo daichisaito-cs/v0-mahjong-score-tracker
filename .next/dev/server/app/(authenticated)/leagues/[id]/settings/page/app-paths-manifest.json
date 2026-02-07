@@ -1,0 +1,3 @@
+{
+  "/(authenticated)/leagues/[id]/settings/page": "app/(authenticated)/leagues/[id]/settings/page.js"
+}

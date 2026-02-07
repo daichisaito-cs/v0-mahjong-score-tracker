@@ -3,15 +3,36 @@ import { redirect, notFound } from "next/navigation"
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Plus, Trophy, Settings, Users } from "lucide-react"
+import { ArrowLeft, Plus, Trophy, Settings } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { LeagueCreateForm } from "@/components/league-create-form"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { LeagueMemberAdd } from "@/components/league-member-add"
-import { LeagueMemberRemove } from "@/components/league-member-remove"
 
 function isValidUUID(str: string): boolean {
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
   return uuidRegex.test(str)
+}
+
+const EPSILON = 1e-6
+
+function addRankLabels<T>(items: T[], getValue: (item: T) => number, epsilon = EPSILON): Array<T & { rankLabel: number }> {
+  let lastValue: number | null = null
+  let lastRank = 0
+  let position = 0
+
+  return items.map((item) => {
+    position += 1
+    const value = getValue(item)
+    const isTie = lastValue !== null && Math.abs(value - lastValue) < epsilon
+
+    if (!isTie) {
+      lastRank = position
+      lastValue = value
+    }
+
+    return { ...item, rankLabel: lastRank }
+  })
 }
 
 export default async function LeagueDetailPage({
@@ -53,10 +74,21 @@ export default async function LeagueDetailPage({
 
   const { data: members } = await supabase
     .from("league_members")
-    .select("user_id, profiles(id, display_name, friend_code)")
+    .select("user_id, profiles(id, display_name, friend_code, avatar_url)")
     .eq("league_id", id)
 
   const memberIds = members?.map((m) => m.user_id) || []
+  const existingMemberIds = Array.from(new Set([...memberIds, league.owner_id]))
+
+  let ownerProfile: { id: string; display_name: string | null; avatar_url: string | null } | null = null
+  if (!memberIds.includes(league.owner_id)) {
+    const { data: profileRow } = await supabase
+      .from("profiles")
+      .select("id, display_name, avatar_url")
+      .eq("id", league.owner_id)
+      .maybeSingle()
+    ownerProfile = profileRow || null
+  }
 
   // リーグの対局を取得
   const { data: games } = await supabase
@@ -65,11 +97,21 @@ export default async function LeagueDetailPage({
       *,
       game_results (
         *,
-        profiles (display_name)
+        profiles (display_name, avatar_url)
       )
     `)
     .eq("league_id", id)
     .order("played_at", { ascending: false })
+
+  const { data: leagueRollups, error: leagueRollupsError } = await supabase
+    .from("league_user_game_rollups")
+    .select("*")
+    .eq("league_id", id)
+  if (leagueRollupsError) {
+    // rollups がまだ導入されていない環境でもページが落ちないようにする
+    // eslint-disable-next-line no-console
+    console.warn("[v0] failed to load league_user_game_rollups:", leagueRollupsError)
+  }
 
   // ランキング集計
   const playerStats: Record<
@@ -77,34 +119,180 @@ export default async function LeagueDetailPage({
     {
       odIndex: string
       name: string
+      avatarUrl?: string | null
       totalPoints: number
       gameCount: number
-      ranks: number[]
+      rankSum: number
+      bestScore: number | null
+      fourthCount: number
     }
   > = {}
 
   games?.forEach((game) => {
-    game.game_results?.forEach((result) => {
-      const odIndex = result.user_id || result.player_name || "unknown"
-      const name = result.player_name || result.profiles?.display_name || "Unknown"
+    game.game_results?.forEach((result: any) => {
+      if (!result.user_id) return
+
+      const odIndex = result.user_id
+      const name = result.profiles?.display_name || result.player_name || "Unknown"
+      const avatarUrl = (result.profiles as any)?.avatar_url
 
       if (!playerStats[odIndex]) {
         playerStats[odIndex] = {
           odIndex,
           name,
+          avatarUrl,
           totalPoints: 0,
           gameCount: 0,
-          ranks: [],
+          rankSum: 0,
+          bestScore: null,
+          fourthCount: 0,
         }
       }
 
       playerStats[odIndex].totalPoints += Number(result.point)
       playerStats[odIndex].gameCount += 1
-      playerStats[odIndex].ranks.push(result.rank)
+      playerStats[odIndex].rankSum += Number(result.rank)
+      const rawScoreNum = Number((result.raw_score ?? "").toString().replace(/,/g, ""))
+      if (Number.isFinite(rawScoreNum)) {
+        const currentBest = playerStats[odIndex].bestScore
+        playerStats[odIndex].bestScore =
+          currentBest === null || currentBest === undefined ? rawScoreNum : Math.max(currentBest as number, rawScoreNum)
+      }
+      if (playerStats[odIndex].fourthCount === undefined || playerStats[odIndex].fourthCount === null) {
+        playerStats[odIndex].fourthCount = 0
+      }
+      if (result.rank === 4) {
+        playerStats[odIndex].fourthCount += 1
+      }
     })
   })
 
-  const ranking = Object.values(playerStats).sort((a, b) => b.totalPoints - a.totalPoints)
+  ;(leagueRollups || []).forEach((row: any) => {
+    const userId = row.user_id as string | null
+    if (!userId) return
+
+    if (!playerStats[userId]) {
+      // 名前・アイコンは seedPlayers 側で補完される想定だが、念のため
+      playerStats[userId] = {
+        odIndex: userId,
+        name: "Unknown",
+        avatarUrl: null,
+        totalPoints: 0,
+        gameCount: 0,
+        rankSum: 0,
+        bestScore: null,
+        fourthCount: 0,
+      }
+    }
+
+    const rolledGameCount = Number(row.rolled_game_count ?? 0)
+    const rolledTotalPoints = Number(row.rolled_total_points ?? 0)
+    const rolledRankCounts = [
+      Number(row.rolled_rank1_count ?? 0),
+      Number(row.rolled_rank2_count ?? 0),
+      Number(row.rolled_rank3_count ?? 0),
+      Number(row.rolled_rank4_count ?? 0),
+    ]
+    const rolledRankSum =
+      rolledRankCounts[0] * 1 + rolledRankCounts[1] * 2 + rolledRankCounts[2] * 3 + rolledRankCounts[3] * 4
+    const rolledBest = row.rolled_best_raw_score ?? null
+
+    playerStats[userId].gameCount += rolledGameCount
+    playerStats[userId].totalPoints += rolledTotalPoints
+    playerStats[userId].rankSum += rolledRankSum
+    playerStats[userId].fourthCount += rolledRankCounts[3]
+    playerStats[userId].bestScore =
+      playerStats[userId].bestScore === null
+        ? rolledBest
+        : rolledBest === null
+          ? playerStats[userId].bestScore
+          : Math.max(playerStats[userId].bestScore as number, rolledBest as number)
+  })
+
+  // 参加メンバーを全員初期化（未対局でもランキングに表示）
+  const seedPlayers: Array<{ id: string; name: string; avatarUrl?: string | null }> = []
+  members?.forEach((member) => {
+    seedPlayers.push({
+      id: member.user_id,
+      name: (member.profiles as any)?.display_name || "メンバー",
+      avatarUrl: (member.profiles as any)?.avatar_url,
+    })
+  })
+  if (!memberIds.includes(league.owner_id)) {
+    seedPlayers.push({
+      id: league.owner_id,
+      name: ownerProfile?.display_name || "オーナー",
+      avatarUrl: ownerProfile?.avatar_url || null,
+    })
+  }
+
+  seedPlayers.forEach((p) => {
+    if (!playerStats[p.id]) {
+      playerStats[p.id] = {
+        odIndex: p.id,
+        name: p.name,
+        avatarUrl: p.avatarUrl,
+        totalPoints: 0,
+        gameCount: 0,
+        rankSum: 0,
+        bestScore: null,
+        fourthCount: 0,
+      }
+    } else {
+      // rollups だけで作成された場合に表示名を補完
+      playerStats[p.id].name = playerStats[p.id].name === "Unknown" ? p.name : playerStats[p.id].name
+      playerStats[p.id].avatarUrl = playerStats[p.id].avatarUrl ?? p.avatarUrl
+    }
+  })
+
+  const unknownIds = Object.values(playerStats)
+    .filter((p) => p.name === "Unknown")
+    .map((p) => p.odIndex)
+  if (unknownIds.length > 0) {
+    const { data: unknownProfiles, error: unknownProfilesError } = await supabase
+      .from("profiles")
+      .select("id, display_name, avatar_url")
+      .in("id", unknownIds)
+    if (unknownProfilesError) {
+      // eslint-disable-next-line no-console
+      console.warn("[v0] failed to load unknown profiles:", unknownProfilesError)
+    }
+    unknownProfiles?.forEach((p: any) => {
+      const id = p.id as string | null
+      if (!id || !playerStats[id]) return
+      playerStats[id].name = p.display_name || "ユーザー"
+      playerStats[id].avatarUrl = p.avatar_url ?? playerStats[id].avatarUrl
+    })
+  }
+
+  const rankingAll = Object.values(playerStats)
+  const rankingPlayed = rankingAll.filter((p) => p.gameCount > 0).sort((a, b) => b.totalPoints - a.totalPoints)
+  const rankingUnplayed = rankingAll
+    .filter((p) => p.gameCount === 0)
+    .sort((a, b) => a.name.localeCompare(b.name))
+
+  const rankedWithLabels = addRankLabels(rankingPlayed, (player) => player.totalPoints)
+  const fullRanking = [
+    ...rankedWithLabels,
+    ...rankingUnplayed.map((player) => ({ ...player, rankLabel: "—" as const })),
+  ]
+  const bestScoreCandidates = Object.values(playerStats)
+    .filter((p) => p.gameCount > 0 && Number.isFinite(p.bestScore))
+    .sort((a, b) => (b.bestScore ?? -Infinity) - (a.bestScore ?? -Infinity))
+  const bestScoreRanking = addRankLabels(bestScoreCandidates, (player) => player.bestScore ?? -Infinity).filter(
+    (player) => player.rankLabel <= 3,
+  )
+  const avoidCandidates = Object.values(playerStats)
+    .filter((p) => p.gameCount > 0)
+    .map((p) => ({
+      ...p,
+      avoidRate: p.gameCount > 0 ? 1 - p.fourthCount / p.gameCount : null,
+    }))
+    .filter((p) => Number.isFinite(p.avoidRate))
+    .sort((a, b) => (b.avoidRate as number) - (a.avoidRate as number))
+  const avoidRanking = addRankLabels(avoidCandidates, (player) => player.avoidRate as number).filter(
+    (player) => player.rankLabel <= 3,
+  )
 
   const isOwner = league.owner_id === userData.user.id
   const isMember = memberIds.includes(userData.user.id)
@@ -112,16 +300,16 @@ export default async function LeagueDetailPage({
   return (
     <div className="space-y-6 pb-20 md:pb-0">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex items-start gap-3 min-w-0">
           <Link href="/leagues">
             <Button variant="ghost" size="icon">
               <ArrowLeft className="h-5 w-5" />
             </Button>
           </Link>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold text-foreground">{league.name}</h1>
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="text-2xl font-bold text-foreground break-words">{league.name}</h1>
               <span className="text-xs px-2 py-1 rounded bg-secondary text-secondary-foreground">
                 {league.game_type === "four_player" ? "四麻" : "三麻"}
               </span>
@@ -129,7 +317,7 @@ export default async function LeagueDetailPage({
             {league.description && <p className="text-muted-foreground text-sm mt-1">{league.description}</p>}
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex w-full flex-wrap items-center gap-2 md:w-auto md:justify-end">
           {isOwner && (
             <Link href={`/leagues/${id}/settings`}>
               <Button variant="outline" size="icon">
@@ -137,83 +325,21 @@ export default async function LeagueDetailPage({
               </Button>
             </Link>
           )}
+          {isOwner && (
+            <LeagueMemberAdd
+              leagueId={id}
+              userId={userData.user.id}
+              existingMemberIds={existingMemberIds}
+            />
+          )}
           <Link href={`/games/new?league=${id}`}>
-            <Button size="sm" className="gap-2">
+            <Button size="sm" className="gap-2 w-full sm:w-auto">
               <Plus className="h-4 w-4" />
               対局を記録
             </Button>
           </Link>
         </div>
       </div>
-
-      {/* ルール情報 */}
-      <Card>
-        <CardContent className="pt-4">
-          <div className="flex flex-wrap gap-4 text-sm">
-            <div>
-              <span className="text-muted-foreground">ウマ: </span>
-              <span className="font-medium">
-                {league.uma_first} / {league.uma_second} / {league.uma_third}
-                {league.game_type === "four_player" && ` / ${league.uma_fourth}`}
-              </span>
-            </div>
-            <div>
-              <span className="text-muted-foreground">持ち点: </span>
-              <span className="font-medium">{league.starting_points.toLocaleString()}</span>
-            </div>
-            <div>
-              <span className="text-muted-foreground">返し: </span>
-              <span className="font-medium">{league.return_points?.toLocaleString() || "30,000"}</span>
-            </div>
-            <div>
-              <span className="text-muted-foreground">対局数: </span>
-              <span className="font-medium">{games?.length || 0}戦</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              メンバー ({members?.length || 0}人)
-            </CardTitle>
-            {isOwner && <LeagueMemberAdd leagueId={id} userId={userData.user.id} existingMemberIds={memberIds} />}
-          </div>
-        </CardHeader>
-        <CardContent>
-          {members && members.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {members.map((member) => (
-                <div
-                  key={member.user_id}
-                  className="group px-3 py-1.5 rounded-full bg-secondary text-secondary-foreground text-sm flex items-center gap-2"
-                >
-                  <span>
-                    {(member.profiles as any)?.display_name || "Unknown"}
-                    {member.user_id === league.owner_id && (
-                      <span className="ml-1 text-xs text-muted-foreground">(オーナー)</span>
-                    )}
-                  </span>
-                  {isOwner && (
-                    <LeagueMemberRemove
-                      leagueId={id}
-                      memberId={member.user_id}
-                      memberName={(member.profiles as any)?.display_name || "Unknown"}
-                      currentUserId={userData.user.id}
-                      isOwner={member.user_id === league.owner_id}
-                    />
-                  )}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-muted-foreground text-sm">メンバーがいません</p>
-          )}
-        </CardContent>
-      </Card>
 
       {/* ランキング */}
       <Card>
@@ -224,37 +350,48 @@ export default async function LeagueDetailPage({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {ranking.length > 0 ? (
+          {fullRanking.length > 0 ? (
             <div className="space-y-3">
-              {ranking.map((player, index) => {
-                const avgRank = player.ranks.reduce((a, b) => a + b, 0) / player.ranks.length
+              <p className="text-xs text-muted-foreground">
+                対局履歴は各記録者ごとに直近30戦まで表示されます（成績は全期間）。
+              </p>
+              {fullRanking.map((player, index) => {
+                const rankLabel = (player as any).rankLabel
+                const rankNumber = typeof rankLabel === "number" ? rankLabel : null
+                const avgRank = player.gameCount > 0 ? player.rankSum / player.gameCount : null
                 return (
                   <div
                     key={player.odIndex}
                     className={cn(
                       "flex items-center justify-between p-3 rounded-lg",
-                      index === 0 && "bg-accent/20",
-                      index === 1 && "bg-secondary/50",
-                      index === 2 && "bg-muted/50",
-                      index > 2 && "border border-border",
+                      rankNumber === 1 && "bg-accent/20",
+                      rankNumber === 2 && "bg-secondary/50",
+                      rankNumber === 3 && "bg-muted/50",
+                      (rankNumber === null || rankNumber > 3) && "border border-border",
                     )}
                   >
                     <div className="flex items-center gap-3">
-                      <div
-                        className={cn(
-                          "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold",
-                          index === 0 && "bg-accent text-accent-foreground",
-                          index === 1 && "bg-secondary text-secondary-foreground",
-                          index === 2 && "bg-muted text-muted-foreground",
-                          index > 2 && "bg-background text-foreground border border-border",
-                        )}
-                      >
-                        {index + 1}
+                      <div className="flex items-center gap-2">
+                        <div
+                          className={cn(
+                            "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold",
+                            rankNumber === 1 && "bg-accent text-accent-foreground",
+                            rankNumber === 2 && "bg-secondary text-secondary-foreground",
+                            rankNumber === 3 && "bg-muted text-muted-foreground",
+                            (rankNumber === null || rankNumber > 3) && "bg-background text-foreground border border-border",
+                          )}
+                        >
+                          {rankLabel}
+                        </div>
+                        <Avatar className="h-9 w-9">
+                          <AvatarImage src={player.avatarUrl || undefined} />
+                          <AvatarFallback>{player.name.charAt(0).toUpperCase()}</AvatarFallback>
+                        </Avatar>
                       </div>
                       <div>
                         <p className="font-semibold">{player.name}</p>
                         <p className="text-xs text-muted-foreground">
-                          {player.gameCount}戦 / 平均{avgRank.toFixed(2)}位
+                          {player.gameCount}戦 / 平均{avgRank !== null ? `${avgRank.toFixed(2)}位` : "-"}
                         </p>
                       </div>
                     </div>
@@ -280,6 +417,68 @@ export default async function LeagueDetailPage({
         </CardContent>
       </Card>
 
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">最高スコア TOP3</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0 space-y-2">
+            {bestScoreRanking.length > 0 ? (
+              bestScoreRanking.map((player) => (
+                <div key={player.odIndex} className="flex items-center justify-between rounded-lg border border-border/70 px-3 py-2">
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-semibold text-muted-foreground">#{player.rankLabel}</span>
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={player.avatarUrl || undefined} />
+                      <AvatarFallback>{player.name.charAt(0).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-semibold text-sm">{player.name}</p>
+                      <p className="text-xs text-muted-foreground">{player.gameCount}戦</p>
+                    </div>
+                  </div>
+                  <p className="text-base font-bold text-emerald-600">
+                    {Number.isFinite(player.bestScore) ? `${(player.bestScore as number).toLocaleString()}点` : "-"}
+                  </p>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground">まだスコアがありません</p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">4着回避率 TOP3</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0 space-y-2">
+            {avoidRanking.length > 0 ? (
+              avoidRanking.map((player) => (
+                <div key={player.odIndex} className="flex items-center justify-between rounded-lg border border-border/70 px-3 py-2">
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-semibold text-muted-foreground">#{player.rankLabel}</span>
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={player.avatarUrl || undefined} />
+                      <AvatarFallback>{player.name.charAt(0).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-semibold text-sm">{player.name}</p>
+                      <p className="text-xs text-muted-foreground">{player.gameCount}戦</p>
+                    </div>
+                  </div>
+                  <p className="text-base font-bold text-blue-600">
+                    {Number.isFinite(player.avoidRate) ? `${((player.avoidRate as number) * 100).toFixed(1)}%` : "-"}
+                  </p>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground">まだ対局がありません</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
       {/* 対局履歴 */}
       <Card>
         <CardHeader>
@@ -291,7 +490,7 @@ export default async function LeagueDetailPage({
               {games.map((game) => {
                 const sortedResults = [...(game.game_results || [])].sort((a, b) => a.rank - b.rank)
                 return (
-                  <Link key={game.id} href={`/games/${game.id}`}>
+                  <Link key={game.id} href={`/games/${game.id}`} className="block">
                     <div className="p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm text-muted-foreground">
@@ -301,9 +500,19 @@ export default async function LeagueDetailPage({
                       <div className="grid grid-cols-4 gap-2">
                         {sortedResults.map((result) => (
                           <div key={result.id} className="text-center">
-                            <div className="text-xs text-muted-foreground">{result.rank}位</div>
-                            <div className="text-sm font-medium truncate">
-                              {result.player_name || result.profiles?.display_name || "Unknown"}
+                            <div className="flex flex-col items-center gap-1">
+                              <Avatar className="h-10 w-10">
+                                <AvatarImage src={(result.profiles as any)?.avatar_url || undefined} />
+                                <AvatarFallback>
+                                  {(result.player_name || result.profiles?.display_name || "?")
+                                    .charAt(0)
+                                    .toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="text-xs text-muted-foreground">{result.rank}位</div>
+                              <div className="text-sm font-medium truncate">
+                                {result.player_name || result.profiles?.display_name || "Unknown"}
+                              </div>
                             </div>
                             <div
                               className={cn("text-xs", Number(result.point) >= 0 ? "text-chart-1" : "text-destructive")}

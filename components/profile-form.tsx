@@ -9,8 +9,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { useRouter } from "next/navigation"
-import { Upload } from "lucide-react"
+import { Eye, EyeOff, Upload } from "lucide-react"
 
 interface ProfileFormProps {
   initialData: {
@@ -38,8 +49,16 @@ export function ProfileForm({ initialData, currentEmail }: ProfileFormProps) {
   const [confirmPassword, setConfirmPassword] = useState("")
   const [isPasswordLoading, setIsPasswordLoading] = useState(false)
   const [passwordMessage, setPasswordMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+
+  const [deleteConfirm, setDeleteConfirm] = useState("")
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [deleteMessage, setDeleteMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
 
   const router = useRouter()
+  const deleteKeyword = "DELETE"
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -167,6 +186,28 @@ export function ProfileForm({ initialData, currentEmail }: ProfileFormProps) {
     }
   }
 
+  const handleDeleteAccount = async () => {
+    setIsDeleting(true)
+    setDeleteMessage(null)
+    try {
+      const response = await fetch("/api/account-delete", { method: "POST" })
+      const payload = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        throw new Error(payload.error || "アカウントの削除に失敗しました")
+      }
+      const supabase = createClient()
+      await supabase.auth.signOut()
+      router.push("/")
+    } catch (error) {
+      setDeleteMessage({
+        type: "error",
+        text: error instanceof Error ? error.message : "アカウントの削除に失敗しました",
+      })
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       <Card>
@@ -251,33 +292,72 @@ export function ProfileForm({ initialData, currentEmail }: ProfileFormProps) {
           <form onSubmit={handlePasswordChange} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="currentPassword">現在のパスワード</Label>
-              <Input
-                id="currentPassword"
-                type="password"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                required
-              />
+              <div className="relative">
+                <Input
+                  id="currentPassword"
+                  type={showCurrentPassword ? "text" : "password"}
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  required
+                  className="pr-10"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  className="absolute right-1 top-1/2 -translate-y-1/2"
+                  onClick={() => setShowCurrentPassword((prev) => !prev)}
+                  aria-label={showCurrentPassword ? "パスワードを隠す" : "パスワードを表示"}
+                >
+                  {showCurrentPassword ? <EyeOff /> : <Eye />}
+                </Button>
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="newPassword">新しいパスワード</Label>
-              <Input
-                id="newPassword"
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                required
-              />
+              <div className="relative">
+                <Input
+                  id="newPassword"
+                  type={showNewPassword ? "text" : "password"}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  required
+                  className="pr-10"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  className="absolute right-1 top-1/2 -translate-y-1/2"
+                  onClick={() => setShowNewPassword((prev) => !prev)}
+                  aria-label={showNewPassword ? "パスワードを隠す" : "パスワードを表示"}
+                >
+                  {showNewPassword ? <EyeOff /> : <Eye />}
+                </Button>
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">新しいパスワード（確認）</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-              />
+              <div className="relative">
+                <Input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  className="pr-10"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  className="absolute right-1 top-1/2 -translate-y-1/2"
+                  onClick={() => setShowConfirmPassword((prev) => !prev)}
+                  aria-label={showConfirmPassword ? "パスワードを隠す" : "パスワードを表示"}
+                >
+                  {showConfirmPassword ? <EyeOff /> : <Eye />}
+                </Button>
+              </div>
             </div>
             {passwordMessage && (
               <p className={`text-sm ${passwordMessage.type === "success" ? "text-green-600" : "text-destructive"}`}>
@@ -288,6 +368,52 @@ export function ProfileForm({ initialData, currentEmail }: ProfileFormProps) {
               {isPasswordLoading ? "変更中..." : "パスワードを変更"}
             </Button>
           </form>
+        </CardContent>
+      </Card>
+
+      <Card className="border-destructive/30">
+        <CardHeader>
+          <CardTitle className="text-destructive">アカウント削除</CardTitle>
+          <CardDescription>
+            すべてのデータが削除されます。続行するには「{deleteKeyword}」と入力してください。
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="deleteConfirm">確認入力</Label>
+            <Input
+              id="deleteConfirm"
+              value={deleteConfirm}
+              onChange={(e) => setDeleteConfirm(e.target.value)}
+              placeholder={deleteKeyword}
+            />
+          </div>
+          {deleteMessage && (
+            <p className={`text-sm ${deleteMessage.type === "success" ? "text-green-600" : "text-destructive"}`}>
+              {deleteMessage.text}
+            </p>
+          )}
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" disabled={deleteConfirm !== deleteKeyword || isDeleting}>
+                アカウントを削除
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>アカウントを削除しますか？</AlertDialogTitle>
+                <AlertDialogDescription>
+                  この操作は取り消せません。対局やフレンド、リーグ情報などが削除されます。
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>キャンセル</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDeleteAccount} disabled={isDeleting}>
+                  {isDeleting ? "削除中..." : "削除する"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </CardContent>
       </Card>
     </div>

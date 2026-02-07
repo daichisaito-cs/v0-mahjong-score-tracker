@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { BrandLogo } from "@/components/brand-logo"
 
 export default function LandingPage() {
   return (
@@ -7,7 +8,7 @@ export default function LandingPage() {
       {/* Header */}
       <header className="border-b border-border bg-card">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-primary">Janki</h1>
+          <BrandLogo className="h-8 w-auto" priority />
           <div className="flex items-center gap-3">
             <Link href="/auth/login">
               <Button variant="ghost" size="sm">

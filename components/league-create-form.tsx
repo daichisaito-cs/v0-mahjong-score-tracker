@@ -13,11 +13,13 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Users, AlertCircle } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import Link from "next/link"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 interface Friend {
   id: string
   display_name: string
   friend_code: string
+  avatar_url?: string | null
 }
 
 interface Rule {
@@ -29,7 +31,7 @@ interface Rule {
   uma_first: number
   uma_second: number
   uma_third: number
-  uma_fourth: number
+  uma_fourth: number | null
 }
 
 interface LeagueCreateFormProps {
@@ -85,7 +87,7 @@ export function LeagueCreateForm({ userId }: LeagueCreateFormProps) {
 
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("id, display_name, friend_code")
+        .select("id, display_name, friend_code, avatar_url")
         .in("id", friendIds)
 
       setFriends(profiles || [])
@@ -287,7 +289,7 @@ export function LeagueCreateForm({ userId }: LeagueCreateFormProps) {
                   {rules.find((r) => r.id === selectedRuleId)?.uma_second} /{" "}
                   {rules.find((r) => r.id === selectedRuleId)?.uma_third}
                   {rules.find((r) => r.id === selectedRuleId)?.game_type === "four_player" &&
-                    ` / ${rules.find((r) => r.id === selectedRuleId)?.uma_fourth}`}
+                    ` / ${rules.find((r) => r.id === selectedRuleId)?.uma_fourth ?? "-"}`}
                 </p>
                 <p>
                   持ち点: {rules.find((r) => r.id === selectedRuleId)?.starting_points.toLocaleString()} 返し:{" "}
@@ -325,9 +327,15 @@ export function LeagueCreateForm({ userId }: LeagueCreateFormProps) {
                       onCheckedChange={() => toggleFriend(friend.id)}
                       disabled={isLoading || isSubmitted}
                     />
-                    <div className="flex-1">
-                      <p className="font-medium">{friend.display_name}</p>
-                      <p className="text-xs text-muted-foreground">ID: {friend.friend_code}</p>
+                    <div className="flex items-center gap-3 flex-1">
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage src={friend.avatar_url || undefined} />
+                        <AvatarFallback>{friend.display_name.charAt(0).toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <p className="font-medium">{friend.display_name}</p>
+                        <p className="text-xs text-muted-foreground">ID: {friend.friend_code}</p>
+                      </div>
                     </div>
                   </label>
                 ))}

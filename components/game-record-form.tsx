@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
@@ -10,36 +10,56 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
-import { SessionSummaryDialog } from "@/components/session-summary-dialog"
+import { SessionSummaryDialog, type SessionResult, type SessionPlayer } from "@/components/session-summary-dialog"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import Link from "next/link"
 
 interface League {
   id: string
   name: string
   game_type: string
+  rule_id?: string | null
   uma_first: number
   uma_second: number
   uma_third: number
-  uma_fourth: number
+  uma_fourth: number | null
   oka: number
   starting_points: number
   return_points: number
 }
 
+interface Rule {
+  id: string
+  name: string
+  game_type: string
+  starting_points: number
+  return_points: number
+  uma_first: number
+  uma_second: number
+  uma_third: number
+  uma_fourth: number | null
+}
+
 interface Friend {
   id: string
   display_name: string
+  avatar_url?: string | null
 }
 
 interface PlayerResult {
   name: string
   score: string
   userId?: string
+  avatarUrl?: string | null
+  isManual?: boolean
 }
 
 interface GameRecordFormProps {
   currentUserId: string
   currentUserName: string
+  currentUserAvatarUrl?: string | null
   leagues: League[]
+  rules: Rule[]
   friends: Friend[]
   defaultLeagueId?: string
   sessionData?: SessionData // セッションデータを受け取る
@@ -48,8 +68,9 @@ interface GameRecordFormProps {
 interface SessionData {
   gameType: string
   leagueId: string
+  ruleId?: string
   players: PlayerResult[]
-  sessionResults: Array<{ players: string[]; points: number[] }>
+  sessionResults: SessionResult[]
 }
 
 function calculatePoints(
@@ -146,62 +167,112 @@ function calculatePoints(
 export function GameRecordForm({
   currentUserId,
   currentUserName,
+  currentUserAvatarUrl,
   leagues,
+  rules,
   friends,
   defaultLeagueId,
   sessionData,
 }: GameRecordFormProps) {
   const router = useRouter()
+
+  const normalizeSessionResults = (results?: SessionResult[]) =>
+    (results || []).map((result) => ({
+      players: (result?.players || []).map((player: any) =>
+        typeof player === "string"
+          ? { name: player }
+          : { name: player.name, userId: player.userId, avatarUrl: player.avatarUrl, isManual: player.isManual },
+      ),
+      points: result?.points || [],
+    }))
+
   const [gameType, setGameType] = useState<"four_player" | "three_player">(
     (sessionData?.gameType as "four_player" | "three_player") || "four_player",
   )
   const [leagueId, setLeagueId] = useState<string>(sessionData?.leagueId || defaultLeagueId || "none")
+  const [ruleId, setRuleId] = useState<string>(sessionData?.ruleId || "")
   const [isLoading, setIsLoading] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [bonusPoints, setBonusPoints] = useState<number[]>([0, 0, 0, 0])
   const [continueSession, setContinueSession] = useState(false) // 連続記録モード
 
-  const [sessionResults, setSessionResults] = useState<Array<{ players: string[]; points: number[] }>>(
-    sessionData?.sessionResults || [],
-  )
+  const [sessionResults, setSessionResults] = useState<SessionResult[]>(normalizeSessionResults(sessionData?.sessionResults))
 
   const [players, setPlayers] = useState<PlayerResult[]>(
-    sessionData?.players || [
-      { name: "", score: "", userId: undefined },
-      { name: "", score: "", userId: undefined },
-      { name: "", score: "", userId: undefined },
-      { name: "", score: "", userId: undefined },
-    ],
+    sessionData?.players
+      ? sessionData.players.map((p) => ({
+          name: p.name,
+          score: p.score ?? "",
+          userId: p.userId,
+          avatarUrl: p.avatarUrl,
+          isManual: p.isManual,
+        }))
+      : [
+          { name: "", score: "", userId: undefined, avatarUrl: undefined, isManual: false },
+          { name: "", score: "", userId: undefined, avatarUrl: undefined, isManual: false },
+          { name: "", score: "", userId: undefined, avatarUrl: undefined, isManual: false },
+          { name: "", score: "", userId: undefined, avatarUrl: undefined, isManual: false },
+        ],
   )
 
   const [showSummaryDialog, setShowSummaryDialog] = useState(false)
-  const [finalSessionResults, setFinalSessionResults] = useState<Array<{ players: string[]; points: number[] }>>([])
+  const [finalSessionResults, setFinalSessionResults] = useState<SessionResult[]>([])
 
   const playerCount = gameType === "four_player" ? 4 : 3
   const selectedLeague = leagues.find((l) => l.id === leagueId)
-  const uma = selectedLeague
-    ? [selectedLeague.uma_first, selectedLeague.uma_second, selectedLeague.uma_third, selectedLeague.uma_fourth]
+  const selectedRule = rules.find((rule) => rule.id === ruleId)
+  const selectedLeagueRule = selectedLeague?.rule_id
+    ? rules.find((rule) => rule.id === selectedLeague.rule_id)
+    : null
+  const isFreeGame = leagueId === "none"
+  const activeRule = isFreeGame ? selectedRule : selectedLeagueRule
+
+  const umaSource = activeRule ?? selectedLeague ?? null
+  const uma = umaSource
+    ? [
+        umaSource.uma_first,
+        umaSource.uma_second,
+        umaSource.uma_third,
+        umaSource.uma_fourth ?? -30,
+      ]
     : gameType === "four_player"
       ? [30, 10, -10, -30]
       : [30, 0, -30, 0]
-  const startingPoints = selectedLeague?.starting_points || 25000
-  const returnPoints = selectedLeague?.return_points || 30000
+  const startingPoints = activeRule?.starting_points ?? selectedLeague?.starting_points ?? 25000
+  const returnPoints = activeRule?.return_points ?? selectedLeague?.return_points ?? 30000
   const oka = selectedLeague?.oka || 0
+
+  const rulesForGameType = rules.filter((rule) => rule.game_type === gameType)
+  const ruleUnavailable = isFreeGame && rulesForGameType.length === 0
+  const ruleSelectionMissing = isFreeGame && rulesForGameType.length > 0 && !selectedRule
+
+  useEffect(() => {
+    if (!selectedRule) return
+    if (selectedRule.game_type !== gameType) {
+      setRuleId("")
+    }
+  }, [gameType, selectedRule])
 
   const handleFriendSelect = (index: number, value: string) => {
     if (value === "manual") {
       // 手動入力モードを有効化
       setPlayers((prev) => {
         const updated = [...prev]
-        updated[index] = { name: "", score: updated[index].score, userId: undefined }
+        updated[index] = { name: "", score: updated[index].score, userId: undefined, avatarUrl: undefined, isManual: true }
         return updated
       })
     } else if (value === "self") {
       // 手動入力モードを無効化
       setPlayers((prev) => {
         const updated = [...prev]
-        updated[index] = { name: currentUserName, score: updated[index].score, userId: currentUserId }
+        updated[index] = {
+          name: currentUserName,
+          score: updated[index].score,
+          userId: currentUserId,
+          avatarUrl: currentUserAvatarUrl,
+          isManual: false,
+        }
         return updated
       })
     } else {
@@ -210,7 +281,13 @@ export function GameRecordForm({
       if (friend) {
         setPlayers((prev) => {
           const updated = [...prev]
-          updated[index] = { name: friend.display_name, score: updated[index].score, userId: friend.id }
+          updated[index] = {
+            name: friend.display_name,
+            score: updated[index].score,
+            userId: friend.id,
+            avatarUrl: friend.avatar_url,
+            isManual: false,
+          }
           return updated
         })
       }
@@ -234,57 +311,6 @@ export function GameRecordForm({
     })
   }
 
-  const handleScoreBlur = (index: number) => {
-    console.log("[v0] handleScoreBlur called for index:", index)
-    console.log(
-      "[v0] Current players scores:",
-      players.slice(0, playerCount).map((p) => p.score),
-    )
-
-    // 入力値が数値として有効かチェック
-    const currentScore = players[index].score
-    if (currentScore && isNaN(Number(currentScore))) {
-      console.log("[v0] Invalid score detected, clearing")
-      setPlayers((prev) => {
-        const updated = [...prev]
-        updated[index] = { ...updated[index], score: "" }
-        return updated
-      })
-      return
-    }
-
-    // 空でない素点の数をカウント（現在のフィールドを含む）
-    const filledScoresCount = players.slice(0, playerCount).filter((p) => p.score && p.score.trim() !== "").length
-    console.log("[v0] Filled scores count:", filledScoresCount)
-
-    const shouldAutoFillLastScore = filledScoresCount === playerCount - 1
-
-    if (shouldAutoFillLastScore) {
-      const emptyIndex = players.slice(0, playerCount).findIndex((p) => !p.score || p.score.trim() === "")
-      console.log("[v0] Empty index for auto-fill:", emptyIndex)
-
-      if (emptyIndex !== -1) {
-        const filledTotal = players
-          .slice(0, playerCount)
-          .reduce((sum, p, i) => (i !== emptyIndex ? sum + (Number(p.score) || 0) : sum), 0)
-        const autoScore = startingPoints * playerCount - filledTotal
-
-        console.log("[v0] Auto-calculating last score:", {
-          filledTotal,
-          startingPoints,
-          playerCount,
-          autoScore,
-        })
-
-        setPlayers((prev) => {
-          const updated = [...prev]
-          updated[emptyIndex] = { ...updated[emptyIndex], score: String(autoScore) }
-          return updated
-        })
-      }
-    }
-  }
-
   // 4人全員分の名前と素点が入力されたかチェック
   const allFieldsFilled = players.slice(0, playerCount).every((p) => p.name && p.score)
 
@@ -300,28 +326,53 @@ export function GameRecordForm({
   const totalPoints = previewResults ? previewResults.reduce((sum, r, i) => sum + r.point + bonusPoints[i], 0) : 0
   const pointBalanceError = previewResults && Math.abs(totalPoints) > 0.1
 
+  const maybeAutofillFourth = () => {
+    if (playerCount !== 4 && playerCount !== 3) return
+    const targetIndex = playerCount === 4 ? 3 : 2
+    const targetPlayer = players[targetIndex]
+    if (targetPlayer.isManual) return
+    if (targetPlayer.score) return
+
+    const filledScores = players.slice(0, targetIndex).map((p) => Number.parseInt(p.score))
+    if (filledScores.some((s) => Number.isNaN(s))) return
+
+    const remaining = expectedTotalScore - filledScores.reduce((sum, s) => sum + s, 0)
+    setPlayers((prev) => {
+      const updated = [...prev]
+      updated[targetIndex] = { ...updated[targetIndex], score: remaining.toString() }
+      return updated
+    })
+  }
+
   const calculateSessionTotals = () => {
     if (sessionResults.length === 0) return []
 
-    const totals: Record<string, { name: string; total: number }> = {}
+    const totals: Record<string, { name: string; total: number; avatarUrl?: string | null }> = {}
 
     sessionResults.forEach((result) => {
-      result.players.forEach((playerName, index) => {
-        if (!totals[playerName]) {
-          totals[playerName] = { name: playerName, total: 0 }
+      result.players.forEach((player, index) => {
+        const key = player.userId || player.name
+        if (!totals[key]) {
+          totals[key] = { name: player.name, avatarUrl: player.avatarUrl, total: 0 }
         }
-        totals[playerName].total += result.points[index]
+        totals[key].total += result.points[index] || 0
+        if (!totals[key].avatarUrl && player.avatarUrl) {
+          totals[key].avatarUrl = player.avatarUrl
+        }
       })
     })
 
     // 現在の対局結果も追加
     if (allFieldsFilled && previewResults) {
       players.slice(0, playerCount).forEach((player, index) => {
-        const playerName = player.name
-        if (!totals[playerName]) {
-          totals[playerName] = { name: playerName, total: 0 }
+        const key = player.userId || player.name
+        if (!totals[key]) {
+          totals[key] = { name: player.name, avatarUrl: player.avatarUrl, total: 0 }
         }
-        totals[playerName].total += (previewResults[index]?.point || 0) + bonusPoints[index]
+        totals[key].total += (previewResults[index]?.point || 0) + bonusPoints[index]
+        if (!totals[key].avatarUrl && player.avatarUrl) {
+          totals[key].avatarUrl = player.avatarUrl
+        }
       })
     }
 
@@ -333,6 +384,16 @@ export function GameRecordForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (isSubmitted || isLoading) return
+
+    if (ruleUnavailable) {
+      setError("この対局タイプのルールがありません")
+      return
+    }
+
+    if (ruleSelectionMissing) {
+      setError("フリー対局はルールを選択してください")
+      return
+    }
 
     if (scoreBalanceError) {
       setError(
@@ -374,14 +435,28 @@ export function GameRecordForm({
         rank: calculatedResults[index].rank,
         raw_score: Number.parseInt(player.score),
         point: calculatedResults[index].point + bonusPoints[index],
+        bonus_points: bonusPoints[index],
       }))
 
       const { error: resultsError } = await supabase.from("game_results").insert(gameResults)
 
       if (resultsError) throw resultsError
 
-      const newSessionResult = {
-        players: players.slice(0, playerCount).map((p) => p.name),
+      // Keep only recent games per creator; stats are preserved via rollups.
+      // Non-fatal: recording the game should succeed even if pruning fails.
+      const { error: pruneError } = await supabase.rpc("rollup_and_prune_games_for_user", { p_keep: 30 })
+      if (pruneError) {
+        // eslint-disable-next-line no-console
+        console.warn("[v0] rollup_and_prune_games_for_user failed:", pruneError)
+      }
+
+      const newSessionResult: SessionResult = {
+        players: players.slice(0, playerCount).map((p) => ({
+          name: p.name,
+          userId: p.userId,
+          // avatarUrlはURLが長くなるのでセッション保存時は持たせない
+          isManual: p.isManual,
+        })),
         points: players.slice(0, playerCount).map((_, index) => calculatedResults[index].point + bonusPoints[index]),
       }
       const allSessionResults = [...sessionResults, newSessionResult]
@@ -392,8 +467,22 @@ export function GameRecordForm({
           JSON.stringify({
             gameType,
             leagueId,
-            players: players.slice(0, playerCount).map((p) => ({ name: p.name, score: "", userId: p.userId })),
-            sessionResults: allSessionResults,
+            ruleId,
+            players: players.slice(0, playerCount).map((p) => ({
+              name: p.name,
+              score: "",
+              userId: p.userId,
+              // セッションURLを短く保つためavatarUrlは持たせない
+              isManual: p.isManual,
+            })),
+            sessionResults: allSessionResults.map((res) => ({
+              players: res.players.map((p) => ({
+                name: p.name,
+                userId: p.userId,
+                isManual: p.isManual,
+              })),
+              points: res.points,
+            })),
           }),
         )
 
@@ -502,6 +591,42 @@ export function GameRecordForm({
           </Card>
         )}
 
+        {isFreeGame && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">ルール（必須）</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {rulesForGameType.length > 0 ? (
+                <Select value={ruleId} onValueChange={setRuleId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="ルールを選択" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {rulesForGameType.map((rule) => (
+                      <SelectItem key={rule.id} value={rule.id}>
+                        {rule.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    この対局タイプのルールがありません。先にルールを作成してください。
+                  </p>
+                  <Button asChild variant="outline" size="sm">
+                    <Link href="/rules/new">ルールを作成</Link>
+                  </Button>
+                </div>
+              )}
+              {ruleSelectionMissing && (
+                <p className="text-xs text-destructive">フリー対局はルールを選択してください</p>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">対局結果</CardTitle>
@@ -513,12 +638,42 @@ export function GameRecordForm({
                   ? "self"
                   : players[index].userId
                 : ""
-
+              const preview = allFieldsFilled && previewResults ? previewResults[index] : null
+              const basePoint = preview?.point ?? 0
+              const bonusPoint = bonusPoints[index] || 0
+              const totalPoint = basePoint + bonusPoint
+              const rankBadgeClass = cn(
+                "text-xs font-semibold px-2 py-1 rounded-full border",
+                preview
+                  ? preview.rank === 1
+                    ? "bg-chart-1/10 text-chart-1 border-chart-1/30"
+                    : basePoint < 0
+                      ? "bg-destructive/10 text-destructive border-destructive/20"
+                      : "bg-secondary text-secondary-foreground border-secondary/50"
+                  : "text-muted-foreground bg-muted border-transparent",
+              )
+              const pointBadgeClass = cn(
+                "text-sm font-semibold px-3 py-1 rounded-full border",
+                totalPoint >= 0
+                  ? "bg-chart-1/10 text-chart-1 border-chart-1/30"
+                  : "bg-destructive/10 text-destructive border-destructive/20",
+              )
               return (
-                <div key={index} className="space-y-2">
-                  <Label className="text-sm">プレイヤー{index + 1}</Label>
-                  <div className="flex gap-2 items-start">
-                    <div className="flex-1 space-y-2">
+                <div key={index} className="rounded-lg border bg-card/50 p-3 space-y-3 sm:p-4">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-semibold">プレイヤー{index + 1}</Label>
+                    {preview && (
+                      <div className="flex items-center gap-2">
+                        <span className={rankBadgeClass}>{preview.rank ? `${preview.rank}位` : "-"}</span>
+                        <span className={pointBadgeClass}>
+                          {totalPoint >= 0 ? "+" : ""}
+                          {totalPoint.toFixed(1)}pt
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    <div className="space-y-3 sm:col-span-2">
                       <Select value={selectedValue} onValueChange={(value) => handleFriendSelect(index, value)}>
                         <SelectTrigger>
                           <SelectValue placeholder="フレンドを選択" />
@@ -527,65 +682,73 @@ export function GameRecordForm({
                           <SelectItem value="self">自分 ({currentUserName})</SelectItem>
                           {friends.map((friend) => (
                             <SelectItem key={friend.id} value={friend.id}>
-                              {friend.display_name}
+                              <div className="flex items-center gap-2">
+                                <Avatar className="h-6 w-6">
+                                  <AvatarImage src={friend.avatar_url || undefined} />
+                                  <AvatarFallback>{friend.display_name.charAt(0).toUpperCase()}</AvatarFallback>
+                                </Avatar>
+                                <span>{friend.display_name}</span>
+                              </div>
                             </SelectItem>
                           ))}
+                          <SelectItem value="manual">手動入力</SelectItem>
                         </SelectContent>
                       </Select>
-                    </div>
-                    <div className="w-28">
-                      <Label className="text-xs text-muted-foreground">素点</Label>
-                      <Input
-                        type="number"
-                        placeholder="25000"
-                        value={players[index].score}
-                        onChange={(e) => updatePlayer(index, "score", e.target.value)}
-                        onBlur={() => handleScoreBlur(index)}
-                      />
-                    </div>
-                    {/* 全員分入力完了後のみポイント表示 */}
-                    {allFieldsFilled && previewResults && (
-                      <>
-                        <div className="w-20 text-right">
-                          <Label className="text-xs text-muted-foreground">±pt</Label>
-                          <div
-                            className={cn(
-                              "font-semibold text-sm",
-                              previewResults[index]?.point >= 0 ? "text-chart-1" : "text-destructive",
-                            )}
-                          >
-                            {previewResults[index]?.rank && `${previewResults[index].rank}位: `}
-                            {previewResults[index]?.point >= 0 ? "+" : ""}
-                            {previewResults[index]?.point.toFixed(1) || "0.0"}
-                          </div>
-                        </div>
-                        <div className="w-20">
-                          <Label className="text-xs text-muted-foreground">飛び賞</Label>
+                      {players[index].isManual && (
+                        <div className="space-y-1">
+                          <Label className="text-xs text-muted-foreground">名前</Label>
                           <Input
-                            type="number"
-                            step="0.1"
-                            placeholder="0"
-                            value={bonusPoints[index] || ""}
-                            onChange={(e) => updateBonusPoint(index, e.target.value)}
-                            className="h-9 text-sm"
+                            type="text"
+                            placeholder="プレイヤー名"
+                            value={players[index].name}
+                            onChange={(e) => updatePlayer(index, "name", e.target.value)}
                           />
                         </div>
-                        <div className="w-20 text-right">
-                          <Label className="text-xs text-muted-foreground">合計</Label>
-                          <div
-                            className={cn(
-                              "font-bold text-sm",
-                              (previewResults[index]?.point || 0) + bonusPoints[index] >= 0
-                                ? "text-chart-1"
-                                : "text-destructive",
-                            )}
-                          >
-                            {(previewResults[index]?.point || 0) + bonusPoints[index] >= 0 ? "+" : ""}
-                            {((previewResults[index]?.point || 0) + bonusPoints[index]).toFixed(1)}
+                      )}
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="space-y-1">
+                          <Label className="text-xs text-muted-foreground">素点</Label>
+                          <div className="relative">
+                            <Input
+                              type="number"
+                              placeholder="25000"
+                              value={players[index].score}
+                              onChange={(e) => updatePlayer(index, "score", e.target.value)}
+                              className="text-right pr-10"
+                              onWheel={(e) => (e.currentTarget as HTMLInputElement).blur()}
+                              onBlur={() => maybeAutofillFourth()}
+                            />
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+                              点
+                            </span>
                           </div>
                         </div>
-                      </>
-                    )}
+                        <div className="space-y-1">
+                          <Label className="text-xs text-muted-foreground">飛び賞</Label>
+                          <div className="relative">
+                            <Input
+                              type="number"
+                              step="0.1"
+                              placeholder="0"
+                              value={bonusPoints[index] || ""}
+                              onChange={(e) => updateBonusPoint(index, e.target.value)}
+                              className="h-9 text-right text-sm pr-10"
+                              disabled={!allFieldsFilled}
+                              onWheel={(e) => (e.currentTarget as HTMLInputElement).blur()}
+                            />
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+                              pt
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      {preview && bonusPoint !== 0 && (
+                        <p className="text-xs text-muted-foreground">
+                          {bonusPoint > 0 ? "飛び賞" : "飛ばされたプレイヤー"}: {bonusPoint > 0 ? "+" : ""}
+                          {bonusPoint.toFixed(1)}pt
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
               )
@@ -602,11 +765,11 @@ export function GameRecordForm({
               {allFieldsFilled && (
                 <div className="space-y-1">
                   <div className={cn("text-xs", scoreBalanceError ? "text-destructive" : "text-muted-foreground")}>
-                    素点合計: {totalScore.toLocaleString()} {scoreBalanceError && "⚠️ 合計が一致しません"}
+                    素点合計: {totalScore.toLocaleString()}点 {scoreBalanceError && "⚠️ 合計が一致しません"}
                   </div>
                   <div className={cn("text-xs font-semibold", pointBalanceError ? "text-destructive" : "text-chart-1")}>
                     ポイント合計: {totalPoints >= 0 ? "+" : ""}
-                    {totalPoints.toFixed(1)} {pointBalanceError && "⚠️ ゼロになっていません"}
+                    {totalPoints.toFixed(1)}pt {pointBalanceError && "⚠️ ゼロになっていません"}
                   </div>
                 </div>
               )}
@@ -638,7 +801,14 @@ export function GameRecordForm({
               type="submit"
               variant="secondary"
               className="flex-1"
-              disabled={isLoading || !allFieldsFilled || scoreBalanceError || pointBalanceError}
+              disabled={
+                isLoading ||
+                ruleUnavailable ||
+                ruleSelectionMissing ||
+                !allFieldsFilled ||
+                scoreBalanceError ||
+                pointBalanceError
+              }
               onClick={() => setContinueSession(true)}
             >
               続けて登録
@@ -647,7 +817,15 @@ export function GameRecordForm({
           <Button
             type="submit"
             className="flex-1"
-            disabled={isLoading || isSubmitted || !allFieldsFilled || scoreBalanceError || pointBalanceError}
+            disabled={
+              isLoading ||
+              isSubmitted ||
+              ruleUnavailable ||
+              ruleSelectionMissing ||
+              !allFieldsFilled ||
+              scoreBalanceError ||
+              pointBalanceError
+            }
             onClick={() => setContinueSession(false)}
           >
             {isLoading || isSubmitted ? "保存中..." : sessionResults.length > 0 ? "記録を終了する" : "記録する"}
@@ -658,6 +836,7 @@ export function GameRecordForm({
       <SessionSummaryDialog
         open={showSummaryDialog}
         sessionResults={finalSessionResults}
+        leagueName={selectedLeague?.name || undefined}
         onClose={handleCloseSummary}
       />
     </>

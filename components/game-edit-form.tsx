@@ -31,6 +31,7 @@ interface GameEditFormProps {
     name: string
     score: string
     userId: string
+    bonusPoints: number
   }[]
 }
 
@@ -72,6 +73,7 @@ function calculatePoints(scores: string[], gameType: string, uma: number[], star
 export function GameEditForm({ gameId, gameType, results }: GameEditFormProps) {
   const router = useRouter()
   const [scores, setScores] = useState(results.map((r) => r.score))
+  const [bonusPoints, setBonusPoints] = useState(results.map((r) => r.bonusPoints || 0))
   const [isLoading, setIsLoading] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
@@ -82,6 +84,15 @@ export function GameEditForm({ gameId, gameType, results }: GameEditFormProps) {
   const startingPoints = 25000
 
   const previewResults = scores.every((s) => s) ? calculatePoints(scores, gameType, uma, startingPoints) : null
+
+  const updateBonusPoint = (index: number, value: string) => {
+    const numValue = Number.parseFloat(value) || 0
+    setBonusPoints((prev) => {
+      const updated = [...prev]
+      updated[index] = numValue
+      return updated
+    })
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -102,7 +113,8 @@ export function GameEditForm({ gameId, gameType, results }: GameEditFormProps) {
           .update({
             raw_score: Number.parseInt(scores[i]),
             rank: calculatedResults[i].rank,
-            point: calculatedResults[i].point,
+            point: calculatedResults[i].point + bonusPoints[i],
+            bonus_points: bonusPoints[i],
           })
           .eq("id", results[i].id)
 
@@ -163,17 +175,27 @@ export function GameEditForm({ gameId, gameType, results }: GameEditFormProps) {
                   disabled={isDisabled}
                 />
               </div>
+              <div className="w-24">
+                <Label className="text-sm">飛び賞</Label>
+                <Input
+                  type="number"
+                  step="0.1"
+                  value={bonusPoints[index] || ""}
+                  onChange={(e) => updateBonusPoint(index, e.target.value)}
+                  disabled={isDisabled}
+                />
+              </div>
               {previewResults && previewResults[index] && (
                 <div className="w-20 text-right">
                   <div className="text-xs text-muted-foreground">{previewResults[index].rank}位</div>
                   <div
                     className={cn(
                       "font-semibold",
-                      previewResults[index].point >= 0 ? "text-chart-1" : "text-destructive",
+                      previewResults[index].point + bonusPoints[index] >= 0 ? "text-chart-1" : "text-destructive",
                     )}
                   >
-                    {previewResults[index].point >= 0 ? "+" : ""}
-                    {previewResults[index].point.toFixed(1)}
+                    {previewResults[index].point + bonusPoints[index] >= 0 ? "+" : ""}
+                    {(previewResults[index].point + bonusPoints[index]).toFixed(1)}
                   </div>
                 </div>
               )}

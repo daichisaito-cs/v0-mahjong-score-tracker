@@ -6,8 +6,8 @@ import { TrendingUp, Target, Award, Percent, ArrowLeft } from "lucide-react"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { PointsHistoryChart } from "@/components/points-history-chart"
 
 export default async function UserProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -48,18 +48,31 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
     .eq("user_id", id)
     .order("created_at", { ascending: false })
 
+  const { data: rollups, error: rollupsError } = await supabase.from("user_game_rollups").select("*").eq("user_id", id)
+  if (rollupsError) {
+    // rollups がまだ導入されていない環境でもページが落ちないようにする
+    // eslint-disable-next-line no-console
+    console.warn("[v0] failed to load user_game_rollups:", rollupsError)
+  }
+
   const fourPlayerResults = results?.filter((r) => r.games?.game_type === "four_player") || []
   const threePlayerResults = results?.filter((r) => r.games?.game_type === "three_player") || []
 
-  const createPointsHistory = (gameResults: typeof results) => {
-    let cumulativePoints = 0
+  const getRollupForType = (gameType: "four_player" | "three_player") =>
+    (rollups || []).find((r: any) => r.game_type === gameType) || null
+
+  const createPointsHistory = (gameResults: typeof results, gameType: "four_player" | "three_player") => {
+    const rollup = getRollupForType(gameType)
+    const basePoints = Number(rollup?.rolled_total_points ?? 0)
+    const baseGames = Number(rollup?.rolled_game_count ?? 0)
+    let cumulativePoints = basePoints
     return (
       gameResults
         ?.sort((a, b) => new Date(a.games.created_at).getTime() - new Date(b.games.created_at).getTime())
         .map((result, index) => {
           cumulativePoints += Number(result.point)
           return {
-            game: index + 1,
+            game: baseGames + index + 1,
             points: cumulativePoints,
             date: new Date(result.games.created_at).toLocaleDateString("ja-JP", {
               month: "short",
@@ -70,14 +83,31 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
     )
   }
 
-  const fourPlayerPointsHistory = createPointsHistory(fourPlayerResults)
-  const threePlayerPointsHistory = createPointsHistory(threePlayerResults)
+  const fourPlayerPointsHistory = createPointsHistory(fourPlayerResults, "four_player")
+  const threePlayerPointsHistory = createPointsHistory(threePlayerResults, "three_player")
 
-  const calculateStats = (gameResults: typeof results) => {
-    const totalGames = gameResults?.length || 0
-    const totalPoints = gameResults?.reduce((sum, r) => sum + Number(r.point), 0) || 0
-    const avgRank = totalGames > 0 ? (gameResults?.reduce((sum, r) => sum + r.rank, 0) || 0) / totalGames : 0
-    const rentaiCount = gameResults?.filter((r) => r.rank <= 2).length || 0
+  const calculateStats = (gameResults: typeof results, gameType: "four_player" | "three_player") => {
+    const rollup = getRollupForType(gameType)
+    const rolledGameCount = Number(rollup?.rolled_game_count ?? 0)
+    const rolledTotalPoints = Number(rollup?.rolled_total_points ?? 0)
+    const rolledRankCounts = [
+      Number(rollup?.rolled_rank1_count ?? 0),
+      Number(rollup?.rolled_rank2_count ?? 0),
+      Number(rollup?.rolled_rank3_count ?? 0),
+      Number(rollup?.rolled_rank4_count ?? 0),
+    ]
+    const rolledRankSum =
+      rolledRankCounts[0] * 1 + rolledRankCounts[1] * 2 + rolledRankCounts[2] * 3 + rolledRankCounts[3] * 4
+
+    const currentGames = gameResults?.length || 0
+    const currentTotalPoints = gameResults?.reduce((sum, r) => sum + Number(r.point), 0) || 0
+    const currentRankSum = gameResults?.reduce((sum, r) => sum + Number(r.rank), 0) || 0
+    const currentRentaiCount = gameResults?.filter((r) => r.rank <= 2).length || 0
+
+    const totalGames = rolledGameCount + currentGames
+    const totalPoints = rolledTotalPoints + currentTotalPoints
+    const avgRank = totalGames > 0 ? (rolledRankSum + currentRankSum) / totalGames : 0
+    const rentaiCount = rolledRankCounts[0] + rolledRankCounts[1] + currentRentaiCount
     const rentaiRate = totalGames > 0 ? (rentaiCount / totalGames) * 100 : 0
 
     const rankCounts = [0, 0, 0, 0]
@@ -86,18 +116,36 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
         rankCounts[r.rank - 1]++
       }
     })
+    rankCounts[0] += rolledRankCounts[0]
+    rankCounts[1] += rolledRankCounts[1]
+    rankCounts[2] += rolledRankCounts[2]
+    rankCounts[3] += rolledRankCounts[3]
 
     const maxRankCount = Math.max(...rankCounts)
 
     const scores = gameResults?.map((r) => r.raw_score) || []
-    const highScore = scores.length > 0 ? Math.max(...scores) : null
-    const lowScore = scores.length > 0 ? Math.min(...scores) : null
+    const currentHighScore = scores.length > 0 ? Math.max(...scores) : null
+    const currentLowScore = scores.length > 0 ? Math.min(...scores) : null
+    const rolledHighScore = rollup?.rolled_best_raw_score ?? null
+    const rolledLowScore = rollup?.rolled_low_raw_score ?? null
+    const highScore =
+      currentHighScore === null
+        ? rolledHighScore
+        : rolledHighScore === null
+          ? currentHighScore
+          : Math.max(rolledHighScore, currentHighScore)
+    const lowScore =
+      currentLowScore === null
+        ? rolledLowScore
+        : rolledLowScore === null
+          ? currentLowScore
+          : Math.min(rolledLowScore, currentLowScore)
 
     return { totalGames, totalPoints, avgRank, rentaiRate, rankCounts, maxRankCount, highScore, lowScore }
   }
 
-  const fourPlayerStats = calculateStats(fourPlayerResults)
-  const threePlayerStats = calculateStats(threePlayerResults)
+  const fourPlayerStats = calculateStats(fourPlayerResults, "four_player")
+  const threePlayerStats = calculateStats(threePlayerResults, "three_player")
 
   return (
     <div className="space-y-6 pb-20 md:pb-0">
@@ -125,7 +173,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
         <TabsContent value="four_player" className="space-y-6">
           {/* Stats Grid */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard title="総対戦数" value={`${fourPlayerStats.totalGames}戦`} icon={Target} />
+            <StatCard title="総対戦数" value={`${fourPlayerStats.totalGames}戦`} icon={Target} color="text-blue-500" />
             <StatCard
               title="総合pt"
               value={
@@ -134,45 +182,46 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
                   : fourPlayerStats.totalPoints.toFixed(1)
               }
               icon={TrendingUp}
+              color={fourPlayerStats.totalPoints >= 0 ? "text-green-500" : "text-red-500"}
             />
             <StatCard
               title="平均順位"
               value={fourPlayerStats.avgRank > 0 ? fourPlayerStats.avgRank.toFixed(2) : "-"}
               icon={Award}
+              color="text-yellow-500"
             />
             <StatCard
               title="連対率"
               value={fourPlayerStats.totalGames > 0 ? `${fourPlayerStats.rentaiRate.toFixed(1)}%` : "-"}
               icon={Percent}
+              color="text-purple-500"
             />
           </div>
 
           {/* 総合pt推移 */}
           {fourPlayerPointsHistory.length > 0 && (
-            <Card className="py-4">
-              <CardHeader className="py-3 px-4">
+            <Card className="border border-slate-100 shadow-sm bg-white pt-4 pb-2">
+              <CardHeader className="pt-1 pb-1 px-4">
                 <CardTitle className="text-lg">総合pt推移</CardTitle>
               </CardHeader>
-              <CardContent className="py-2 px-4">
-                <ResponsiveContainer width="100%" height={200}>
-                  <LineChart data={fourPlayerPointsHistory}>
-                    <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-                    <YAxis tick={{ fontSize: 12 }} />
-                    <Tooltip />
-                    <Line type="linear" dataKey="points" stroke="#3b82f6" strokeWidth={2} dot={{ r: 3 }} />
-                  </LineChart>
-                </ResponsiveContainer>
+              <CardContent className="pt-0 pb-2 px-3 sm:px-4">
+                <PointsHistoryChart data={fourPlayerPointsHistory} stroke="#3b82f6" />
               </CardContent>
             </Card>
           )}
 
           {/* 順位分布 */}
           {fourPlayerStats.totalGames > 0 && (
-            <Card className="py-4">
-              <CardHeader className="py-3 px-4">
-                <CardTitle className="text-lg">順位分布</CardTitle>
+            <Card className="border border-slate-100 shadow-sm bg-white">
+              <CardHeader className="pb-2 px-4">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg">順位分布</CardTitle>
+                  <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
+                    {fourPlayerStats.totalGames}戦の内訳
+                  </span>
+                </div>
               </CardHeader>
-              <CardContent className="py-2 px-4">
+              <CardContent className="pt-0 px-4">
                 <div className="grid grid-cols-4 gap-3">
                   {fourPlayerStats.rankCounts.map((count, index) => {
                     const percentage = fourPlayerStats.totalGames > 0 ? (count / fourPlayerStats.totalGames) * 100 : 0
@@ -180,14 +229,14 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
                       fourPlayerStats.maxRankCount > 0 ? (count / fourPlayerStats.maxRankCount) * 100 : 0
                     return (
                       <div key={index} className="text-center">
-                        <div className="w-full h-32 rounded-lg flex items-end justify-center relative overflow-hidden bg-muted">
+                        <div className="w-full h-32 rounded-xl flex items-end justify-center relative overflow-hidden bg-gradient-to-b from-slate-50 to-muted">
                           <div
                             className={cn(
-                              "absolute bottom-0 w-full transition-all",
-                              index === 0 && "bg-accent",
-                              index === 1 && "bg-chart-1",
-                              index === 2 && "bg-chart-4",
-                              index === 3 && "bg-destructive/60",
+                              "absolute bottom-0 w-full transition-all rounded-t-xl",
+                              index === 0 && "bg-gradient-to-t from-amber-300 to-amber-200",
+                              index === 1 && "bg-gradient-to-t from-emerald-400 to-emerald-300",
+                              index === 2 && "bg-gradient-to-t from-slate-300 to-slate-200",
+                              index === 3 && "bg-gradient-to-t from-rose-300 to-rose-200",
                             )}
                             style={{ height: `${heightPercentage}%` }}
                           />
@@ -205,19 +254,21 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
 
           {/* 記録 */}
           {(fourPlayerStats.highScore !== null || fourPlayerStats.lowScore !== null) && (
-            <Card className="py-4">
-              <CardHeader className="py-3 px-4">
+            <Card className="border border-slate-100 shadow-sm bg-white">
+              <CardHeader className="pb-1 px-4">
                 <CardTitle className="text-lg">記録</CardTitle>
               </CardHeader>
-              <CardContent className="py-2 px-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-accent/20 rounded-lg text-center">
-                    <p className="text-sm text-muted-foreground">最高得点</p>
-                    <p className="text-2xl font-bold text-chart-1">{fourPlayerStats.highScore?.toLocaleString()}点</p>
+              <CardContent className="pt-0 px-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-3 rounded-lg bg-emerald-50/80 ring-1 ring-emerald-100 text-center">
+                    <p className="text-xs text-muted-foreground">最高得点</p>
+                    <p className="text-xl font-bold text-emerald-600 mt-1">
+                      {fourPlayerStats.highScore?.toLocaleString()}点
+                    </p>
                   </div>
-                  <div className="p-4 bg-destructive/10 rounded-lg text-center">
-                    <p className="text-sm text-muted-foreground">最低得点</p>
-                    <p className="text-2xl font-bold text-destructive">
+                  <div className="p-3 rounded-lg bg-rose-50/80 ring-1 ring-rose-100 text-center">
+                    <p className="text-xs text-muted-foreground">最低得点</p>
+                    <p className="text-xl font-bold text-rose-600 mt-1">
                       {fourPlayerStats.lowScore?.toLocaleString()}点
                     </p>
                   </div>
@@ -231,7 +282,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
         <TabsContent value="three_player" className="space-y-6">
           {/* Stats Grid */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard title="総対戦数" value={`${threePlayerStats.totalGames}戦`} icon={Target} />
+            <StatCard title="総対戦数" value={`${threePlayerStats.totalGames}戦`} icon={Target} color="text-blue-500" />
             <StatCard
               title="総合pt"
               value={
@@ -240,45 +291,46 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
                   : threePlayerStats.totalPoints.toFixed(1)
               }
               icon={TrendingUp}
+              color={threePlayerStats.totalPoints >= 0 ? "text-green-500" : "text-red-500"}
             />
             <StatCard
               title="平均順位"
               value={threePlayerStats.avgRank > 0 ? threePlayerStats.avgRank.toFixed(2) : "-"}
               icon={Award}
+              color="text-yellow-500"
             />
             <StatCard
               title="連対率"
               value={threePlayerStats.totalGames > 0 ? `${threePlayerStats.rentaiRate.toFixed(1)}%` : "-"}
               icon={Percent}
+              color="text-purple-500"
             />
           </div>
 
           {/* 総合pt推移 */}
           {threePlayerPointsHistory.length > 0 && (
-            <Card className="py-4">
-              <CardHeader className="py-3 px-4">
+            <Card className="border border-slate-100 shadow-sm bg-white pt-4 pb-2">
+              <CardHeader className="pt-1 pb-1 px-4">
                 <CardTitle className="text-lg">総合pt推移</CardTitle>
               </CardHeader>
-              <CardContent className="py-2 px-4">
-                <ResponsiveContainer width="100%" height={200}>
-                  <LineChart data={threePlayerPointsHistory}>
-                    <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-                    <YAxis tick={{ fontSize: 12 }} />
-                    <Tooltip />
-                    <Line type="linear" dataKey="points" stroke="#3b82f6" strokeWidth={2} dot={{ r: 3 }} />
-                  </LineChart>
-                </ResponsiveContainer>
+              <CardContent className="pt-0 pb-2 px-3 sm:px-4">
+                <PointsHistoryChart data={threePlayerPointsHistory} stroke="#3b82f6" />
               </CardContent>
             </Card>
           )}
 
           {/* 順位分布 */}
           {threePlayerStats.totalGames > 0 && (
-            <Card className="py-4">
-              <CardHeader className="py-3 px-4">
-                <CardTitle className="text-lg">順位分布</CardTitle>
+            <Card className="border border-slate-100 shadow-sm bg-white">
+              <CardHeader className="pb-2 px-4">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg">順位分布</CardTitle>
+                  <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
+                    {threePlayerStats.totalGames}戦の内訳
+                  </span>
+                </div>
               </CardHeader>
-              <CardContent className="py-2 px-4">
+              <CardContent className="pt-0 px-4">
                 <div className="grid grid-cols-3 gap-3">
                   {threePlayerStats.rankCounts.slice(0, 3).map((count, index) => {
                     const percentage = threePlayerStats.totalGames > 0 ? (count / threePlayerStats.totalGames) * 100 : 0
@@ -286,13 +338,13 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
                       threePlayerStats.maxRankCount > 0 ? (count / threePlayerStats.maxRankCount) * 100 : 0
                     return (
                       <div key={index} className="text-center">
-                        <div className="w-full h-32 rounded-lg flex items-end justify-center relative overflow-hidden bg-muted">
+                        <div className="w-full h-32 rounded-xl flex items-end justify-center relative overflow-hidden bg-gradient-to-b from-slate-50 to-muted">
                           <div
                             className={cn(
-                              "absolute bottom-0 w-full transition-all",
-                              index === 0 && "bg-accent",
-                              index === 1 && "bg-chart-1",
-                              index === 2 && "bg-chart-4",
+                              "absolute bottom-0 w-full transition-all rounded-t-xl",
+                              index === 0 && "bg-gradient-to-t from-amber-300 to-amber-200",
+                              index === 1 && "bg-gradient-to-t from-emerald-400 to-emerald-300",
+                              index === 2 && "bg-gradient-to-t from-slate-300 to-slate-200",
                             )}
                             style={{ height: `${heightPercentage}%` }}
                           />
@@ -310,19 +362,21 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
 
           {/* 記録 */}
           {(threePlayerStats.highScore !== null || threePlayerStats.lowScore !== null) && (
-            <Card className="py-4">
-              <CardHeader className="py-3 px-4">
+            <Card className="border border-slate-100 shadow-sm bg-white">
+              <CardHeader className="pb-1 px-4">
                 <CardTitle className="text-lg">記録</CardTitle>
               </CardHeader>
-              <CardContent className="py-2 px-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-accent/20 rounded-lg text-center">
-                    <p className="text-sm text-muted-foreground">最高得点</p>
-                    <p className="text-2xl font-bold text-chart-1">{threePlayerStats.highScore?.toLocaleString()}点</p>
+              <CardContent className="pt-0 px-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-3 rounded-lg bg-emerald-50/80 ring-1 ring-emerald-100 text-center">
+                    <p className="text-xs text-muted-foreground">最高得点</p>
+                    <p className="text-xl font-bold text-emerald-600 mt-1">
+                      {threePlayerStats.highScore?.toLocaleString()}点
+                    </p>
                   </div>
-                  <div className="p-4 bg-destructive/10 rounded-lg text-center">
-                    <p className="text-sm text-muted-foreground">最低得点</p>
-                    <p className="text-2xl font-bold text-destructive">
+                  <div className="p-3 rounded-lg bg-rose-50/80 ring-1 ring-rose-100 text-center">
+                    <p className="text-xs text-muted-foreground">最低得点</p>
+                    <p className="text-xl font-bold text-rose-600 mt-1">
                       {threePlayerStats.lowScore?.toLocaleString()}点
                     </p>
                   </div>
@@ -336,12 +390,22 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
   )
 }
 
-function StatCard({ title, value, icon: Icon }: { title: string; value: string; icon: React.ElementType }) {
+function StatCard({
+  title,
+  value,
+  icon: Icon,
+  color,
+}: {
+  title: string
+  value: string
+  icon: React.ElementType
+  color?: string
+}) {
   return (
-    <Card className="p-3">
-      <CardContent className="p-0">
+    <Card className="!py-0">
+      <CardContent className="py-3 !px-4">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-muted">
+          <div className={cn("p-2 rounded-lg bg-muted", color)}>
             <Icon className="h-5 w-5" />
           </div>
           <div>

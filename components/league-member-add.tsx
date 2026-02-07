@@ -6,11 +6,13 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { UserPlus } from "lucide-react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 interface Friend {
   id: string
   display_name: string
   friend_code: string
+  avatar_url?: string | null
 }
 
 interface LeagueMemberAddProps {
@@ -60,7 +62,7 @@ export function LeagueMemberAdd({ leagueId, userId, existingMemberIds, onMembers
       // フレンドのプロフィールを取得
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("id, display_name, friend_code")
+        .select("id, display_name, friend_code, avatar_url")
         .in("id", friendIds)
 
       setFriends(profiles || [])
@@ -172,9 +174,15 @@ export function LeagueMemberAdd({ leagueId, userId, existingMemberIds, onMembers
                       onCheckedChange={() => toggleFriend(friend.id)}
                       disabled={isLoading}
                     />
-                    <div className="flex-1">
-                      <p className="font-medium">{friend.display_name}</p>
-                      <p className="text-xs text-muted-foreground">ID: {friend.friend_code}</p>
+                    <div className="flex items-center gap-3 flex-1">
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage src={friend.avatar_url || undefined} />
+                        <AvatarFallback>{friend.display_name.charAt(0).toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <p className="font-medium">{friend.display_name}</p>
+                        <p className="text-xs text-muted-foreground">ID: {friend.friend_code}</p>
+                      </div>
                     </div>
                   </label>
                 ))}

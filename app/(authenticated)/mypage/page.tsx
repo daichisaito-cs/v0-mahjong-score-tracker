@@ -22,8 +22,8 @@ export default async function MyPage() {
       requester_id,
       addressee_id,
       status,
-      requester:profiles!friendships_requester_id_fkey(id, display_name, friend_code),
-      addressee:profiles!friendships_addressee_id_fkey(id, display_name, friend_code)
+      requester:profiles!friendships_requester_id_fkey(id, display_name, friend_code, avatar_url),
+      addressee:profiles!friendships_addressee_id_fkey(id, display_name, friend_code, avatar_url)
     `)
     .eq("status", "accepted")
     .or(`requester_id.eq.${userData.user.id},addressee_id.eq.${userData.user.id}`)
@@ -34,7 +34,7 @@ export default async function MyPage() {
     .select(`
       id,
       requester_id,
-      requester:profiles!friendships_requester_id_fkey(id, display_name, friend_code)
+      requester:profiles!friendships_requester_id_fkey(id, display_name, friend_code, avatar_url)
     `)
     .eq("addressee_id", userData.user.id)
     .eq("status", "pending")
@@ -45,7 +45,7 @@ export default async function MyPage() {
     .select(`
       id,
       addressee_id,
-      addressee:profiles!friendships_addressee_id_fkey(id, display_name, friend_code)
+      addressee:profiles!friendships_addressee_id_fkey(id, display_name, friend_code, avatar_url)
     `)
     .eq("requester_id", userData.user.id)
     .eq("status", "pending")
@@ -58,6 +58,7 @@ export default async function MyPage() {
         id: friend.id,
         display_name: friend.display_name,
         friend_code: friend.friend_code,
+        avatar_url: friend.avatar_url,
       }
     }) || []
 

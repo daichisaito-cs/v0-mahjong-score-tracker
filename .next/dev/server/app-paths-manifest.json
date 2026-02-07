@@ -1,0 +1,11 @@
+{
+  "/(authenticated)/games/[id]/page": "app/(authenticated)/games/[id]/page.js",
+  "/(authenticated)/games/new/page": "app/(authenticated)/games/new/page.js",
+  "/(authenticated)/games/page": "app/(authenticated)/games/page.js",
+  "/(authenticated)/leagues/[id]/page": "app/(authenticated)/leagues/[id]/page.js",
+  "/(authenticated)/leagues/[id]/settings/page": "app/(authenticated)/leagues/[id]/settings/page.js",
+  "/(authenticated)/leagues/new/page": "app/(authenticated)/leagues/new/page.js",
+  "/(authenticated)/leagues/page": "app/(authenticated)/leagues/page.js",
+  "/(authenticated)/rules/new/page": "app/(authenticated)/rules/new/page.js",
+  "/(authenticated)/rules/page": "app/(authenticated)/rules/page.js"
+}

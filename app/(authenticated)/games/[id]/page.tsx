@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { ArrowLeft, Edit, Trophy } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { GameRecordForm } from "@/components/game-record-form"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 function isValidUUID(str: string): boolean {
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -31,7 +32,7 @@ export default async function GameDetailPage({
   if (id === "new") {
     const { data: myProfile } = await supabase.from("profiles").select("*").eq("id", userData.user.id).single()
 
-    const friends: { id: string; display_name: string }[] = []
+    const friends: { id: string; display_name: string; avatar_url?: string | null }[] = []
 
     try {
       const { data: friendships, error: friendshipsError } = await supabase
@@ -49,7 +50,7 @@ export default async function GameDetailPage({
 
         const { data: profiles, error: profilesError } = await supabase
           .from("profiles")
-          .select("id, display_name")
+          .select("id, display_name, avatar_url")
           .in("id", friendIds)
 
         if (profilesError) {
@@ -75,6 +76,11 @@ export default async function GameDetailPage({
       (league, index, self) => league && index === self.findIndex((l) => l?.id === league?.id),
     )
 
+    const { data: rules } = await supabase
+      .from("rules")
+      .select("id, name, game_type, starting_points, return_points, uma_first, uma_second, uma_third, uma_fourth")
+      .order("created_at", { ascending: false })
+
     let sessionData = null
     if (sessionParam) {
       try {
@@ -94,7 +100,9 @@ export default async function GameDetailPage({
         <GameRecordForm
           currentUserId={userData.user.id}
           currentUserName={myProfile?.display_name || "自分"}
+          currentUserAvatarUrl={myProfile?.avatar_url || null}
           leagues={(uniqueLeagues as any[]) || []}
+          rules={(rules as any[]) || []}
           friends={friends}
           defaultLeagueId={leagueParam}
           sessionData={sessionData}
@@ -111,6 +119,10 @@ export default async function GameDetailPage({
     .from("games")
     .select(`
       *,
+      creator:profiles!games_created_by_fkey (
+        display_name,
+        avatar_url
+      ),
       leagues (name),
       game_results (
         id,
@@ -120,7 +132,9 @@ export default async function GameDetailPage({
         rank,
         raw_score,
         point,
-        created_at
+        bonus_points,
+        created_at,
+        profiles (display_name, avatar_url)
       )
     `)
     .eq("id", id)
@@ -131,6 +145,7 @@ export default async function GameDetailPage({
   }
 
   const sortedResults = [...(game.game_results || [])].sort((a, b) => a.rank - b.rank)
+  const creatorName = game.creator?.display_name || "不明"
 
   const isOwner = game.created_by === userData.user.id
 
@@ -152,6 +167,7 @@ export default async function GameDetailPage({
                 day: "numeric",
               })}
             </p>
+            <p className="text-xs text-muted-foreground">作成者: {creatorName}</p>
           </div>
         </div>
         {isOwner && (
@@ -200,8 +216,14 @@ export default async function GameDetailPage({
                   >
                     {result.rank === 1 ? <Trophy className="h-5 w-5" /> : `${result.rank}位`}
                   </div>
+                  <Avatar className="h-11 w-11">
+                    <AvatarImage src={(result.profiles as any)?.avatar_url || undefined} />
+                    <AvatarFallback>
+                      {(result.player_name || result.profiles?.display_name || "?").charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
                   <div>
-                    <p className="font-semibold">{result.player_name || "Unknown"}</p>
+                    <p className="font-semibold">{result.player_name || result.profiles?.display_name || "Unknown"}</p>
                     <p className="text-sm text-muted-foreground">{result.raw_score.toLocaleString()}点</p>
                   </div>
                 </div>
@@ -213,6 +235,13 @@ export default async function GameDetailPage({
                     {Number(result.point).toFixed(1)}
                   </p>
                   <p className="text-xs text-muted-foreground">ポイント</p>
+                  {Number(result.bonus_points) !== 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      {Number(result.bonus_points) > 0 ? "飛び賞" : "飛ばされたプレイヤー"}{" "}
+                      {Number(result.bonus_points) > 0 ? "+" : ""}
+                      {Number(result.bonus_points).toFixed(1)}pt
+                    </p>
+                  )}
                 </div>
               </div>
             ))}

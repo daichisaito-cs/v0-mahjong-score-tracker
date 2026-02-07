@@ -8,11 +8,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Users, Search, UserPlus, Check, X, Copy, Clock, TrendingUp, Mail } from "lucide-react"
 import Link from "next/link"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 type Friend = {
   id: string
   display_name: string
   friend_code: string
+  avatar_url?: string | null
 }
 
 type PendingRequest = {
@@ -22,6 +24,7 @@ type PendingRequest = {
     id: string
     display_name: string
     friend_code: string
+    avatar_url?: string | null
   }
 }
 
@@ -32,6 +35,7 @@ type SentRequest = {
     id: string
     display_name: string
     friend_code: string
+    avatar_url?: string | null
   }
 }
 
@@ -45,9 +49,12 @@ type Props = {
 
 export function FriendSection({ currentUserId, friendCode, friends, pendingRequests, sentRequests }: Props) {
   const [searchCode, setSearchCode] = useState("")
-  const [searchResult, setSearchResult] = useState<{ id: string; display_name: string; friend_code: string } | null>(
-    null,
-  )
+  const [searchResult, setSearchResult] = useState<{
+    id: string
+    display_name: string
+    friend_code: string
+    avatar_url?: string | null
+  } | null>(null)
   const [searchError, setSearchError] = useState("")
   const [isSearching, setIsSearching] = useState(false)
   const [isSending, setIsSending] = useState(false)
@@ -61,6 +68,9 @@ export function FriendSection({ currentUserId, friendCode, friends, pendingReque
   const [inviteMessage, setInviteMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
 
   const supabase = createClient()
+  const notifyPendingUpdate = () => {
+    window.dispatchEvent(new Event("friend-requests-updated"))
+  }
 
   const copyFriendCode = async () => {
     await navigator.clipboard.writeText(friendCode)
@@ -77,7 +87,7 @@ export function FriendSection({ currentUserId, friendCode, friends, pendingReque
 
     const { data, error } = await supabase
       .from("profiles")
-      .select("id, display_name, friend_code")
+      .select("id, display_name, friend_code, avatar_url")
       .eq("friend_code", searchCode.toUpperCase().trim())
       .single()
 
@@ -138,6 +148,7 @@ export function FriendSection({ currentUserId, friendCode, friends, pendingReque
     if (!error) {
       setLocalPendingRequests(localPendingRequests.filter((r) => r.id !== requestId))
       setLocalFriends([...localFriends, requester])
+      notifyPendingUpdate()
     }
   }
 
@@ -146,6 +157,7 @@ export function FriendSection({ currentUserId, friendCode, friends, pendingReque
 
     if (!error) {
       setLocalPendingRequests(localPendingRequests.filter((r) => r.id !== requestId))
+      notifyPendingUpdate()
     }
   }
 
@@ -177,27 +189,37 @@ export function FriendSection({ currentUserId, friendCode, friends, pendingReque
     setIsInviting(true)
     setInviteMessage(null)
 
-    const inviteUrl = `${window.location.origin}/auth/sign-up?inviter=${currentUserId}`
-
-    // TODO: 本番環境では実際のメール送信APIを使用
-    // 現在はクリップボードにコピーする仮実装
-    const message = `Jankiに招待します！\n\nこのリンクから登録すると、自動的にフレンド登録されます：\n${inviteUrl}\n\nメールアドレス: ${inviteEmail}`
-
     try {
-      await navigator.clipboard.writeText(inviteUrl)
+      const response = await fetch("/api/friend-invite", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: inviteEmail.trim(),
+          inviterId: currentUserId,
+        }),
+      })
+
+      const payload = await response.json()
+
+      if (!response.ok) {
+        throw new Error(payload.error || "招待メールの送信に失敗しました")
+      }
+
       setInviteMessage({
         type: "success",
-        text: `招待リンクをコピーしました。${inviteEmail}に送信してください。`,
+        text: "招待メールを送信しました",
       })
       setInviteEmail("")
     } catch (error) {
       setInviteMessage({
         type: "error",
-        text: "招待リンクのコピーに失敗しました",
+        text: error instanceof Error ? error.message : "招待メールの送信に失敗しました",
       })
+    } finally {
+      setIsInviting(false)
     }
-
-    setIsInviting(false)
   }
 
   return (
@@ -242,9 +264,7 @@ export function FriendSection({ currentUserId, friendCode, friends, pendingReque
               {inviteMessage.text}
             </p>
           )}
-          <p className="text-xs text-muted-foreground">
-            招待リンクをクリップボードにコピーします。友達にメールやメッセージで送信してください。
-          </p>
+          <p className="text-xs text-muted-foreground">Supabase経由で招待メールを送信します。</p>
         </div>
 
         {/* フレンド検索 */}
@@ -264,10 +284,18 @@ export function FriendSection({ currentUserId, friendCode, friends, pendingReque
           </div>
           {searchError && <p className="text-sm text-destructive">{searchError}</p>}
           {searchResult && (
-            <div className="flex items-center justify-between p-3 bg-accent/20 rounded-lg">
-              <div>
-                <p className="font-medium">{searchResult.display_name}</p>
-                <p className="text-xs text-muted-foreground font-mono">{searchResult.friend_code}</p>
+          <div className="flex items-center justify-between p-3 bg-accent/20 rounded-lg">
+              <div className="flex items-center gap-3">
+                <Avatar className="h-9 w-9">
+                  <AvatarImage src={searchResult.avatar_url || undefined} />
+                  <AvatarFallback>
+                    {searchResult.display_name ? searchResult.display_name.charAt(0).toUpperCase() : "?"}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="font-medium">{searchResult.display_name}</p>
+                  <p className="text-xs text-muted-foreground font-mono">{searchResult.friend_code}</p>
+                </div>
               </div>
               <Button size="sm" onClick={sendRequest} disabled={isSending}>
                 <UserPlus className="w-4 h-4 mr-1" />
@@ -287,9 +315,17 @@ export function FriendSection({ currentUserId, friendCode, friends, pendingReque
             <div className="space-y-2">
               {localPendingRequests.map((request) => (
                 <div key={request.id} className="flex items-center justify-between p-3 border border-border rounded-lg">
-                  <div>
-                    <p className="font-medium">{request.requester.display_name}</p>
-                    <p className="text-xs text-muted-foreground font-mono">{request.requester.friend_code}</p>
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={request.requester.avatar_url || undefined} />
+                      <AvatarFallback>
+                        {request.requester.display_name.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-medium">{request.requester.display_name}</p>
+                      <p className="text-xs text-muted-foreground font-mono">{request.requester.friend_code}</p>
+                    </div>
                   </div>
                   <div className="flex gap-2">
                     <Button
@@ -325,9 +361,17 @@ export function FriendSection({ currentUserId, friendCode, friends, pendingReque
                   key={request.id}
                   className="flex items-center justify-between p-3 border border-border rounded-lg opacity-70"
                 >
-                  <div>
-                    <p className="font-medium">{request.addressee.display_name}</p>
-                    <p className="text-xs text-muted-foreground font-mono">{request.addressee.friend_code}</p>
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={request.addressee.avatar_url || undefined} />
+                      <AvatarFallback>
+                        {request.addressee.display_name.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-medium">{request.addressee.display_name}</p>
+                      <p className="text-xs text-muted-foreground font-mono">{request.addressee.friend_code}</p>
+                    </div>
                   </div>
                   <Button size="sm" variant="ghost" onClick={() => cancelRequest(request.id)}>
                     <X className="w-4 h-4" />
@@ -351,7 +395,11 @@ export function FriendSection({ currentUserId, friendCode, friends, pendingReque
                   className="flex items-center justify-between p-3 border border-border rounded-lg hover:bg-accent/5 transition-colors group"
                 >
                   <Link href={`/users/${friend.id}`} className="flex-1">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage src={friend.avatar_url || undefined} />
+                        <AvatarFallback>{friend.display_name.charAt(0).toUpperCase()}</AvatarFallback>
+                      </Avatar>
                       <div>
                         <p className="font-medium group-hover:text-chart-1 transition-colors">{friend.display_name}</p>
                         <p className="text-xs text-muted-foreground font-mono">{friend.friend_code}</p>

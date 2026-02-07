@@ -68,6 +68,7 @@ export default async function GameEditPage({
           name: r.profiles?.display_name || "",
           score: r.raw_score.toString(),
           userId: r.user_id,
+          bonusPoints: Number(r.bonus_points || 0),
         }))}
       />
     </div>

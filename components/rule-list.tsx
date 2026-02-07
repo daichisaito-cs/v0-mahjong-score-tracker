@@ -17,7 +17,7 @@ interface Rule {
   uma_first: number
   uma_second: number
   uma_third: number
-  uma_fourth: number
+  uma_fourth: number | null
   created_by: string
 }
 
@@ -88,7 +88,9 @@ export function RuleList({ rules, currentUserId }: { rules: Rule[]; currentUserI
               <div>
                 <div className="text-muted-foreground">ウマ</div>
                 <div className="font-medium">
-                  {rule.uma_first} / {rule.uma_second} / {rule.uma_third} / {rule.uma_fourth}
+                  {rule.game_type === "four_player"
+                    ? `${rule.uma_first} / ${rule.uma_second} / ${rule.uma_third} / ${rule.uma_fourth ?? "-"}`
+                    : `${rule.uma_first} / ${rule.uma_second} / ${rule.uma_third}`}
                 </div>
               </div>
               <div>

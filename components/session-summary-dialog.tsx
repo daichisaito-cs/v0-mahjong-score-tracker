@@ -1,5 +1,7 @@
 "use client"
 
+import { useRef, useState } from "react"
+import { toPng } from "html-to-image"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -10,65 +12,161 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Card, CardContent } from "@/components/ui/card"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Trophy } from "lucide-react"
+import { cn } from "@/lib/utils"
+
+export type SessionPlayer = {
+  name: string
+  userId?: string
+  avatarUrl?: string | null
+}
+
+export type SessionResult = {
+  players: SessionPlayer[]
+  points: number[]
+}
 
 interface SessionSummaryDialogProps {
   open: boolean
-  sessionResults: Array<{
-    players: string[]
-    points: number[]
-  }>
+  sessionResults: SessionResult[]
+  leagueName?: string
   onClose: () => void
 }
 
-export function SessionSummaryDialog({ open, sessionResults, onClose }: SessionSummaryDialogProps) {
-  // プレイヤー名のリストを取得（user_idがないプレイヤーは名前で同一人物と判断）
-  const allPlayerNames = Array.from(new Set(sessionResults.flatMap((result) => result.players)))
+export function SessionSummaryDialog({ open, sessionResults, leagueName, onClose }: SessionSummaryDialogProps) {
+  const captureRef = useRef<HTMLDivElement | null>(null)
+  const [isSaving, setIsSaving] = useState(false)
+  const [isCapturing, setIsCapturing] = useState(false)
+  const dateStr = new Date().toISOString().slice(0, 10)
 
-  // 各プレイヤーの合計ポイントを計算
-  const playerTotals = allPlayerNames.map((name) => {
-    const total = sessionResults.reduce((sum, result) => {
-      const playerIndex = result.players.indexOf(name)
-      return sum + (playerIndex !== -1 ? result.points[playerIndex] : 0)
-    }, 0)
-    return { name, total }
+  const totals = sessionResults.reduce<Record<string, { name: string; avatarUrl?: string | null; total: number }>>(
+    (acc, result) => {
+      result.players.forEach((player, idx) => {
+        const key = player.userId || player.name
+        const avatarUrl = player.avatarUrl || null
+        const points = result.points[idx] || 0
+
+        if (!acc[key]) {
+          acc[key] = { name: player.name, avatarUrl, total: 0 }
+        }
+
+        acc[key].total += points
+        if (!acc[key].avatarUrl && avatarUrl) {
+          acc[key].avatarUrl = avatarUrl
+        }
+      })
+
+      return acc
+    },
+    {},
+  )
+
+  const sortedPlayers = Object.values(totals).sort((a, b) => b.total - a.total)
+  let lastTotal: number | null = null
+  let lastRank = 0
+  const rankedPlayers = sortedPlayers.map((player, index) => {
+    if (lastTotal === null || player.total !== lastTotal) {
+      lastRank = index + 1
+      lastTotal = player.total
+    }
+    return { ...player, rankLabel: lastRank }
   })
 
-  // 合計ポイントでソート
-  const sortedPlayers = [...playerTotals].sort((a, b) => b.total - a.total)
+  const handleSaveImage = async () => {
+    if (!captureRef.current || isSaving) return
+    try {
+      setIsSaving(true)
+      setIsCapturing(true)
+      await new Promise((resolve) => requestAnimationFrame(() => resolve(null)))
+      const dataUrl = await toPng(captureRef.current, {
+        cacheBust: true,
+        backgroundColor: "#ffffff",
+        pixelRatio: 2,
+        filter: (node) => !(node instanceof HTMLElement && node.dataset?.ignore === "true"),
+      })
+      const link = document.createElement("a")
+      link.href = dataUrl
+      link.download = `session-total.png`
+      link.click()
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn("[v0] failed to export session summary image:", error)
+    } finally {
+      setIsCapturing(false)
+      setIsSaving(false)
+    }
+  }
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>セッション合計結果</DialogTitle>
-          <DialogDescription>{sessionResults.length}回の対局の合計ポイントです</DialogDescription>
-        </DialogHeader>
-        <div className="space-y-2">
-          {sortedPlayers.map((player, index) => (
-            <Card key={player.name}>
-              <CardContent className="flex items-center justify-between p-4">
-                <div className="flex items-center gap-3">
-                  <div className="text-2xl font-bold text-muted-foreground">{index + 1}</div>
-                  <div>
-                    <div className="font-medium">{player.name}</div>
+        <div ref={captureRef} className="space-y-3">
+          <DialogHeader>
+            <DialogTitle>セッション合計結果</DialogTitle>
+            <DialogDescription>{sessionResults.length}回の対局の合計ポイントです</DialogDescription>
+            <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+              {leagueName && (
+                <span className="inline-flex items-center rounded-full bg-muted px-2 py-1">
+                  {leagueName}
+                </span>
+              )}
+              <span className="inline-flex items-center rounded-full bg-muted px-2 py-1">{dateStr}</span>
+            </div>
+          </DialogHeader>
+          <div className={cn("space-y-3 pr-1", !isCapturing && "max-h-[60vh] overflow-y-auto")}>
+            {rankedPlayers.map((player, index) => (
+              <Card
+                key={player.name}
+                className={cn(
+                  "border border-border/80 shadow-sm",
+                  player.rankLabel === 1 && "bg-amber-50/70 border-amber-200",
+                )}
+              >
+                <CardContent className="flex items-center justify-between p-4">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={cn(
+                        "h-10 w-10 rounded-full flex items-center justify-center font-semibold",
+                        player.rankLabel === 1 ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground",
+                      )}
+                    >
+                      {player.rankLabel === 1 ? <Trophy className="h-5 w-5" /> : player.rankLabel}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {player.avatarUrl && (
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src={player.avatarUrl} />
+                          <AvatarFallback>{player.name.charAt(0).toUpperCase()}</AvatarFallback>
+                        </Avatar>
+                      )}
+                      <div className="font-semibold">{player.name}</div>
+                    </div>
                   </div>
-                </div>
-                <div
-                  className={`text-xl font-bold ${
-                    player.total > 0 ? "text-green-600" : player.total < 0 ? "text-red-600" : ""
-                  }`}
-                >
-                  {player.total > 0 ? "+" : ""}
-                  {player.total.toFixed(1)}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                  <div
+                    className={cn(
+                      "text-2xl font-bold tabular-nums",
+                      player.total > 0 && "text-chart-1",
+                      player.total < 0 && "text-destructive",
+                    )}
+                  >
+                    {player.total > 0 ? "+" : ""}
+                    {player.total.toFixed(1)}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
         <DialogFooter>
-          <Button onClick={onClose} className="w-full">
-            対局一覧に戻る
-          </Button>
+          <div className="flex w-full flex-col gap-2">
+            <Button onClick={handleSaveImage} variant="outline" className="w-full" data-ignore="true" disabled={isSaving}>
+              {isSaving ? "画像を作成中..." : "画像で保存"}
+            </Button>
+            <Button onClick={onClose} className="w-full" data-ignore="true">
+              対局一覧に戻る
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -31,7 +31,7 @@ interface League {
   uma_first: number
   uma_second: number
   uma_third: number
-  uma_fourth: number
+  uma_fourth: number | null
   starting_points: number
 }
 

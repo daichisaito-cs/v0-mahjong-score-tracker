@@ -33,6 +33,15 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
+  const needsPassword = Boolean(user?.user_metadata?.needs_password)
+  const isInviteCompletePath = request.nextUrl.pathname.startsWith("/auth/invite-complete")
+
+  if (user && needsPassword && !isInviteCompletePath) {
+    const url = request.nextUrl.clone()
+    url.pathname = "/auth/invite-complete"
+    return NextResponse.redirect(url)
+  }
+
   // 認証が必要なページへのアクセス制御
   const protectedPaths = ["/dashboard", "/games", "/leagues", "/mypage"]
   const isProtectedPath = protectedPaths.some((path) => request.nextUrl.pathname.startsWith(path))
@@ -44,7 +53,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   // ログイン済みユーザーが認証ページにアクセスした場合
-  if (request.nextUrl.pathname.startsWith("/auth/") && user) {
+  if (request.nextUrl.pathname.startsWith("/auth/") && user && !needsPassword) {
     const url = request.nextUrl.clone()
     url.pathname = "/dashboard"
     return NextResponse.redirect(url)

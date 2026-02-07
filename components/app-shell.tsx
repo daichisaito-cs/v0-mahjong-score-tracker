@@ -17,6 +17,7 @@ import { Home, List, Trophy, User, LogOut, Plus, Settings } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useEffect, useState } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { BrandLogo } from "@/components/brand-logo"
 
 const navigation = [
   { name: "ホーム", href: "/dashboard", icon: Home },
@@ -72,6 +73,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
     fetchPendingRequests()
 
+    const handleFriendRequestsUpdated = () => {
+      fetchPendingRequests()
+    }
+
+    window.addEventListener("friend-requests-updated", handleFriendRequestsUpdated as EventListener)
+
     const supabase = createClient()
     const channel = supabase
       .channel("friend-requests")
@@ -90,6 +97,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
     return () => {
       window.removeEventListener("profile-updated", handleProfileUpdate as EventListener)
+      window.removeEventListener("friend-requests-updated", handleFriendRequestsUpdated as EventListener)
       supabase.removeChannel(channel)
     }
   }, [])
@@ -105,8 +113,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-border bg-card">
         <div className="container mx-auto px-4 h-14 flex items-center justify-between">
-          <Link href="/dashboard" className="text-lg font-bold text-primary">
-            Janki
+          <Link href="/dashboard" className="flex items-center" aria-label="Janki">
+            <BrandLogo className="h-7 w-auto" />
           </Link>
 
           {/* Desktop Navigation */}
@@ -121,11 +129,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             {/* Desktop Profile Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full">
+                <Button variant="ghost" size="icon" className="rounded-full relative">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={profile?.avatar_url || undefined} />
                     <AvatarFallback>{profile?.display_name?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
                   </Avatar>
+                  {pendingCount > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-destructive text-white text-[10px] flex items-center justify-center">
+                      {pendingCount}
+                    </span>
+                  )}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
@@ -157,7 +170,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 container mx-auto px-4 py-6">{children}</main>
+      <main className="flex-1 container mx-auto px-4 pt-6 pb-24 md:pb-6">{children}</main>
 
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 border-t border-border bg-card">

@@ -1,0 +1,36 @@
+{
+  "version": 3,
+  "middleware": {
+    "/": {
+      "files": [
+        "server/edge/chunks/insane_workspace_playground_v0-mahjong-score-tracker_bb6418c9._.js",
+        "server/edge/chunks/7833d_@supabase_realtime-js_dist_module_5db634c5._.js",
+        "server/edge/chunks/27f63_@supabase_auth-js_dist_module_9816f03a._.js",
+        "server/edge/chunks/7b061__pnpm_7acaad32._.js",
+        "server/edge/chunks/[root-of-the-server]__96694806._.js",
+        "server/edge/chunks/26913_workspace_playground_v0-mahjong-score-tracker_edge-wrapper_01a03b50.js"
+      ],
+      "name": "middleware",
+      "page": "/",
+      "matchers": [
+        {
+          "regexp": "^(?:\\/(_next\\/data\\/[^/]{1,}))?(?:\\/((?!_next\\/static|_next\\/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*))(\\\\.json)?[\\/#\\?]?$",
+          "originalSource": "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"
+        }
+      ],
+      "wasm": [],
+      "assets": [],
+      "env": {
+        "__NEXT_BUILD_ID": "development",
+        "NEXT_SERVER_ACTIONS_ENCRYPTION_KEY": "KtyMaXrKaskki3MZiX7H6Bd9ngxKMVJNXQniyPBGMjw=",
+        "__NEXT_PREVIEW_MODE_ID": "f6086ada4f426469bac29d535de5c7af",
+        "__NEXT_PREVIEW_MODE_ENCRYPTION_KEY": "10f69b5148dcdd8b6591b9f3c7d305565adb321a264357ec66325009b05bc599",
+        "__NEXT_PREVIEW_MODE_SIGNING_KEY": "1d6879f2c4c19c4a6483dc88270173811e1362a12e847cea5f7c42a55a96a247"
+      }
+    }
+  },
+  "sortedMiddleware": [
+    "/"
+  ],
+  "functions": {}
+}
