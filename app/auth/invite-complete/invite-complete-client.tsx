@@ -22,6 +22,7 @@ export default function InviteCompleteClient() {
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [needsPassword, setNeedsPassword] = useState(false)
 
   useEffect(() => {
     const hashParams = typeof window !== "undefined" ? new URLSearchParams(window.location.hash.slice(1)) : null
@@ -46,6 +47,15 @@ export default function InviteCompleteClient() {
             url.searchParams.delete("type")
             url.hash = ""
             router.replace(url.pathname + url.search)
+          }
+        })
+        .then(async () => {
+          const { data } = await supabase.auth.getUser()
+          const needs = Boolean((data?.user?.user_metadata as any)?.needs_password)
+          setNeedsPassword(needs)
+          if (!needs) {
+            setMessage("メール確認が完了しました。ダッシュボードへ移動します。")
+            router.push("/dashboard")
           }
         })
         .finally(() => setIsSettingSession(false))
@@ -101,7 +111,7 @@ export default function InviteCompleteClient() {
             <CardContent className="space-y-4">
               {isSettingSession ? (
                 <p className="text-sm text-muted-foreground">準備中です…</p>
-              ) : (
+              ) : needsPassword ? (
                 <form onSubmit={handleSetPassword} className="space-y-4">
                   <div className="grid gap-2">
                     <Label htmlFor="password">パスワード</Label>
@@ -155,6 +165,14 @@ export default function InviteCompleteClient() {
                     {isSubmitting ? "設定中..." : "パスワードを設定"}
                   </Button>
                 </form>
+              ) : (
+                <div className="space-y-3">
+                  {message && <p className="text-sm text-green-600">{message}</p>}
+                  {error && <p className="text-sm text-destructive">{error}</p>}
+                  <Button className="w-full" onClick={() => router.push("/dashboard")}>
+                    ダッシュボードへ
+                  </Button>
+                </div>
               )}
             </CardContent>
           </Card>

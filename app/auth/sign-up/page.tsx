@@ -66,10 +66,11 @@ export default function SignUpPage() {
         email,
         password,
         options: {
-          emailRedirectTo: buildRedirectUrl("/auth/invite-complete"),
+          emailRedirectTo: buildRedirectUrl(isValidInviter ? "/auth/invite-complete" : "/auth/sign-up-complete"),
           data: {
             display_name: displayName,
             ...(isValidInviter ? { inviter_id: inviterId } : {}),
+            ...(isValidInviter ? { needs_password: false } : {}),
           },
         },
       })
