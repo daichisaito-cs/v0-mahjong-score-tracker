@@ -30,6 +30,19 @@ export default function SignUpPage() {
   const inviterId = searchParams.get("inviter")
   const isValidInviter = Boolean(inviterId && uuidRegex.test(inviterId))
 
+  const buildRedirectUrl = (path: string) => {
+    const base =
+      process.env.NEXT_PUBLIC_SUPABASE_REDIRECT_URL ||
+      process.env.NEXT_PUBLIC_SITE_URL ||
+      (typeof window !== "undefined" ? window.location.origin : "")
+    if (!base) return path
+    try {
+      return new URL(path, base).toString()
+    } catch {
+      return `${base.replace(/\/$/, "")}${path}`
+    }
+  }
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
     const supabase = createClient()
@@ -53,7 +66,7 @@ export default function SignUpPage() {
         email,
         password,
         options: {
-          emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/dashboard`,
+          emailRedirectTo: buildRedirectUrl("/auth/invite-complete"),
           data: {
             display_name: displayName,
             ...(isValidInviter ? { inviter_id: inviterId } : {}),
