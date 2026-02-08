@@ -127,7 +127,7 @@ export function GamesList({ games }: GamesListProps) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {selectedGames.length > 0 && (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2">
           <div className="flex items-center gap-2 text-sm">
@@ -164,29 +164,29 @@ export function GamesList({ games }: GamesListProps) {
                     player.rankLabel === 1 && "bg-amber-50/70 border-amber-200",
                   )}
                 >
-                  <CardContent className="flex items-center justify-between p-4">
-                    <div className="flex items-center gap-3">
+                  <CardContent className="flex items-center justify-between px-4 py-3">
+                    <div className="flex items-center gap-2.5">
                       <div
                         className={cn(
-                          "h-10 w-10 rounded-full flex items-center justify-center font-semibold",
+                          "h-9 w-9 rounded-full flex items-center justify-center font-semibold text-sm",
                           player.rankLabel === 1 ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground",
                         )}
                       >
-                        {player.rankLabel === 1 ? <Trophy className="h-5 w-5" /> : player.rankLabel}
+                        {player.rankLabel === 1 ? <Trophy className="h-4 w-4" /> : player.rankLabel}
                       </div>
                       <div className="flex items-center gap-2">
                         {player.avatarUrl && (
-                          <Avatar className="h-10 w-10">
+                          <Avatar className="h-9 w-9">
                             <AvatarImage src={player.avatarUrl} />
                             <AvatarFallback>{player.name.charAt(0).toUpperCase()}</AvatarFallback>
                           </Avatar>
                         )}
-                        <div className="font-semibold">{player.name}</div>
+                        <div className="font-semibold text-sm">{player.name}</div>
                       </div>
                     </div>
                     <div
                       className={cn(
-                        "text-2xl font-bold tabular-nums",
+                        "text-xl font-bold tabular-nums",
                         player.total > 0 && "text-chart-1",
                         player.total < 0 && "text-destructive",
                       )}
@@ -223,36 +223,36 @@ export function GamesList({ games }: GamesListProps) {
         const isSelected = selectedGames.includes(game.id)
 
         return (
-          <div key={game.id} className="flex gap-2 items-start">
-            <div className="pt-4">
+          <div key={game.id} className="flex gap-3 items-center">
+            <div className="self-start pt-2">
               <Checkbox checked={isSelected} onCheckedChange={() => toggleGameSelection(game.id)} />
             </div>
             <Link href={`/games/${game.id}`} className="flex-1">
-              <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
-                <CardContent className="pt-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs px-2 py-1 rounded bg-secondary text-secondary-foreground">
+              <Card className="hover:bg-muted/40 transition-colors cursor-pointer py-4 gap-3 border-border/70">
+                <CardContent className="px-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-[11px] px-2 py-1 rounded-full bg-secondary text-secondary-foreground">
                         {game.game_type === "four_player" ? "四麻" : "三麻"}
                       </span>
                       {game.league_id && (
-                        <span className="text-xs px-2 py-1 rounded bg-primary/10 text-primary">リーグ戦</span>
+                        <span className="text-[11px] px-2 py-1 rounded-full bg-primary/10 text-primary">リーグ戦</span>
                       )}
                     </div>
-                    <div className="text-right">
-                      <div className="text-sm text-muted-foreground">
+                    <div className="text-right text-xs text-muted-foreground leading-tight">
+                      <div>
                         {new Date(game.played_at).toLocaleDateString("ja-JP")}
                       </div>
-                      <div className="text-xs text-muted-foreground">
-                        作成者: {game.creator?.display_name || "不明"}
-                      </div>
+                      <div>作成者: {game.creator?.display_name || "不明"}</div>
                     </div>
                   </div>
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-4 gap-3 mt-3">
                     {sortedResults.map((result) => (
-                      <div key={result.id} className="text-center">
-                        <div className="text-xs text-muted-foreground mb-1">{result.rank}位</div>
-                        <div className="text-sm font-medium truncate">{result.player_name || "Unknown"}</div>
+                      <div key={result.id} className="text-center min-w-0">
+                        <div className="text-[11px] text-muted-foreground">{result.rank}位</div>
+                        <div className="text-sm font-semibold truncate w-full">
+                          {result.player_name || "Unknown"}
+                        </div>
                         <div className={`text-xs ${Number(result.point) >= 0 ? "text-chart-1" : "text-destructive"}`}>
                           {Number(result.point) >= 0 ? "+" : ""}
                           {Number(result.point).toFixed(1)}

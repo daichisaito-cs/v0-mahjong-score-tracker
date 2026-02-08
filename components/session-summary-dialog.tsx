@@ -123,29 +123,29 @@ export function SessionSummaryDialog({ open, sessionResults, leagueName, onClose
                   player.rankLabel === 1 && "bg-amber-50/70 border-amber-200",
                 )}
               >
-                <CardContent className="flex items-center justify-between p-4">
-                  <div className="flex items-center gap-3">
+                <CardContent className="flex items-center justify-between px-4 py-3">
+                  <div className="flex items-center gap-2.5">
                     <div
                       className={cn(
-                        "h-10 w-10 rounded-full flex items-center justify-center font-semibold",
+                        "h-9 w-9 rounded-full flex items-center justify-center font-semibold text-sm",
                         player.rankLabel === 1 ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground",
                       )}
                     >
-                      {player.rankLabel === 1 ? <Trophy className="h-5 w-5" /> : player.rankLabel}
+                      {player.rankLabel === 1 ? <Trophy className="h-4 w-4" /> : player.rankLabel}
                     </div>
                     <div className="flex items-center gap-2">
                       {player.avatarUrl && (
-                        <Avatar className="h-10 w-10">
+                        <Avatar className="h-9 w-9">
                           <AvatarImage src={player.avatarUrl} />
                           <AvatarFallback>{player.name.charAt(0).toUpperCase()}</AvatarFallback>
                         </Avatar>
                       )}
-                      <div className="font-semibold">{player.name}</div>
+                      <div className="font-semibold text-sm">{player.name}</div>
                     </div>
                   </div>
                   <div
                     className={cn(
-                      "text-2xl font-bold tabular-nums",
+                      "text-xl font-bold tabular-nums",
                       player.total > 0 && "text-chart-1",
                       player.total < 0 && "text-destructive",
                     )}

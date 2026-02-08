@@ -1518,11 +1518,20 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playg
 var __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$lucide$2d$react$40$0$2e$454$2e$0_react$40$19$2e$2$2e$0$2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$plus$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Plus$3e$__ = __turbopack_context__.i("[project]/insane/workspace/playground/v0-mahjong-score-tracker/node_modules/.pnpm/lucide-react@0.454.0_react@19.2.0/node_modules/lucide-react/dist/esm/icons/plus.js [app-ssr] (ecmascript) <export default as Plus>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$lucide$2d$react$40$0$2e$454$2e$0_react$40$19$2e$2$2e$0$2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$trophy$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Trophy$3e$__ = __turbopack_context__.i("[project]/insane/workspace/playground/v0-mahjong-score-tracker/node_modules/.pnpm/lucide-react@0.454.0_react@19.2.0/node_modules/lucide-react/dist/esm/icons/trophy.js [app-ssr] (ecmascript) <export default as Trophy>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$lucide$2d$react$40$0$2e$454$2e$0_react$40$19$2e$2$2e$0$2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$settings$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Settings$3e$__ = __turbopack_context__.i("[project]/insane/workspace/playground/v0-mahjong-score-tracker/node_modules/.pnpm/lucide-react@0.454.0_react@19.2.0/node_modules/lucide-react/dist/esm/icons/settings.js [app-ssr] (ecmascript) <export default as Settings>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$recharts$40$2$2e$15$2e$4_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$recharts$2f$es6$2f$chart$2f$LineChart$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/insane/workspace/playground/v0-mahjong-score-tracker/node_modules/.pnpm/recharts@2.15.4_react-dom@19.2.0_react@19.2.0__react@19.2.0/node_modules/recharts/es6/chart/LineChart.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$recharts$40$2$2e$15$2e$4_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$Line$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/insane/workspace/playground/v0-mahjong-score-tracker/node_modules/.pnpm/recharts@2.15.4_react-dom@19.2.0_react@19.2.0__react@19.2.0/node_modules/recharts/es6/cartesian/Line.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$recharts$40$2$2e$15$2e$4_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$XAxis$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/insane/workspace/playground/v0-mahjong-score-tracker/node_modules/.pnpm/recharts@2.15.4_react-dom@19.2.0_react@19.2.0__react@19.2.0/node_modules/recharts/es6/cartesian/XAxis.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$recharts$40$2$2e$15$2e$4_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$YAxis$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/insane/workspace/playground/v0-mahjong-score-tracker/node_modules/.pnpm/recharts@2.15.4_react-dom@19.2.0_react@19.2.0__react@19.2.0/node_modules/recharts/es6/cartesian/YAxis.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$recharts$40$2$2e$15$2e$4_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$recharts$2f$es6$2f$component$2f$Tooltip$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/insane/workspace/playground/v0-mahjong-score-tracker/node_modules/.pnpm/recharts@2.15.4_react-dom@19.2.0_react@19.2.0__react@19.2.0/node_modules/recharts/es6/component/Tooltip.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$recharts$40$2$2e$15$2e$4_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$recharts$2f$es6$2f$component$2f$ResponsiveContainer$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/insane/workspace/playground/v0-mahjong-score-tracker/node_modules/.pnpm/recharts@2.15.4_react-dom@19.2.0_react@19.2.0__react@19.2.0/node_modules/recharts/es6/component/ResponsiveContainer.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$recharts$40$2$2e$15$2e$4_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$CartesianGrid$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/insane/workspace/playground/v0-mahjong-score-tracker/node_modules/.pnpm/recharts@2.15.4_react-dom@19.2.0_react@19.2.0__react@19.2.0/node_modules/recharts/es6/cartesian/CartesianGrid.js [app-ssr] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$recharts$40$2$2e$15$2e$4_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$recharts$2f$es6$2f$component$2f$Legend$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/insane/workspace/playground/v0-mahjong-score-tracker/node_modules/.pnpm/recharts@2.15.4_react-dom@19.2.0_react@19.2.0__react@19.2.0/node_modules/recharts/es6/component/Legend.js [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$lib$2f$utils$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/insane/workspace/playground/v0-mahjong-score-tracker/lib/utils.ts [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$components$2f$league$2d$create$2d$form$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/insane/workspace/playground/v0-mahjong-score-tracker/components/league-create-form.tsx [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$components$2f$ui$2f$avatar$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/insane/workspace/playground/v0-mahjong-score-tracker/components/ui/avatar.tsx [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$components$2f$league$2d$member$2d$add$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/insane/workspace/playground/v0-mahjong-score-tracker/components/league-member-add.tsx [app-ssr] (ecmascript)");
 "use client";
+;
 ;
 ;
 ;
@@ -1564,6 +1573,7 @@ function LeagueDetailPage() {
     const router = (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRouter"])();
     const params = (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useParams"])();
     const supabase = (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$lib$2f$supabase$2f$client$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["createClient"])();
+    const [selectedPlayerId, setSelectedPlayerId] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(null);
     const leagueId = (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useMemo"])(()=>{
         const raw = params?.id;
         return Array.isArray(raw) ? raw[0] : raw;
@@ -1588,17 +1598,17 @@ function LeagueDetailPage() {
                     children: "読み込み中..."
                 }, void 0, false, {
                     fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                    lineNumber: 65,
+                    lineNumber: 67,
                     columnNumber: 11
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                lineNumber: 64,
+                lineNumber: 66,
                 columnNumber: 9
             }, this)
         }, void 0, false, {
             fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-            lineNumber: 63,
+            lineNumber: 65,
             columnNumber: 7
         }, this);
     }
@@ -1613,7 +1623,7 @@ function LeagueDetailPage() {
                             children: "リーグを作成"
                         }, void 0, false, {
                             fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                            lineNumber: 75,
+                            lineNumber: 77,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1621,26 +1631,26 @@ function LeagueDetailPage() {
                             children: "新しいリーグの設定を入力してください"
                         }, void 0, false, {
                             fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                            lineNumber: 76,
+                            lineNumber: 78,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                    lineNumber: 74,
+                    lineNumber: 76,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$components$2f$league$2d$create$2d$form$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["LeagueCreateForm"], {
                     userId: user.id
                 }, void 0, false, {
                     fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                    lineNumber: 78,
+                    lineNumber: 80,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-            lineNumber: 73,
+            lineNumber: 75,
             columnNumber: 7
         }, this);
     }
@@ -1653,17 +1663,17 @@ function LeagueDetailPage() {
                     children: "リーグが見つかりません"
                 }, void 0, false, {
                     fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                    lineNumber: 87,
+                    lineNumber: 89,
                     columnNumber: 11
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                lineNumber: 86,
+                lineNumber: 88,
                 columnNumber: 9
             }, this)
         }, void 0, false, {
             fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-            lineNumber: 85,
+            lineNumber: 87,
             columnNumber: 7
         }, this);
     }
@@ -1736,17 +1746,17 @@ function LeagueDetailPage() {
                     children: "読み込み中..."
                 }, void 0, false, {
                     fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                    lineNumber: 166,
+                    lineNumber: 168,
                     columnNumber: 11
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                lineNumber: 165,
+                lineNumber: 167,
                 columnNumber: 9
             }, this)
         }, void 0, false, {
             fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-            lineNumber: 164,
+            lineNumber: 166,
             columnNumber: 7
         }, this);
     }
@@ -1760,17 +1770,17 @@ function LeagueDetailPage() {
                     children: "リーグが見つかりません"
                 }, void 0, false, {
                     fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                    lineNumber: 177,
+                    lineNumber: 179,
                     columnNumber: 11
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                lineNumber: 176,
+                lineNumber: 178,
                 columnNumber: 9
             }, this)
         }, void 0, false, {
             fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-            lineNumber: 175,
+            lineNumber: 177,
             columnNumber: 7
         }, this);
     }
@@ -1799,20 +1809,25 @@ function LeagueDetailPage() {
                     totalPoints: 0,
                     gameCount: 0,
                     rankSum: 0,
-                    bestScore: null,
-                    fourthCount: 0
+                    rankCounts: [
+                        0,
+                        0,
+                        0,
+                        0
+                    ],
+                    bestScore: null
                 };
             }
             playerStats[odIndex].totalPoints += Number(result.point);
             playerStats[odIndex].gameCount += 1;
             playerStats[odIndex].rankSum += Number(result.rank);
+            if (result.rank >= 1 && result.rank <= 4) {
+                playerStats[odIndex].rankCounts[result.rank - 1] += 1;
+            }
             const rawScoreNum = Number((result.raw_score ?? "").toString().replace(/,/g, ""));
             if (Number.isFinite(rawScoreNum)) {
                 const currentBest = playerStats[odIndex].bestScore;
                 playerStats[odIndex].bestScore = currentBest === null || currentBest === undefined ? rawScoreNum : Math.max(currentBest, rawScoreNum);
-            }
-            if (result.rank === 4) {
-                playerStats[odIndex].fourthCount += 1;
             }
         });
     });
@@ -1828,8 +1843,13 @@ function LeagueDetailPage() {
                 totalPoints: 0,
                 gameCount: 0,
                 rankSum: 0,
-                bestScore: null,
-                fourthCount: 0
+                rankCounts: [
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                bestScore: null
             };
         }
         const rolledGameCount = Number(row.rolled_game_count ?? 0);
@@ -1845,7 +1865,10 @@ function LeagueDetailPage() {
         playerStats[userId].gameCount += rolledGameCount;
         playerStats[userId].totalPoints += rolledTotalPoints;
         playerStats[userId].rankSum += rolledRankSum;
-        playerStats[userId].fourthCount += rolledRankCounts[3];
+        playerStats[userId].rankCounts[0] += rolledRankCounts[0];
+        playerStats[userId].rankCounts[1] += rolledRankCounts[1];
+        playerStats[userId].rankCounts[2] += rolledRankCounts[2];
+        playerStats[userId].rankCounts[3] += rolledRankCounts[3];
         playerStats[userId].bestScore = playerStats[userId].bestScore === null ? rolledBest : rolledBest === null ? playerStats[userId].bestScore : Math.max(playerStats[userId].bestScore, rolledBest);
     });
     const seedPlayers = [];
@@ -1872,8 +1895,13 @@ function LeagueDetailPage() {
                 totalPoints: 0,
                 gameCount: 0,
                 rankSum: 0,
-                bestScore: null,
-                fourthCount: 0
+                rankCounts: [
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                bestScore: null
             };
         } else {
             playerStats[p.id].name = playerStats[p.id].name === "Unknown" ? p.name : playerStats[p.id].name;
@@ -1895,9 +1923,61 @@ function LeagueDetailPage() {
     const bestScoreRanking = addRankLabels(bestScoreCandidates, (player)=>player.bestScore ?? -Infinity).filter((player)=>player.rankLabel <= 3);
     const avoidCandidates = Object.values(playerStats).filter((p)=>p.gameCount > 0).map((p)=>({
             ...p,
-            avoidRate: p.gameCount > 0 ? 1 - p.fourthCount / p.gameCount : null
+            avoidRate: p.gameCount > 0 ? 1 - p.rankCounts[3] / p.gameCount : null
         })).filter((p)=>Number.isFinite(p.avoidRate)).sort((a, b)=>b.avoidRate - a.avoidRate);
     const avoidRanking = addRankLabels(avoidCandidates, (player)=>player.avoidRate).filter((player)=>player.rankLabel <= 3);
+    const rollupTotalsMap = new Map();
+    (leagueRollups || []).forEach((row)=>{
+        if (!row.user_id) return;
+        rollupTotalsMap.set(row.user_id, Number(row.rolled_total_points ?? 0));
+    });
+    const chartPlayers = Object.values(playerStats).filter((p)=>p.gameCount > 0).sort((a, b)=>b.totalPoints - a.totalPoints);
+    const chartColors = [
+        "#10b981",
+        "#f97316",
+        "#3b82f6",
+        "#8b5cf6",
+        "#ef4444",
+        "#14b8a6",
+        "#eab308",
+        "#6366f1",
+        "#ec4899",
+        "#22c55e"
+    ];
+    const gamesSorted = [
+        ...games || []
+    ].sort((a, b)=>{
+        const aTime = new Date(a.played_at || a.created_at).getTime();
+        const bTime = new Date(b.played_at || b.created_at).getTime();
+        return aTime - bTime;
+    });
+    const perPlayerSeries = new Map();
+    chartPlayers.forEach((player)=>{
+        const base = rollupTotalsMap.get(player.odIndex) ?? 0;
+        let total = base;
+        const series = [];
+        gamesSorted.forEach((game)=>{
+            const result = (game.game_results || []).find((r)=>r.user_id === player.odIndex);
+            if (!result) return;
+            total += Number(result.point);
+            series.push(Number(total.toFixed(1)));
+        });
+        perPlayerSeries.set(player.odIndex, series);
+    });
+    const maxSeriesLength = Math.max(0, ...Array.from(perPlayerSeries.values()).map((series)=>series.length));
+    const pointsTimeline = Array.from({
+        length: maxSeriesLength
+    }, (_, index)=>{
+        const entry = {
+            game: index + 1
+        };
+        perPlayerSeries.forEach((series, playerId)=>{
+            if (index < series.length) {
+                entry[playerId] = series[index];
+            }
+        });
+        return entry;
+    });
     const memberIds = members?.map((m)=>m.user_id) || [];
     const existingMemberIds = Array.from(new Set([
         ...memberIds,
@@ -1923,17 +2003,17 @@ function LeagueDetailPage() {
                                         className: "h-5 w-5"
                                     }, void 0, false, {
                                         fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                        lineNumber: 358,
+                                        lineNumber: 417,
                                         columnNumber: 15
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                    lineNumber: 357,
+                                    lineNumber: 416,
                                     columnNumber: 13
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                lineNumber: 356,
+                                lineNumber: 415,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1947,7 +2027,7 @@ function LeagueDetailPage() {
                                                 children: league.name
                                             }, void 0, false, {
                                                 fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                lineNumber: 363,
+                                                lineNumber: 422,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1955,13 +2035,13 @@ function LeagueDetailPage() {
                                                 children: league.game_type === "four_player" ? "四麻" : "三麻"
                                             }, void 0, false, {
                                                 fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                lineNumber: 364,
+                                                lineNumber: 423,
                                                 columnNumber: 15
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                        lineNumber: 362,
+                                        lineNumber: 421,
                                         columnNumber: 13
                                     }, this),
                                     league.description && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1969,19 +2049,19 @@ function LeagueDetailPage() {
                                         children: league.description
                                     }, void 0, false, {
                                         fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                        lineNumber: 368,
+                                        lineNumber: 427,
                                         columnNumber: 36
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                lineNumber: 361,
+                                lineNumber: 420,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                        lineNumber: 355,
+                        lineNumber: 414,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1996,17 +2076,17 @@ function LeagueDetailPage() {
                                         className: "h-4 w-4"
                                     }, void 0, false, {
                                         fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                        lineNumber: 375,
+                                        lineNumber: 434,
                                         columnNumber: 17
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                    lineNumber: 374,
+                                    lineNumber: 433,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                lineNumber: 373,
+                                lineNumber: 432,
                                 columnNumber: 13
                             }, this),
                             isOwner && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$components$2f$league$2d$member$2d$add$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["LeagueMemberAdd"], {
@@ -2015,7 +2095,7 @@ function LeagueDetailPage() {
                                 existingMemberIds: existingMemberIds
                             }, void 0, false, {
                                 fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                lineNumber: 380,
+                                lineNumber: 439,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
@@ -2028,31 +2108,31 @@ function LeagueDetailPage() {
                                             className: "h-4 w-4"
                                         }, void 0, false, {
                                             fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                            lineNumber: 384,
+                                            lineNumber: 443,
                                             columnNumber: 15
                                         }, this),
                                         "対局を記録"
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                    lineNumber: 383,
+                                    lineNumber: 442,
                                     columnNumber: 13
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                lineNumber: 382,
+                                lineNumber: 441,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                        lineNumber: 371,
+                        lineNumber: 430,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                lineNumber: 354,
+                lineNumber: 413,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Card"], {
@@ -2065,174 +2145,539 @@ function LeagueDetailPage() {
                                     className: "h-5 w-5 text-accent"
                                 }, void 0, false, {
                                     fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                    lineNumber: 394,
+                                    lineNumber: 453,
                                     columnNumber: 13
                                 }, this),
                                 "ランキング"
                             ]
                         }, void 0, true, {
                             fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                            lineNumber: 393,
+                            lineNumber: 452,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                        lineNumber: 392,
+                        lineNumber: 451,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CardContent"], {
                         children: fullRanking.length > 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                             className: "space-y-3",
-                            children: [
-                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                    className: "text-xs text-muted-foreground",
-                                    children: "対局履歴は各記録者ごとに直近30戦まで表示されます（成績は全期間）。"
-                                }, void 0, false, {
+                            children: fullRanking.map((player, index)=>{
+                                const rankLabel = player.rankLabel;
+                                const rankNumber = typeof rankLabel === "number" ? rankLabel : null;
+                                const avgRank = player.gameCount > 0 ? player.rankSum / player.gameCount : null;
+                                return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                    className: (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$lib$2f$utils$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["cn"])("flex items-center justify-between p-3 rounded-lg", rankNumber === 1 && "bg-accent/20", rankNumber === 2 && "bg-secondary/50", rankNumber === 3 && "bg-muted/50", (rankNumber === null || rankNumber > 3) && "border border-border"),
+                                    children: [
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                            className: "flex items-center gap-3",
+                                            children: [
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                    className: "flex items-center gap-2",
+                                                    children: [
+                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                            className: (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$lib$2f$utils$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["cn"])("w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold", rankNumber === 1 && "bg-accent text-accent-foreground", rankNumber === 2 && "bg-secondary text-secondary-foreground", rankNumber === 3 && "bg-muted text-muted-foreground", (rankNumber === null || rankNumber > 3) && "bg-background text-foreground border border-border"),
+                                                            children: rankLabel
+                                                        }, void 0, false, {
+                                                            fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                                            lineNumber: 477,
+                                                            columnNumber: 25
+                                                        }, this),
+                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$components$2f$ui$2f$avatar$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Avatar"], {
+                                                            className: "h-9 w-9",
+                                                            children: [
+                                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$components$2f$ui$2f$avatar$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["AvatarImage"], {
+                                                                    src: player.avatarUrl || undefined
+                                                                }, void 0, false, {
+                                                                    fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                                                    lineNumber: 489,
+                                                                    columnNumber: 27
+                                                                }, this),
+                                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$components$2f$ui$2f$avatar$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["AvatarFallback"], {
+                                                                    children: player.name.charAt(0).toUpperCase()
+                                                                }, void 0, false, {
+                                                                    fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                                                    lineNumber: 490,
+                                                                    columnNumber: 27
+                                                                }, this)
+                                                            ]
+                                                        }, void 0, true, {
+                                                            fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                                            lineNumber: 488,
+                                                            columnNumber: 25
+                                                        }, this)
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                                    lineNumber: 476,
+                                                    columnNumber: 23
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                    children: [
+                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                                            className: "font-semibold",
+                                                            children: player.name
+                                                        }, void 0, false, {
+                                                            fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                                            lineNumber: 494,
+                                                            columnNumber: 25
+                                                        }, this),
+                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                                            className: "text-xs text-muted-foreground",
+                                                            children: [
+                                                                player.gameCount,
+                                                                "戦 / 平均",
+                                                                avgRank !== null ? `${avgRank.toFixed(2)}位` : "-"
+                                                            ]
+                                                        }, void 0, true, {
+                                                            fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                                            lineNumber: 495,
+                                                            columnNumber: 25
+                                                        }, this)
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                                    lineNumber: 493,
+                                                    columnNumber: 23
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                            lineNumber: 475,
+                                            columnNumber: 21
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                            className: "text-right",
+                                            children: [
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                                    className: (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$lib$2f$utils$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["cn"])("font-bold text-lg", player.totalPoints >= 0 ? "text-chart-1" : "text-destructive"),
+                                                    children: [
+                                                        player.totalPoints >= 0 ? "+" : "",
+                                                        player.totalPoints.toFixed(1)
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                                    lineNumber: 501,
+                                                    columnNumber: 23
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                                    className: "text-xs text-muted-foreground",
+                                                    children: "pt"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                                    lineNumber: 510,
+                                                    columnNumber: 23
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                            lineNumber: 500,
+                                            columnNumber: 21
+                                        }, this)
+                                    ]
+                                }, player.odIndex, true, {
                                     fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                    lineNumber: 401,
-                                    columnNumber: 15
-                                }, this),
-                                fullRanking.map((player, index)=>{
-                                    const rankLabel = player.rankLabel;
-                                    const rankNumber = typeof rankLabel === "number" ? rankLabel : null;
-                                    const avgRank = player.gameCount > 0 ? player.rankSum / player.gameCount : null;
-                                    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                        className: (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$lib$2f$utils$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["cn"])("flex items-center justify-between p-3 rounded-lg", rankNumber === 1 && "bg-accent/20", rankNumber === 2 && "bg-secondary/50", rankNumber === 3 && "bg-muted/50", (rankNumber === null || rankNumber > 3) && "border border-border"),
-                                        children: [
-                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                className: "flex items-center gap-3",
-                                                children: [
-                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                        className: "flex items-center gap-2",
-                                                        children: [
-                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                                className: (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$lib$2f$utils$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["cn"])("w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold", rankNumber === 1 && "bg-accent text-accent-foreground", rankNumber === 2 && "bg-secondary text-secondary-foreground", rankNumber === 3 && "bg-muted text-muted-foreground", (rankNumber === null || rankNumber > 3) && "bg-background text-foreground border border-border"),
-                                                                children: rankLabel
-                                                            }, void 0, false, {
-                                                                fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                                lineNumber: 421,
-                                                                columnNumber: 25
-                                                            }, this),
-                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$components$2f$ui$2f$avatar$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Avatar"], {
-                                                                className: "h-9 w-9",
-                                                                children: [
-                                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$components$2f$ui$2f$avatar$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["AvatarImage"], {
-                                                                        src: player.avatarUrl || undefined
-                                                                    }, void 0, false, {
-                                                                        fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                                        lineNumber: 433,
-                                                                        columnNumber: 27
-                                                                    }, this),
-                                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$components$2f$ui$2f$avatar$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["AvatarFallback"], {
-                                                                        children: player.name.charAt(0).toUpperCase()
-                                                                    }, void 0, false, {
-                                                                        fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                                        lineNumber: 434,
-                                                                        columnNumber: 27
-                                                                    }, this)
-                                                                ]
-                                                            }, void 0, true, {
-                                                                fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                                lineNumber: 432,
-                                                                columnNumber: 25
-                                                            }, this)
-                                                        ]
-                                                    }, void 0, true, {
-                                                        fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                        lineNumber: 420,
-                                                        columnNumber: 23
-                                                    }, this),
-                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                        children: [
-                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                                                className: "font-semibold",
-                                                                children: player.name
-                                                            }, void 0, false, {
-                                                                fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                                lineNumber: 438,
-                                                                columnNumber: 25
-                                                            }, this),
-                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                                                className: "text-xs text-muted-foreground",
-                                                                children: [
-                                                                    player.gameCount,
-                                                                    "戦 / 平均",
-                                                                    avgRank !== null ? `${avgRank.toFixed(2)}位` : "-"
-                                                                ]
-                                                            }, void 0, true, {
-                                                                fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                                lineNumber: 439,
-                                                                columnNumber: 25
-                                                            }, this)
-                                                        ]
-                                                    }, void 0, true, {
-                                                        fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                        lineNumber: 437,
-                                                        columnNumber: 23
-                                                    }, this)
-                                                ]
-                                            }, void 0, true, {
-                                                fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                lineNumber: 419,
-                                                columnNumber: 21
-                                            }, this),
-                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                className: "text-right",
-                                                children: [
-                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                                        className: (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$lib$2f$utils$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["cn"])("font-bold text-lg", player.totalPoints >= 0 ? "text-chart-1" : "text-destructive"),
-                                                        children: [
-                                                            player.totalPoints >= 0 ? "+" : "",
-                                                            player.totalPoints.toFixed(1)
-                                                        ]
-                                                    }, void 0, true, {
-                                                        fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                        lineNumber: 445,
-                                                        columnNumber: 23
-                                                    }, this),
-                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                                        className: "text-xs text-muted-foreground",
-                                                        children: "pt"
-                                                    }, void 0, false, {
-                                                        fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                        lineNumber: 454,
-                                                        columnNumber: 23
-                                                    }, this)
-                                                ]
-                                            }, void 0, true, {
-                                                fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                lineNumber: 444,
-                                                columnNumber: 21
-                                            }, this)
-                                        ]
-                                    }, player.odIndex, true, {
-                                        fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                        lineNumber: 409,
-                                        columnNumber: 19
-                                    }, this);
-                                })
-                            ]
-                        }, void 0, true, {
+                                    lineNumber: 465,
+                                    columnNumber: 19
+                                }, this);
+                            })
+                        }, void 0, false, {
                             fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                            lineNumber: 400,
+                            lineNumber: 459,
                             columnNumber: 13
                         }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                             className: "text-muted-foreground text-center py-4",
                             children: "まだ対局がありません"
                         }, void 0, false, {
                             fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                            lineNumber: 461,
+                            lineNumber: 517,
                             columnNumber: 13
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                        lineNumber: 398,
+                        lineNumber: 457,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                lineNumber: 391,
+                lineNumber: 450,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Card"], {
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CardHeader"], {
+                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CardTitle"], {
+                            className: "text-lg",
+                            children: "順位回数"
+                        }, void 0, false, {
+                            fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                            lineNumber: 524,
+                            columnNumber: 11
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                        lineNumber: 523,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CardContent"], {
+                        className: "overflow-x-auto",
+                        children: fullRanking.length > 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("table", {
+                            className: "w-full text-sm",
+                            children: [
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("thead", {
+                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
+                                        className: "text-muted-foreground border-b",
+                                        children: [
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
+                                                className: "text-left py-2 font-medium",
+                                                children: "プレイヤー"
+                                            }, void 0, false, {
+                                                fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                                lineNumber: 531,
+                                                columnNumber: 19
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
+                                                className: "text-center py-2 font-medium",
+                                                children: "1位"
+                                            }, void 0, false, {
+                                                fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                                lineNumber: 532,
+                                                columnNumber: 19
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
+                                                className: "text-center py-2 font-medium",
+                                                children: "2位"
+                                            }, void 0, false, {
+                                                fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                                lineNumber: 533,
+                                                columnNumber: 19
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
+                                                className: "text-center py-2 font-medium",
+                                                children: "3位"
+                                            }, void 0, false, {
+                                                fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                                lineNumber: 534,
+                                                columnNumber: 19
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
+                                                className: "text-center py-2 font-medium",
+                                                children: "4位"
+                                            }, void 0, false, {
+                                                fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                                lineNumber: 535,
+                                                columnNumber: 19
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                        lineNumber: 530,
+                                        columnNumber: 17
+                                    }, this)
+                                }, void 0, false, {
+                                    fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                    lineNumber: 529,
+                                    columnNumber: 15
+                                }, this),
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("tbody", {
+                                    children: fullRanking.map((player)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
+                                            className: "border-b last:border-0",
+                                            children: [
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
+                                                    className: "py-2 pr-3",
+                                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                        className: "flex items-center gap-2",
+                                                        children: [
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$components$2f$ui$2f$avatar$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Avatar"], {
+                                                                className: "h-7 w-7",
+                                                                children: [
+                                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$components$2f$ui$2f$avatar$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["AvatarImage"], {
+                                                                        src: player.avatarUrl || undefined
+                                                                    }, void 0, false, {
+                                                                        fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                                                        lineNumber: 544,
+                                                                        columnNumber: 27
+                                                                    }, this),
+                                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$components$2f$ui$2f$avatar$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["AvatarFallback"], {
+                                                                        children: player.name.charAt(0).toUpperCase()
+                                                                    }, void 0, false, {
+                                                                        fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                                                        lineNumber: 545,
+                                                                        columnNumber: 27
+                                                                    }, this)
+                                                                ]
+                                                            }, void 0, true, {
+                                                                fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                                                lineNumber: 543,
+                                                                columnNumber: 25
+                                                            }, this),
+                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                                className: "font-semibold",
+                                                                children: player.name
+                                                            }, void 0, false, {
+                                                                fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                                                lineNumber: 547,
+                                                                columnNumber: 25
+                                                            }, this)
+                                                        ]
+                                                    }, void 0, true, {
+                                                        fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                                        lineNumber: 542,
+                                                        columnNumber: 23
+                                                    }, this)
+                                                }, void 0, false, {
+                                                    fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                                    lineNumber: 541,
+                                                    columnNumber: 21
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
+                                                    className: "text-center tabular-nums",
+                                                    children: player.rankCounts[0]
+                                                }, void 0, false, {
+                                                    fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                                    lineNumber: 550,
+                                                    columnNumber: 21
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
+                                                    className: "text-center tabular-nums",
+                                                    children: player.rankCounts[1]
+                                                }, void 0, false, {
+                                                    fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                                    lineNumber: 551,
+                                                    columnNumber: 21
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
+                                                    className: "text-center tabular-nums",
+                                                    children: player.rankCounts[2]
+                                                }, void 0, false, {
+                                                    fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                                    lineNumber: 552,
+                                                    columnNumber: 21
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
+                                                    className: "text-center tabular-nums",
+                                                    children: player.rankCounts[3]
+                                                }, void 0, false, {
+                                                    fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                                    lineNumber: 553,
+                                                    columnNumber: 21
+                                                }, this)
+                                            ]
+                                        }, player.odIndex, true, {
+                                            fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                            lineNumber: 540,
+                                            columnNumber: 19
+                                        }, this))
+                                }, void 0, false, {
+                                    fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                    lineNumber: 538,
+                                    columnNumber: 15
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                            lineNumber: 528,
+                            columnNumber: 13
+                        }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                            className: "text-muted-foreground text-center py-4",
+                            children: "まだ対局がありません"
+                        }, void 0, false, {
+                            fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                            lineNumber: 559,
+                            columnNumber: 13
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                        lineNumber: 526,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                lineNumber: 522,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Card"], {
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CardHeader"], {
+                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CardTitle"], {
+                            className: "text-lg",
+                            children: "総合pt推移"
+                        }, void 0, false, {
+                            fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                            lineNumber: 566,
+                            columnNumber: 11
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                        lineNumber: 565,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CardContent"], {
+                        children: chartPlayers.length > 0 && pointsTimeline.length > 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            className: "h-[260px]",
+                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$recharts$40$2$2e$15$2e$4_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$recharts$2f$es6$2f$component$2f$ResponsiveContainer$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["ResponsiveContainer"], {
+                                width: "100%",
+                                height: "100%",
+                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$recharts$40$2$2e$15$2e$4_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$recharts$2f$es6$2f$chart$2f$LineChart$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["LineChart"], {
+                                    data: pointsTimeline,
+                                    margin: {
+                                        top: 8,
+                                        right: 12,
+                                        bottom: 8,
+                                        left: 0
+                                    },
+                                    children: [
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$recharts$40$2$2e$15$2e$4_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$CartesianGrid$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CartesianGrid"], {
+                                            strokeDasharray: "3 3",
+                                            stroke: "#e5e7eb",
+                                            opacity: 0.5
+                                        }, void 0, false, {
+                                            fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                            lineNumber: 573,
+                                            columnNumber: 19
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$recharts$40$2$2e$15$2e$4_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$XAxis$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["XAxis"], {
+                                            dataKey: "game",
+                                            stroke: "#9ca3af",
+                                            fontSize: 12,
+                                            tickLine: false,
+                                            axisLine: {
+                                                stroke: "#e5e7eb"
+                                            }
+                                        }, void 0, false, {
+                                            fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                            lineNumber: 574,
+                                            columnNumber: 19
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$recharts$40$2$2e$15$2e$4_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$YAxis$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["YAxis"], {
+                                            width: 32,
+                                            stroke: "#9ca3af",
+                                            fontSize: 12,
+                                            tickLine: false,
+                                            axisLine: {
+                                                stroke: "#e5e7eb"
+                                            }
+                                        }, void 0, false, {
+                                            fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                            lineNumber: 581,
+                                            columnNumber: 19
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$recharts$40$2$2e$15$2e$4_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$recharts$2f$es6$2f$component$2f$Tooltip$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Tooltip"], {
+                                            contentStyle: {
+                                                backgroundColor: "#fff",
+                                                border: "1px solid #e5e7eb",
+                                                borderRadius: "8px"
+                                            },
+                                            labelFormatter: (value)=>`${value}戦目`,
+                                            formatter: (value, name)=>[
+                                                    `${value >= 0 ? "+" : ""}${value}pt`,
+                                                    name
+                                                ]
+                                        }, void 0, false, {
+                                            fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                            lineNumber: 588,
+                                            columnNumber: 19
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$recharts$40$2$2e$15$2e$4_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$recharts$2f$es6$2f$component$2f$Legend$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Legend"], {
+                                            wrapperStyle: {
+                                                paddingTop: 8
+                                            },
+                                            content: ({ payload })=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                    className: "flex flex-wrap items-center gap-3",
+                                                    children: (payload || []).map((entry)=>{
+                                                        const id = entry.dataKey;
+                                                        const isSelected = selectedPlayerId === id;
+                                                        const isDimmed = selectedPlayerId && !isSelected;
+                                                        return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                                            type: "button",
+                                                            onClick: ()=>setSelectedPlayerId(isSelected ? null : id),
+                                                            className: (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$lib$2f$utils$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["cn"])("flex items-center gap-1 text-xs font-semibold transition-opacity", isDimmed && "opacity-40"),
+                                                            style: {
+                                                                color: entry.color
+                                                            },
+                                                            children: [
+                                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                                    className: "inline-block h-2.5 w-2.5 rounded-full border",
+                                                                    style: {
+                                                                        borderColor: entry.color
+                                                                    }
+                                                                }, void 0, false, {
+                                                                    fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                                                    lineNumber: 616,
+                                                                    columnNumber: 31
+                                                                }, void 0),
+                                                                entry.value
+                                                            ]
+                                                        }, id, true, {
+                                                            fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                                            lineNumber: 606,
+                                                            columnNumber: 29
+                                                        }, void 0);
+                                                    })
+                                                }, void 0, false, {
+                                                    fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                                    lineNumber: 600,
+                                                    columnNumber: 23
+                                                }, void 0)
+                                        }, void 0, false, {
+                                            fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                            lineNumber: 597,
+                                            columnNumber: 19
+                                        }, this),
+                                        chartPlayers.map((player, index)=>(()=>{
+                                                const isSelected = selectedPlayerId === player.odIndex;
+                                                const isDimmed = selectedPlayerId && !isSelected;
+                                                const stroke = chartColors[index % chartColors.length];
+                                                return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$recharts$40$2$2e$15$2e$4_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$recharts$2f$es6$2f$cartesian$2f$Line$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Line"], {
+                                                    type: "linear",
+                                                    dataKey: player.odIndex,
+                                                    name: player.name,
+                                                    stroke: stroke,
+                                                    strokeWidth: isSelected ? 3 : 2,
+                                                    dot: false,
+                                                    strokeOpacity: isDimmed ? 0.2 : 1,
+                                                    connectNulls: true
+                                                }, player.odIndex, false, {
+                                                    fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                                    lineNumber: 630,
+                                                    columnNumber: 21
+                                                }, this);
+                                            })())
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                    lineNumber: 572,
+                                    columnNumber: 17
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                                lineNumber: 571,
+                                columnNumber: 15
+                            }, this)
+                        }, void 0, false, {
+                            fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                            lineNumber: 570,
+                            columnNumber: 13
+                        }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                            className: "text-muted-foreground text-center py-4",
+                            children: "まだ対局がありません"
+                        }, void 0, false, {
+                            fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                            lineNumber: 648,
+                            columnNumber: 13
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                        lineNumber: 568,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
+                lineNumber: 564,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2247,12 +2692,12 @@ function LeagueDetailPage() {
                                     children: "最高スコア TOP3"
                                 }, void 0, false, {
                                     fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                    lineNumber: 469,
+                                    lineNumber: 656,
                                     columnNumber: 13
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                lineNumber: 468,
+                                lineNumber: 655,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -2271,7 +2716,7 @@ function LeagueDetailPage() {
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                        lineNumber: 479,
+                                                        lineNumber: 666,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$components$2f$ui$2f$avatar$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Avatar"], {
@@ -2281,20 +2726,20 @@ function LeagueDetailPage() {
                                                                 src: player.avatarUrl || undefined
                                                             }, void 0, false, {
                                                                 fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                                lineNumber: 481,
+                                                                lineNumber: 668,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$components$2f$ui$2f$avatar$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["AvatarFallback"], {
                                                                 children: player.name.charAt(0).toUpperCase()
                                                             }, void 0, false, {
                                                                 fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                                lineNumber: 482,
+                                                                lineNumber: 669,
                                                                 columnNumber: 23
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                        lineNumber: 480,
+                                                        lineNumber: 667,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2304,7 +2749,7 @@ function LeagueDetailPage() {
                                                                 children: player.name
                                                             }, void 0, false, {
                                                                 fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                                lineNumber: 485,
+                                                                lineNumber: 672,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2315,19 +2760,19 @@ function LeagueDetailPage() {
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                                lineNumber: 486,
+                                                                lineNumber: 673,
                                                                 columnNumber: 23
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                        lineNumber: 484,
+                                                        lineNumber: 671,
                                                         columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                lineNumber: 478,
+                                                lineNumber: 665,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2335,31 +2780,31 @@ function LeagueDetailPage() {
                                                 children: Number.isFinite(player.bestScore) ? `${player.bestScore.toLocaleString()}点` : "-"
                                             }, void 0, false, {
                                                 fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                lineNumber: 489,
+                                                lineNumber: 676,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, player.odIndex, true, {
                                         fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                        lineNumber: 474,
+                                        lineNumber: 661,
                                         columnNumber: 17
                                     }, this)) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                     className: "text-sm text-muted-foreground",
                                     children: "まだスコアがありません"
                                 }, void 0, false, {
                                     fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                    lineNumber: 495,
+                                    lineNumber: 682,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                lineNumber: 471,
+                                lineNumber: 658,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                        lineNumber: 467,
+                        lineNumber: 654,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Card"], {
@@ -2371,12 +2816,12 @@ function LeagueDetailPage() {
                                     children: "4着回避率 TOP3"
                                 }, void 0, false, {
                                     fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                    lineNumber: 502,
+                                    lineNumber: 689,
                                     columnNumber: 13
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                lineNumber: 501,
+                                lineNumber: 688,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -2395,7 +2840,7 @@ function LeagueDetailPage() {
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                        lineNumber: 512,
+                                                        lineNumber: 699,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$components$2f$ui$2f$avatar$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Avatar"], {
@@ -2405,20 +2850,20 @@ function LeagueDetailPage() {
                                                                 src: player.avatarUrl || undefined
                                                             }, void 0, false, {
                                                                 fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                                lineNumber: 514,
+                                                                lineNumber: 701,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$components$2f$ui$2f$avatar$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["AvatarFallback"], {
                                                                 children: player.name.charAt(0).toUpperCase()
                                                             }, void 0, false, {
                                                                 fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                                lineNumber: 515,
+                                                                lineNumber: 702,
                                                                 columnNumber: 23
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                        lineNumber: 513,
+                                                        lineNumber: 700,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2428,7 +2873,7 @@ function LeagueDetailPage() {
                                                                 children: player.name
                                                             }, void 0, false, {
                                                                 fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                                lineNumber: 518,
+                                                                lineNumber: 705,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2439,19 +2884,19 @@ function LeagueDetailPage() {
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                                lineNumber: 519,
+                                                                lineNumber: 706,
                                                                 columnNumber: 23
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                        lineNumber: 517,
+                                                        lineNumber: 704,
                                                         columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                lineNumber: 511,
+                                                lineNumber: 698,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2459,37 +2904,37 @@ function LeagueDetailPage() {
                                                 children: Number.isFinite(player.avoidRate) ? `${(player.avoidRate * 100).toFixed(1)}%` : "-"
                                             }, void 0, false, {
                                                 fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                lineNumber: 522,
+                                                lineNumber: 709,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, player.odIndex, true, {
                                         fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                        lineNumber: 507,
+                                        lineNumber: 694,
                                         columnNumber: 17
                                     }, this)) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                     className: "text-sm text-muted-foreground",
                                     children: "まだ対局がありません"
                                 }, void 0, false, {
                                     fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                    lineNumber: 528,
+                                    lineNumber: 715,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                lineNumber: 504,
+                                lineNumber: 691,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                        lineNumber: 500,
+                        lineNumber: 687,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                lineNumber: 466,
+                lineNumber: 653,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Card"], {
@@ -2500,12 +2945,12 @@ function LeagueDetailPage() {
                             children: "対局履歴"
                         }, void 0, false, {
                             fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                            lineNumber: 536,
+                            lineNumber: 723,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                        lineNumber: 535,
+                        lineNumber: 722,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -2528,12 +2973,12 @@ function LeagueDetailPage() {
                                                     children: new Date(game.played_at).toLocaleDateString("ja-JP")
                                                 }, void 0, false, {
                                                     fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                    lineNumber: 547,
+                                                    lineNumber: 734,
                                                     columnNumber: 25
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                lineNumber: 546,
+                                                lineNumber: 733,
                                                 columnNumber: 23
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2551,20 +2996,20 @@ function LeagueDetailPage() {
                                                                                 src: result.profiles?.avatar_url || undefined
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                                                lineNumber: 556,
+                                                                                lineNumber: 743,
                                                                                 columnNumber: 33
                                                                             }, this),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$components$2f$ui$2f$avatar$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["AvatarFallback"], {
                                                                                 children: (result.player_name || result.profiles?.display_name || "?").charAt(0).toUpperCase()
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                                                lineNumber: 557,
+                                                                                lineNumber: 744,
                                                                                 columnNumber: 33
                                                                             }, this)
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                                        lineNumber: 555,
+                                                                        lineNumber: 742,
                                                                         columnNumber: 31
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2575,7 +3020,7 @@ function LeagueDetailPage() {
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                                        lineNumber: 563,
+                                                                        lineNumber: 750,
                                                                         columnNumber: 31
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2584,13 +3029,13 @@ function LeagueDetailPage() {
                                                                         children: result.player_name || result.profiles?.display_name || "Unknown"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                                        lineNumber: 564,
+                                                                        lineNumber: 751,
                                                                         columnNumber: 31
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                                lineNumber: 554,
+                                                                lineNumber: 741,
                                                                 columnNumber: 29
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2601,35 +3046,35 @@ function LeagueDetailPage() {
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                                lineNumber: 571,
+                                                                lineNumber: 758,
                                                                 columnNumber: 29
                                                             }, this)
                                                         ]
                                                     }, result.id, true, {
                                                         fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                        lineNumber: 553,
+                                                        lineNumber: 740,
                                                         columnNumber: 27
                                                     }, this))
                                             }, void 0, false, {
                                                 fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                                lineNumber: 551,
+                                                lineNumber: 738,
                                                 columnNumber: 23
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                        lineNumber: 545,
+                                        lineNumber: 732,
                                         columnNumber: 21
                                     }, this)
                                 }, game.id, false, {
                                     fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                    lineNumber: 544,
+                                    lineNumber: 731,
                                     columnNumber: 19
                                 }, this);
                             })
                         }, void 0, false, {
                             fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                            lineNumber: 540,
+                            lineNumber: 727,
                             columnNumber: 13
                         }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                             className: "text-center py-8",
@@ -2639,7 +3084,7 @@ function LeagueDetailPage() {
                                     children: "まだ対局がありません"
                                 }, void 0, false, {
                                     fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                    lineNumber: 587,
+                                    lineNumber: 774,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$insane$2f$workspace$2f$playground$2f$v0$2d$mahjong$2d$score$2d$tracker$2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$0$2e$10_$40$babel$2b$core$40$7$2e$29$2e$0_react$2d$dom$40$19$2e$2$2e$0_react$40$19$2e$2$2e$0_$5f$react$40$19$2e$2$2e$0$2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
@@ -2648,35 +3093,35 @@ function LeagueDetailPage() {
                                         children: "最初の対局を記録"
                                     }, void 0, false, {
                                         fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                        lineNumber: 589,
+                                        lineNumber: 776,
                                         columnNumber: 17
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                                    lineNumber: 588,
+                                    lineNumber: 775,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                            lineNumber: 586,
+                            lineNumber: 773,
                             columnNumber: 13
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                        lineNumber: 538,
+                        lineNumber: 725,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-                lineNumber: 534,
+                lineNumber: 721,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/insane/workspace/playground/v0-mahjong-score-tracker/app/(authenticated)/leagues/[id]/page.tsx",
-        lineNumber: 353,
+        lineNumber: 412,
         columnNumber: 5
     }, this);
 }

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
 import { useQuery } from "@tanstack/react-query"
@@ -9,6 +9,7 @@ import { useAuthUser } from "@/lib/hooks/use-auth-user"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Plus, Trophy, Settings } from "lucide-react"
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from "recharts"
 import { cn } from "@/lib/utils"
 import { LeagueCreateForm } from "@/components/league-create-form"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -44,6 +45,7 @@ export default function LeagueDetailPage() {
   const router = useRouter()
   const params = useParams()
   const supabase = createClient()
+  const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null)
 
   const leagueId = useMemo(() => {
     const raw = params?.id
@@ -197,8 +199,8 @@ export default function LeagueDetailPage() {
       totalPoints: number
       gameCount: number
       rankSum: number
+      rankCounts: [number, number, number, number]
       bestScore: number | null
-      fourthCount: number
     }
   > = {}
 
@@ -219,22 +221,22 @@ export default function LeagueDetailPage() {
           totalPoints: 0,
           gameCount: 0,
           rankSum: 0,
+          rankCounts: [0, 0, 0, 0],
           bestScore: null,
-          fourthCount: 0,
         }
       }
 
       playerStats[odIndex].totalPoints += Number(result.point)
       playerStats[odIndex].gameCount += 1
       playerStats[odIndex].rankSum += Number(result.rank)
+      if (result.rank >= 1 && result.rank <= 4) {
+        playerStats[odIndex].rankCounts[result.rank - 1] += 1
+      }
       const rawScoreNum = Number((result.raw_score ?? "").toString().replace(/,/g, ""))
       if (Number.isFinite(rawScoreNum)) {
         const currentBest = playerStats[odIndex].bestScore
         playerStats[odIndex].bestScore =
           currentBest === null || currentBest === undefined ? rawScoreNum : Math.max(currentBest as number, rawScoreNum)
-      }
-      if (result.rank === 4) {
-        playerStats[odIndex].fourthCount += 1
       }
     })
   })
@@ -252,8 +254,8 @@ export default function LeagueDetailPage() {
         totalPoints: 0,
         gameCount: 0,
         rankSum: 0,
+        rankCounts: [0, 0, 0, 0],
         bestScore: null,
-        fourthCount: 0,
       }
     }
 
@@ -272,7 +274,10 @@ export default function LeagueDetailPage() {
     playerStats[userId].gameCount += rolledGameCount
     playerStats[userId].totalPoints += rolledTotalPoints
     playerStats[userId].rankSum += rolledRankSum
-    playerStats[userId].fourthCount += rolledRankCounts[3]
+    playerStats[userId].rankCounts[0] += rolledRankCounts[0]
+    playerStats[userId].rankCounts[1] += rolledRankCounts[1]
+    playerStats[userId].rankCounts[2] += rolledRankCounts[2]
+    playerStats[userId].rankCounts[3] += rolledRankCounts[3]
     playerStats[userId].bestScore =
       playerStats[userId].bestScore === null
         ? rolledBest
@@ -306,8 +311,8 @@ export default function LeagueDetailPage() {
         totalPoints: 0,
         gameCount: 0,
         rankSum: 0,
+        rankCounts: [0, 0, 0, 0],
         bestScore: null,
-        fourthCount: 0,
       }
     } else {
       playerStats[p.id].name = playerStats[p.id].name === "Unknown" ? p.name : playerStats[p.id].name
@@ -336,13 +341,67 @@ export default function LeagueDetailPage() {
     .filter((p) => p.gameCount > 0)
     .map((p) => ({
       ...p,
-      avoidRate: p.gameCount > 0 ? 1 - p.fourthCount / p.gameCount : null,
+      avoidRate: p.gameCount > 0 ? 1 - p.rankCounts[3] / p.gameCount : null,
     }))
     .filter((p) => Number.isFinite(p.avoidRate))
     .sort((a, b) => (b.avoidRate as number) - (a.avoidRate as number))
   const avoidRanking = addRankLabels(avoidCandidates, (player) => player.avoidRate as number).filter(
     (player) => player.rankLabel <= 3,
   )
+
+  const rollupTotalsMap = new Map<string, number>()
+  ;(leagueRollups || []).forEach((row: any) => {
+    if (!row.user_id) return
+    rollupTotalsMap.set(row.user_id as string, Number(row.rolled_total_points ?? 0))
+  })
+
+  const chartPlayers = Object.values(playerStats)
+    .filter((p) => p.gameCount > 0)
+    .sort((a, b) => b.totalPoints - a.totalPoints)
+
+  const chartColors = [
+    "#10b981",
+    "#f97316",
+    "#3b82f6",
+    "#8b5cf6",
+    "#ef4444",
+    "#14b8a6",
+    "#eab308",
+    "#6366f1",
+    "#ec4899",
+    "#22c55e",
+  ]
+
+  const gamesSorted = [...(games || [])].sort((a: any, b: any) => {
+    const aTime = new Date(a.played_at || a.created_at).getTime()
+    const bTime = new Date(b.played_at || b.created_at).getTime()
+    return aTime - bTime
+  })
+
+  const perPlayerSeries = new Map<string, number[]>()
+  chartPlayers.forEach((player) => {
+    const base = rollupTotalsMap.get(player.odIndex) ?? 0
+    let total = base
+    const series: number[] = []
+    gamesSorted.forEach((game: any) => {
+      const result = (game.game_results || []).find((r: any) => r.user_id === player.odIndex)
+      if (!result) return
+      total += Number(result.point)
+      series.push(Number(total.toFixed(1)))
+    })
+    perPlayerSeries.set(player.odIndex, series)
+  })
+
+  const maxSeriesLength = Math.max(0, ...Array.from(perPlayerSeries.values()).map((series) => series.length))
+  const pointsTimeline = Array.from({ length: maxSeriesLength }, (_, index) => {
+    const entry: Record<string, number> = { game: index + 1 }
+    perPlayerSeries.forEach((series, playerId) => {
+      if (index < series.length) {
+        entry[playerId] = series[index]
+      }
+    })
+    return entry
+  })
 
   const memberIds = members?.map((m: any) => m.user_id) || []
   const existingMemberIds = Array.from(new Set([...memberIds, league.owner_id]))
@@ -398,9 +457,6 @@ export default function LeagueDetailPage() {
         <CardContent>
           {fullRanking.length > 0 ? (
             <div className="space-y-3">
-              <p className="text-xs text-muted-foreground">
-                対局履歴は各記録者ごとに直近30戦まで表示されます（成績は全期間）。
-              </p>
               {fullRanking.map((player, index) => {
                 const rankLabel = (player as any).rankLabel
                 const rankNumber = typeof rankLabel === "number" ? rankLabel : null
@@ -456,6 +512,137 @@ export default function LeagueDetailPage() {
                   </div>
                 )
               })}
+            </div>
+          ) : (
+            <p className="text-muted-foreground text-center py-4">まだ対局がありません</p>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">順位回数</CardTitle>
+        </CardHeader>
+        <CardContent className="overflow-x-auto">
+          {fullRanking.length > 0 ? (
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-muted-foreground border-b">
+                  <th className="text-left py-2 font-medium">プレイヤー</th>
+                  <th className="text-center py-2 font-medium">1位</th>
+                  <th className="text-center py-2 font-medium">2位</th>
+                  <th className="text-center py-2 font-medium">3位</th>
+                  <th className="text-center py-2 font-medium">4位</th>
+                </tr>
+              </thead>
+              <tbody>
+                {fullRanking.map((player) => (
+                  <tr key={player.odIndex} className="border-b last:border-0">
+                    <td className="py-2 pr-3">
+                      <div className="flex items-center gap-2">
+                        <Avatar className="h-7 w-7">
+                          <AvatarImage src={player.avatarUrl || undefined} />
+                          <AvatarFallback>{player.name.charAt(0).toUpperCase()}</AvatarFallback>
+                        </Avatar>
+                        <span className="font-semibold">{player.name}</span>
+                      </div>
+                    </td>
+                    <td className="text-center tabular-nums">{player.rankCounts[0]}</td>
+                    <td className="text-center tabular-nums">{player.rankCounts[1]}</td>
+                    <td className="text-center tabular-nums">{player.rankCounts[2]}</td>
+                    <td className="text-center tabular-nums">{player.rankCounts[3]}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p className="text-muted-foreground text-center py-4">まだ対局がありません</p>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">総合pt推移</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {chartPlayers.length > 0 && pointsTimeline.length > 0 ? (
+            <div className="h-[260px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={pointsTimeline} margin={{ top: 8, right: 12, bottom: 8, left: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
+                  <XAxis
+                    dataKey="game"
+                    stroke="#9ca3af"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={{ stroke: "#e5e7eb" }}
+                  />
+                  <YAxis
+                    width={32}
+                    stroke="#9ca3af"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={{ stroke: "#e5e7eb" }}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#fff",
+                      border: "1px solid #e5e7eb",
+                      borderRadius: "8px",
+                    }}
+                    labelFormatter={(value) => `${value}戦目`}
+                    formatter={(value: any, name: any) => [`${value >= 0 ? "+" : ""}${value}pt`, name]}
+                  />
+                  <Legend
+                    wrapperStyle={{ paddingTop: 8 }}
+                    content={({ payload }) => (
+                      <div className="flex flex-wrap items-center gap-3">
+                        {(payload || []).map((entry: any) => {
+                          const id = entry.dataKey as string
+                          const isSelected = selectedPlayerId === id
+                          const isDimmed = selectedPlayerId && !isSelected
+                          return (
+                            <button
+                              type="button"
+                              key={id}
+                              onClick={() => setSelectedPlayerId(isSelected ? null : id)}
+                              className={cn(
+                                "flex items-center gap-1 text-xs font-semibold transition-opacity",
+                                isDimmed && "opacity-40",
+                              )}
+                              style={{ color: entry.color }}
+                            >
+                              <span className="inline-block h-2.5 w-2.5 rounded-full border" style={{ borderColor: entry.color }} />
+                              {entry.value}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    )}
+                  />
+                  {chartPlayers.map((player, index) => (
+                    (() => {
+                      const isSelected = selectedPlayerId === player.odIndex
+                      const isDimmed = selectedPlayerId && !isSelected
+                      const stroke = chartColors[index % chartColors.length]
+                      return (
+                    <Line
+                      key={player.odIndex}
+                      type="linear"
+                      dataKey={player.odIndex}
+                      name={player.name}
+                      stroke={stroke}
+                      strokeWidth={isSelected ? 3 : 2}
+                      dot={false}
+                      strokeOpacity={isDimmed ? 0.2 : 1}
+                      connectNulls
+                    />
+                      )
+                    })()
+                  ))}
+                </LineChart>
+              </ResponsiveContainer>
             </div>
           ) : (
             <p className="text-muted-foreground text-center py-4">まだ対局がありません</p>

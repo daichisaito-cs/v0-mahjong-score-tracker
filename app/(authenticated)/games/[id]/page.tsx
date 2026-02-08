@@ -226,27 +226,6 @@ export default function GameDetailPage() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">合計</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 gap-4 text-center">
-            <div>
-              <p className="text-sm text-muted-foreground">合計点</p>
-              <p className="text-xl font-bold">
-                {sortedResults.reduce((sum, r) => sum + r.raw_score, 0).toLocaleString()}点
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">合計pt</p>
-              <p className="text-xl font-bold">
-                {sortedResults.reduce((sum, r) => sum + Number(r.point), 0).toFixed(1)}
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   )
 }
