@@ -1,65 +1,100 @@
-import { createClient } from "@/lib/supabase/server"
-import { redirect } from "next/navigation"
+"use client"
+
+import { useEffect } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useQuery } from "@tanstack/react-query"
+import { createClient } from "@/lib/supabase/client"
+import { useAuthUser } from "@/lib/hooks/use-auth-user"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import { GamesList } from "@/components/games-list"
+import { Card, CardContent } from "@/components/ui/card"
 
-export default async function GamesPage() {
-  const supabase = await createClient()
+export default function GamesPage() {
+  const router = useRouter()
+  const supabase = createClient()
 
-  const { data: userData, error } = await supabase.auth.getUser()
-  if (error || !userData?.user) {
-    redirect("/auth/login")
-  }
+  const userQuery = useAuthUser()
 
-  const { data: myResults } = await supabase.from("game_results").select("game_id").eq("user_id", userData.user.id)
-  const { data: memberLeagues } = await supabase
-    .from("league_members")
-    .select("league_id")
-    .eq("user_id", userData.user.id)
-  const { data: ownedLeagues } = await supabase.from("leagues").select("id").eq("owner_id", userData.user.id)
+  const user = userQuery.data
 
-  const gameIds = myResults?.map((r) => r.game_id) || []
-  const leagueIds = Array.from(
-    new Set([...(memberLeagues?.map((m) => m.league_id) || []), ...(ownedLeagues?.map((l) => l.id) || [])]),
-  )
+  useEffect(() => {
+    if (userQuery.isFetched && !user) router.replace("/auth/login")
+  }, [router, user, userQuery.isFetched])
 
-  let games: any[] = []
-  const orConditions: string[] = []
-  orConditions.push(`created_by.eq.${userData.user.id}`)
-  if (gameIds.length > 0) {
-    orConditions.push(`id.in.(${gameIds.join(",")})`)
-  }
-  if (leagueIds.length > 0) {
-    orConditions.push(`league_id.in.(${leagueIds.join(",")})`)
-  }
+  const gamesQuery = useQuery({
+    queryKey: ["games", user?.id],
+    enabled: Boolean(user?.id),
+    queryFn: async () => {
+      const userId = user!.id
 
-  if (orConditions.length > 0) {
-    const { data } = await supabase
-      .from("games")
-      .select(`
-        *,
-        creator:profiles!games_created_by_fkey (
-          display_name,
-          avatar_url
-        ),
-        game_results (
-          id,
-          game_id,
-          user_id,
-          player_name,
-          rank,
-          raw_score,
-          point,
-          bonus_points,
-          created_at,
-          profiles (display_name, avatar_url)
-        )
-      `)
-      .or(orConditions.join(","))
-      .order("played_at", { ascending: false })
-    games = data || []
+      const [myResultsRes, memberLeaguesRes, ownedLeaguesRes] = await Promise.all([
+        supabase.from("game_results").select("game_id").eq("user_id", userId),
+        supabase.from("league_members").select("league_id").eq("user_id", userId),
+        supabase.from("leagues").select("id").eq("owner_id", userId),
+      ])
+
+      if (myResultsRes.error) throw myResultsRes.error
+      if (memberLeaguesRes.error) throw memberLeaguesRes.error
+      if (ownedLeaguesRes.error) throw ownedLeaguesRes.error
+
+      const gameIds = (myResultsRes.data || []).map((r: any) => r.game_id).filter(Boolean)
+      const leagueIds = Array.from(
+        new Set([...(memberLeaguesRes.data || []).map((m: any) => m.league_id), ...(ownedLeaguesRes.data || []).map((l: any) => l.id)]),
+      ).filter(Boolean)
+
+      const orConditions: string[] = []
+      orConditions.push(`created_by.eq.${userId}`)
+      if (gameIds.length > 0) orConditions.push(`id.in.(${gameIds.join(",")})`)
+      if (leagueIds.length > 0) orConditions.push(`league_id.in.(${leagueIds.join(",")})`)
+
+      if (orConditions.length === 0) return []
+
+      const { data, error } = await supabase
+        .from("games")
+        .select(`
+          *,
+          creator:profiles!games_created_by_fkey (
+            display_name,
+            avatar_url
+          ),
+          game_results (
+            id,
+            game_id,
+            user_id,
+            player_name,
+            rank,
+            raw_score,
+            point,
+            bonus_points,
+            created_at,
+            profiles (display_name, avatar_url)
+          )
+        `)
+        .or(orConditions.join(","))
+        .order("played_at", { ascending: false })
+        .limit(50)
+
+      if (error) throw error
+      return data || []
+    },
+  })
+
+  if (userQuery.isLoading || (userQuery.isFetched && !user)) {
+    return (
+      <div className="space-y-6 pb-20 md:pb-0">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">対局一覧</h1>
+            <p className="text-muted-foreground">過去の対局履歴</p>
+          </div>
+        </div>
+        <Card>
+          <CardContent className="py-12 text-center text-muted-foreground">読み込み中...</CardContent>
+        </Card>
+      </div>
+    )
   }
 
   return (
@@ -77,7 +112,13 @@ export default async function GamesPage() {
         </Link>
       </div>
 
-      <GamesList games={games} />
+      {gamesQuery.isLoading ? (
+        <Card>
+          <CardContent className="py-12 text-center text-muted-foreground">読み込み中...</CardContent>
+        </Card>
+      ) : (
+        <GamesList games={(gamesQuery.data as any[]) || []} />
+      )}
     </div>
   )
 }

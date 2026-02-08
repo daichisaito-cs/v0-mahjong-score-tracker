@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils"
 import { useEffect, useState } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { BrandLogo } from "@/components/brand-logo"
+import { useQueryClient } from "@tanstack/react-query"
 
 const navigation = [
   { name: "ホーム", href: "/dashboard", icon: Home },
@@ -30,6 +31,7 @@ const navigation = [
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
+  const queryClient = useQueryClient()
   const [pendingCount, setPendingCount] = useState(0)
   const [profile, setProfile] = useState<{ display_name: string; avatar_url: string | null } | null>(null)
 
@@ -102,9 +104,48 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
+  useEffect(() => {
+    const supabase = createClient()
+    const syncSession = async () => {
+      const { data } = await supabase.auth.getSession()
+      queryClient.setQueryData(["authUser"], data.session?.user ?? null)
+    }
+
+    syncSession()
+
+    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+      queryClient.setQueryData(["authUser"], session?.user ?? null)
+    })
+
+    return () => {
+      data.subscription.unsubscribe()
+    }
+  }, [queryClient])
+
+  useEffect(() => {
+    const navHrefs = navigation.map((n) => n.href)
+    const conn = (navigator as any).connection
+    const shouldSkipPrefetch = Boolean(conn?.saveData) || ["slow-2g", "2g"].includes(conn?.effectiveType)
+    if (shouldSkipPrefetch) return
+
+    const run = () => {
+      navHrefs.forEach((href) => router.prefetch(href))
+    }
+
+    // Prefetch on idle to keep the UI responsive.
+    if (typeof (window as any).requestIdleCallback === "function") {
+      const id = (window as any).requestIdleCallback(run, { timeout: 1500 })
+      return () => (window as any).cancelIdleCallback?.(id)
+    }
+
+    const id = window.setTimeout(run, 500)
+    return () => window.clearTimeout(id)
+  }, [router])
+
   const handleSignOut = async () => {
     const supabase = createClient()
     await supabase.auth.signOut()
+    queryClient.clear()
     router.push("/")
   }
 

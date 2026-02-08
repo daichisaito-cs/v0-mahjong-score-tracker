@@ -1,6 +1,11 @@
-import { createClient } from "@/lib/supabase/server"
-import { redirect, notFound } from "next/navigation"
+"use client"
+
+import { useEffect, useMemo } from "react"
 import Link from "next/link"
+import { useParams, useRouter } from "next/navigation"
+import { useQuery } from "@tanstack/react-query"
+import { createClient } from "@/lib/supabase/client"
+import { useAuthUser } from "@/lib/hooks/use-auth-user"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Plus, Trophy, Settings } from "lucide-react"
@@ -35,85 +40,154 @@ function addRankLabels<T>(items: T[], getValue: (item: T) => number, epsilon = E
   })
 }
 
-export default async function LeagueDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
-  const { id } = await params
-  const supabase = await createClient()
+export default function LeagueDetailPage() {
+  const router = useRouter()
+  const params = useParams()
+  const supabase = createClient()
 
-  const { data: userData, error } = await supabase.auth.getUser()
+  const leagueId = useMemo(() => {
+    const raw = params?.id
+    return Array.isArray(raw) ? raw[0] : raw
+  }, [params])
 
-  if (error || !userData?.user) {
-    redirect("/auth/login")
+  const userQuery = useAuthUser()
+
+  const user = userQuery.data
+
+  useEffect(() => {
+    if (userQuery.isFetched && !user) router.replace("/auth/login")
+  }, [router, user, userQuery.isFetched])
+
+  if (userQuery.isLoading || (userQuery.isFetched && !user)) {
+    return (
+      <div className="space-y-6 pb-20 md:pb-0 max-w-xl mx-auto">
+        <Card>
+          <CardContent className="py-12 text-center text-muted-foreground">読み込み中...</CardContent>
+        </Card>
+      </div>
+    )
   }
 
-  if (id === "new") {
+  if (leagueId === "new") {
     return (
       <div className="space-y-6 pb-20 md:pb-0 max-w-xl mx-auto">
         <div>
           <h1 className="text-2xl font-bold text-foreground">リーグを作成</h1>
           <p className="text-muted-foreground">新しいリーグの設定を入力してください</p>
         </div>
-        <LeagueCreateForm userId={userData.user.id} />
+        <LeagueCreateForm userId={user!.id} />
       </div>
     )
   }
 
-  if (!isValidUUID(id)) {
-    notFound()
+  if (!leagueId || !isValidUUID(leagueId)) {
+    return (
+      <div className="space-y-6 pb-20 md:pb-0 max-w-xl mx-auto">
+        <Card>
+          <CardContent className="py-12 text-center text-muted-foreground">リーグが見つかりません</CardContent>
+        </Card>
+      </div>
+    )
   }
 
-  // リーグデータ取得
-  const { data: league } = await supabase.from("leagues").select("*").eq("id", id).single()
+  const leagueQuery = useQuery({
+    queryKey: ["league-detail", leagueId, user?.id],
+    enabled: Boolean(user?.id && leagueId && isValidUUID(leagueId)),
+    queryFn: async () => {
+      const { data: league, error: leagueError } = await supabase.from("leagues").select("*").eq("id", leagueId).single()
+      if (leagueError) throw leagueError
+      if (!league) return null
 
-  if (!league) {
-    notFound()
+      const { data: members, error: membersError } = await supabase
+        .from("league_members")
+        .select("user_id, profiles(id, display_name, friend_code, avatar_url)")
+        .eq("league_id", leagueId)
+      if (membersError) throw membersError
+
+      const memberIds = (members || []).map((m: any) => m.user_id).filter(Boolean)
+      let ownerProfile: { id: string; display_name: string | null; avatar_url: string | null } | null = null
+      if (!memberIds.includes(league.owner_id)) {
+        const { data: profileRow } = await supabase
+          .from("profiles")
+          .select("id, display_name, avatar_url")
+          .eq("id", league.owner_id)
+          .maybeSingle()
+        ownerProfile = profileRow || null
+      }
+
+      const { data: games, error: gamesError } = await supabase
+        .from("games")
+        .select(
+          `
+          *,
+          game_results (
+            *,
+            profiles (display_name, avatar_url)
+          )
+        `,
+        )
+        .eq("league_id", leagueId)
+        .order("played_at", { ascending: false })
+      if (gamesError) throw gamesError
+
+      const { data: leagueRollups, error: leagueRollupsError } = await supabase
+        .from("league_user_game_rollups")
+        .select("*")
+        .eq("league_id", leagueId)
+      if (leagueRollupsError) {
+        // eslint-disable-next-line no-console
+        console.warn("[v0] failed to load league_user_game_rollups:", leagueRollupsError)
+      }
+
+      const rollupUserIds = (leagueRollups || []).map((r: any) => r.user_id).filter(Boolean)
+      const seedIds = Array.from(new Set([...memberIds, league.owner_id, ...rollupUserIds]))
+      let extraProfiles: Array<{ id: string; display_name: string | null; avatar_url: string | null }> = []
+      if (seedIds.length > 0) {
+        const { data: profilesData, error: profilesError } = await supabase
+          .from("profiles")
+          .select("id, display_name, avatar_url")
+          .in("id", seedIds)
+        if (profilesError) {
+          // eslint-disable-next-line no-console
+          console.warn("[v0] failed to load profiles:", profilesError)
+        } else {
+          extraProfiles = profilesData || []
+        }
+      }
+
+      return { league, members: members || [], ownerProfile, games: games || [], leagueRollups: leagueRollups || [], extraProfiles }
+    },
+  })
+
+  if (leagueQuery.isLoading) {
+    return (
+      <div className="space-y-6 pb-20 md:pb-0 max-w-xl mx-auto">
+        <Card>
+          <CardContent className="py-12 text-center text-muted-foreground">読み込み中...</CardContent>
+        </Card>
+      </div>
+    )
   }
 
-  const { data: members } = await supabase
-    .from("league_members")
-    .select("user_id, profiles(id, display_name, friend_code, avatar_url)")
-    .eq("league_id", id)
-
-  const memberIds = members?.map((m) => m.user_id) || []
-  const existingMemberIds = Array.from(new Set([...memberIds, league.owner_id]))
-
-  let ownerProfile: { id: string; display_name: string | null; avatar_url: string | null } | null = null
-  if (!memberIds.includes(league.owner_id)) {
-    const { data: profileRow } = await supabase
-      .from("profiles")
-      .select("id, display_name, avatar_url")
-      .eq("id", league.owner_id)
-      .maybeSingle()
-    ownerProfile = profileRow || null
+  const data = leagueQuery.data as any
+  if (!data || !data.league) {
+    return (
+      <div className="space-y-6 pb-20 md:pb-0 max-w-xl mx-auto">
+        <Card>
+          <CardContent className="py-12 text-center text-muted-foreground">リーグが見つかりません</CardContent>
+        </Card>
+      </div>
+    )
   }
 
-  // リーグの対局を取得
-  const { data: games } = await supabase
-    .from("games")
-    .select(`
-      *,
-      game_results (
-        *,
-        profiles (display_name, avatar_url)
-      )
-    `)
-    .eq("league_id", id)
-    .order("played_at", { ascending: false })
+  const { league, members, ownerProfile, games, leagueRollups, extraProfiles } = data
 
-  const { data: leagueRollups, error: leagueRollupsError } = await supabase
-    .from("league_user_game_rollups")
-    .select("*")
-    .eq("league_id", id)
-  if (leagueRollupsError) {
-    // rollups がまだ導入されていない環境でもページが落ちないようにする
-    // eslint-disable-next-line no-console
-    console.warn("[v0] failed to load league_user_game_rollups:", leagueRollupsError)
-  }
+  const profileMap = new Map<string, { name: string; avatarUrl?: string | null }>()
+  extraProfiles?.forEach((p: any) => {
+    if (!p?.id) return
+    profileMap.set(p.id, { name: p.display_name || "ユーザー", avatarUrl: p.avatar_url || null })
+  })
 
-  // ランキング集計
   const playerStats: Record<
     string,
     {
@@ -128,13 +202,14 @@ export default async function LeagueDetailPage({
     }
   > = {}
 
-  games?.forEach((game) => {
+  games?.forEach((game: any) => {
     game.game_results?.forEach((result: any) => {
       if (!result.user_id) return
 
       const odIndex = result.user_id
-      const name = result.profiles?.display_name || result.player_name || "Unknown"
-      const avatarUrl = (result.profiles as any)?.avatar_url
+      const fallbackProfile = profileMap.get(odIndex)
+      const name = result.profiles?.display_name || result.player_name || fallbackProfile?.name || "Unknown"
+      const avatarUrl = (result.profiles as any)?.avatar_url || fallbackProfile?.avatarUrl
 
       if (!playerStats[odIndex]) {
         playerStats[odIndex] = {
@@ -158,9 +233,6 @@ export default async function LeagueDetailPage({
         playerStats[odIndex].bestScore =
           currentBest === null || currentBest === undefined ? rawScoreNum : Math.max(currentBest as number, rawScoreNum)
       }
-      if (playerStats[odIndex].fourthCount === undefined || playerStats[odIndex].fourthCount === null) {
-        playerStats[odIndex].fourthCount = 0
-      }
       if (result.rank === 4) {
         playerStats[odIndex].fourthCount += 1
       }
@@ -172,11 +244,11 @@ export default async function LeagueDetailPage({
     if (!userId) return
 
     if (!playerStats[userId]) {
-      // 名前・アイコンは seedPlayers 側で補完される想定だが、念のため
+      const fallback = profileMap.get(userId)
       playerStats[userId] = {
         odIndex: userId,
-        name: "Unknown",
-        avatarUrl: null,
+        name: fallback?.name || "Unknown",
+        avatarUrl: fallback?.avatarUrl || null,
         totalPoints: 0,
         gameCount: 0,
         rankSum: 0,
@@ -209,20 +281,19 @@ export default async function LeagueDetailPage({
           : Math.max(playerStats[userId].bestScore as number, rolledBest as number)
   })
 
-  // 参加メンバーを全員初期化（未対局でもランキングに表示）
   const seedPlayers: Array<{ id: string; name: string; avatarUrl?: string | null }> = []
-  members?.forEach((member) => {
+  members?.forEach((member: any) => {
     seedPlayers.push({
       id: member.user_id,
-      name: (member.profiles as any)?.display_name || "メンバー",
-      avatarUrl: (member.profiles as any)?.avatar_url,
+      name: (member.profiles as any)?.display_name || profileMap.get(member.user_id)?.name || "メンバー",
+      avatarUrl: (member.profiles as any)?.avatar_url || profileMap.get(member.user_id)?.avatarUrl,
     })
   })
-  if (!memberIds.includes(league.owner_id)) {
+  if (!members?.some((m: any) => m.user_id === league.owner_id)) {
     seedPlayers.push({
       id: league.owner_id,
-      name: ownerProfile?.display_name || "オーナー",
-      avatarUrl: ownerProfile?.avatar_url || null,
+      name: ownerProfile?.display_name || profileMap.get(league.owner_id)?.name || "オーナー",
+      avatarUrl: ownerProfile?.avatar_url || profileMap.get(league.owner_id)?.avatarUrl || null,
     })
   }
 
@@ -239,31 +310,10 @@ export default async function LeagueDetailPage({
         fourthCount: 0,
       }
     } else {
-      // rollups だけで作成された場合に表示名を補完
       playerStats[p.id].name = playerStats[p.id].name === "Unknown" ? p.name : playerStats[p.id].name
       playerStats[p.id].avatarUrl = playerStats[p.id].avatarUrl ?? p.avatarUrl
     }
   })
-
-  const unknownIds = Object.values(playerStats)
-    .filter((p) => p.name === "Unknown")
-    .map((p) => p.odIndex)
-  if (unknownIds.length > 0) {
-    const { data: unknownProfiles, error: unknownProfilesError } = await supabase
-      .from("profiles")
-      .select("id, display_name, avatar_url")
-      .in("id", unknownIds)
-    if (unknownProfilesError) {
-      // eslint-disable-next-line no-console
-      console.warn("[v0] failed to load unknown profiles:", unknownProfilesError)
-    }
-    unknownProfiles?.forEach((p: any) => {
-      const id = p.id as string | null
-      if (!id || !playerStats[id]) return
-      playerStats[id].name = p.display_name || "ユーザー"
-      playerStats[id].avatarUrl = p.avatar_url ?? playerStats[id].avatarUrl
-    })
-  }
 
   const rankingAll = Object.values(playerStats)
   const rankingPlayed = rankingAll.filter((p) => p.gameCount > 0).sort((a, b) => b.totalPoints - a.totalPoints)
@@ -294,12 +344,13 @@ export default async function LeagueDetailPage({
     (player) => player.rankLabel <= 3,
   )
 
-  const isOwner = league.owner_id === userData.user.id
-  const isMember = memberIds.includes(userData.user.id)
+  const memberIds = members?.map((m: any) => m.user_id) || []
+  const existingMemberIds = Array.from(new Set([...memberIds, league.owner_id]))
+  const isOwner = league.owner_id === user!.id
+  const isMember = memberIds.includes(user!.id)
 
   return (
     <div className="space-y-6 pb-20 md:pb-0">
-      {/* Header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="flex items-start gap-3 min-w-0">
           <Link href="/leagues">
@@ -319,20 +370,16 @@ export default async function LeagueDetailPage({
         </div>
         <div className="flex w-full flex-wrap items-center gap-2 md:w-auto md:justify-end">
           {isOwner && (
-            <Link href={`/leagues/${id}/settings`}>
+            <Link href={`/leagues/${leagueId}/settings`}>
               <Button variant="outline" size="icon">
                 <Settings className="h-4 w-4" />
               </Button>
             </Link>
           )}
           {isOwner && (
-            <LeagueMemberAdd
-              leagueId={id}
-              userId={userData.user.id}
-              existingMemberIds={existingMemberIds}
-            />
+            <LeagueMemberAdd leagueId={leagueId} userId={user!.id} existingMemberIds={existingMemberIds} />
           )}
-          <Link href={`/games/new?league=${id}`}>
+          <Link href={`/games/new?league=${leagueId}`}>
             <Button size="sm" className="gap-2 w-full sm:w-auto">
               <Plus className="h-4 w-4" />
               対局を記録
@@ -341,7 +388,6 @@ export default async function LeagueDetailPage({
         </div>
       </div>
 
-      {/* ランキング */}
       <Card>
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
@@ -425,7 +471,10 @@ export default async function LeagueDetailPage({
           <CardContent className="pt-0 space-y-2">
             {bestScoreRanking.length > 0 ? (
               bestScoreRanking.map((player) => (
-                <div key={player.odIndex} className="flex items-center justify-between rounded-lg border border-border/70 px-3 py-2">
+                <div
+                  key={player.odIndex}
+                  className="flex items-center justify-between rounded-lg border border-border/70 px-3 py-2"
+                >
                   <div className="flex items-center gap-3">
                     <span className="text-sm font-semibold text-muted-foreground">#{player.rankLabel}</span>
                     <Avatar className="h-8 w-8">
@@ -455,7 +504,10 @@ export default async function LeagueDetailPage({
           <CardContent className="pt-0 space-y-2">
             {avoidRanking.length > 0 ? (
               avoidRanking.map((player) => (
-                <div key={player.odIndex} className="flex items-center justify-between rounded-lg border border-border/70 px-3 py-2">
+                <div
+                  key={player.odIndex}
+                  className="flex items-center justify-between rounded-lg border border-border/70 px-3 py-2"
+                >
                   <div className="flex items-center gap-3">
                     <span className="text-sm font-semibold text-muted-foreground">#{player.rankLabel}</span>
                     <Avatar className="h-8 w-8">
@@ -479,7 +531,6 @@ export default async function LeagueDetailPage({
         </Card>
       </div>
 
-      {/* 対局履歴 */}
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">対局履歴</CardTitle>
@@ -487,7 +538,7 @@ export default async function LeagueDetailPage({
         <CardContent>
           {games && games.length > 0 ? (
             <div className="space-y-3">
-              {games.map((game) => {
+              {games.map((game: any) => {
                 const sortedResults = [...(game.game_results || [])].sort((a, b) => a.rank - b.rank)
                 return (
                   <Link key={game.id} href={`/games/${game.id}`} className="block">
@@ -498,8 +549,8 @@ export default async function LeagueDetailPage({
                         </span>
                       </div>
                       <div className="grid grid-cols-4 gap-2">
-                        {sortedResults.map((result) => (
-                          <div key={result.id} className="text-center">
+                        {sortedResults.map((result: any) => (
+                          <div key={result.id} className="text-center min-w-0">
                             <div className="flex flex-col items-center gap-1">
                               <Avatar className="h-10 w-10">
                                 <AvatarImage src={(result.profiles as any)?.avatar_url || undefined} />
@@ -510,7 +561,10 @@ export default async function LeagueDetailPage({
                                 </AvatarFallback>
                               </Avatar>
                               <div className="text-xs text-muted-foreground">{result.rank}位</div>
-                              <div className="text-sm font-medium truncate">
+                              <div
+                                className="text-sm font-medium truncate w-full"
+                                title={result.player_name || result.profiles?.display_name || "Unknown"}
+                              >
                                 {result.player_name || result.profiles?.display_name || "Unknown"}
                               </div>
                             </div>
@@ -531,7 +585,7 @@ export default async function LeagueDetailPage({
           ) : (
             <div className="text-center py-8">
               <p className="text-muted-foreground mb-4">まだ対局がありません</p>
-              <Link href={`/games/new?league=${id}`}>
+              <Link href={`/games/new?league=${leagueId}`}>
                 <Button>最初の対局を記録</Button>
               </Link>
             </div>

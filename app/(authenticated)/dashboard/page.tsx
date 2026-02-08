@@ -3,7 +3,9 @@
 import type React from "react"
 
 import { useEffect, useState } from "react"
+import { useQuery } from "@tanstack/react-query"
 import { createBrowserClient } from "@/lib/supabase/client"
+import { useAuthUser } from "@/lib/hooks/use-auth-user"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -16,51 +18,50 @@ export default function DashboardPage() {
   const supabase = createBrowserClient()
 
   const [gameType, setGameType] = useState<"four_player" | "three_player">("four_player")
-  const [profile, setProfile] = useState<any>(null)
-  const [results, setResults] = useState<any[]>([])
-  const [rollups, setRollups] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+  const userQuery = useAuthUser()
+  const user = userQuery.data
 
   useEffect(() => {
-    const loadData = async () => {
-      const { data: userData } = await supabase.auth.getUser()
-      if (!userData?.user) {
-        router.push("/auth/login")
-        return
-      }
+    if (userQuery.isFetched && !user) router.push("/auth/login")
+  }, [router, user, userQuery.isFetched])
 
-      const { data: profileData } = await supabase.from("profiles").select("*").eq("id", userData.user.id).single()
+  const dashboardQuery = useQuery({
+    queryKey: ["dashboard", user?.id],
+    enabled: Boolean(user?.id),
+    queryFn: async () => {
+      const userId = user!.id
+      const [profileRes, resultsRes, rollupsRes] = await Promise.all([
+        supabase.from("profiles").select("*").eq("id", userId).single(),
+        supabase
+          .from("game_results")
+          .select("*, games(game_type, played_at, created_at)")
+          .eq("user_id", userId)
+          .order("created_at", { ascending: true }),
+        supabase.from("user_game_rollups").select("*").eq("user_id", userId),
+      ])
 
-      setProfile(profileData)
-
-      const { data: resultsData } = await supabase
-        .from("game_results")
-        .select("*, games(game_type, played_at, created_at)")
-        .eq("user_id", userData.user.id)
-        .order("created_at", { ascending: true })
-
-      setResults(resultsData || [])
-
-      const { data: rollupsData, error: rollupsError } = await supabase
-        .from("user_game_rollups")
-        .select("*")
-        .eq("user_id", userData.user.id)
-
-      if (rollupsError) {
+      if (profileRes.error) throw profileRes.error
+      if (resultsRes.error) throw resultsRes.error
+      if (rollupsRes.error) {
         // eslint-disable-next-line no-console
-        console.warn("[v0] failed to load user_game_rollups:", rollupsError)
+        console.warn("[v0] failed to load user_game_rollups:", rollupsRes.error)
       }
-      setRollups(rollupsData || [])
 
-      setLoading(false)
-    }
+      return {
+        profile: profileRes.data,
+        results: resultsRes.data || [],
+        rollups: rollupsRes.data || [],
+      }
+    },
+  })
 
-    loadData()
-  }, [router, supabase])
-
-  if (loading) {
+  if (userQuery.isLoading || (userQuery.isFetched && !user) || dashboardQuery.isLoading) {
     return <div className="p-6">読み込み中...</div>
   }
+
+  const profile = (dashboardQuery.data as any)?.profile
+  const results = ((dashboardQuery.data as any)?.results || []) as any[]
+  const rollups = ((dashboardQuery.data as any)?.rollups || []) as any[]
 
   const filteredResults = results.filter((r) => r.games?.game_type === gameType)
 

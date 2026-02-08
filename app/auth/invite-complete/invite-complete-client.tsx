@@ -33,7 +33,7 @@ export default function InviteCompleteClient() {
     if (accessToken && refreshToken) {
       supabase.auth
         .setSession({ access_token: accessToken, refresh_token: refreshToken })
-        .then(({ error }) => {
+        .then(({ error }: any) => {
           if (error) {
             setError("セッションの復元に失敗しました。招待メールのリンクをもう一度開いてください。")
           } else {

@@ -1,65 +1,78 @@
-import { createClient } from "@/lib/supabase/server"
-import { redirect } from "next/navigation"
+"use client"
+
+import { useEffect } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useQuery } from "@tanstack/react-query"
+import { createClient } from "@/lib/supabase/client"
+import { useAuthUser } from "@/lib/hooks/use-auth-user"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Plus, Users } from "lucide-react"
 
-export default async function LeaguesPage() {
-  console.log("[v0] LeaguesPage: Start rendering")
+export default function LeaguesPage() {
+  const router = useRouter()
+  const supabase = createClient()
 
-  const supabase = await createClient()
+  const userQuery = useAuthUser()
 
-  const { data: userData, error } = await supabase.auth.getUser()
-  console.log("[v0] LeaguesPage: Auth check", { userId: userData?.user?.id, error: error?.message })
+  const user = userQuery.data
 
-  if (error || !userData?.user) {
-    console.log("[v0] LeaguesPage: No user, redirecting to login")
-    redirect("/auth/login")
+  useEffect(() => {
+    if (userQuery.isFetched && !user) router.replace("/auth/login")
+  }, [router, user, userQuery.isFetched])
+
+  const leaguesQuery = useQuery({
+    queryKey: ["leagues", user?.id],
+    enabled: Boolean(user?.id),
+    queryFn: async () => {
+      const userId = user!.id
+      const { data: memberships, error: membershipError } = await supabase
+        .from("league_members")
+        .select("league_id")
+        .eq("user_id", userId)
+      if (membershipError) throw membershipError
+
+      const leagueIds = (memberships || []).map((m: any) => m.league_id).filter(Boolean)
+      const query = supabase
+        .from("leagues")
+        .select(
+          `
+          *,
+          league_members (count)
+        `,
+        )
+        .order("created_at", { ascending: false })
+
+      if (leagueIds.length > 0) {
+        const { data, error } = await query.or(`owner_id.eq.${userId},id.in.(${leagueIds.join(",")})`)
+        if (error) throw error
+        return data || []
+      }
+
+      const { data, error } = await query.eq("owner_id", userId)
+      if (error) throw error
+      return data || []
+    },
+  })
+
+  if (userQuery.isLoading || (userQuery.isFetched && !user)) {
+    return (
+      <div className="space-y-6 pb-20 md:pb-0">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">リーグ</h1>
+            <p className="text-muted-foreground">参加中のリーグ一覧</p>
+          </div>
+        </div>
+        <Card>
+          <CardContent className="py-12 text-center text-muted-foreground">読み込み中...</CardContent>
+        </Card>
+      </div>
+    )
   }
 
-  // 自分が参加しているリーグを取得
-  console.log("[v0] LeaguesPage: Fetching memberships")
-  const { data: memberships, error: membershipError } = await supabase
-    .from("league_members")
-    .select("league_id")
-    .eq("user_id", userData.user.id)
-
-  console.log("[v0] LeaguesPage: Memberships result", { count: memberships?.length, error: membershipError?.message })
-
-  const leagueIds = memberships?.map((m) => m.league_id) || []
-
-  let leagues: any[] = []
-
-  if (leagueIds.length > 0) {
-    // 参加しているリーグがある場合
-    console.log("[v0] LeaguesPage: Fetching leagues with OR condition")
-    const { data, error: leaguesError } = await supabase
-      .from("leagues")
-      .select(`
-        *,
-        league_members (count)
-      `)
-      .or(`owner_id.eq.${userData.user.id},id.in.(${leagueIds.join(",")})`)
-      .order("created_at", { ascending: false })
-    console.log("[v0] LeaguesPage: Leagues result", { count: data?.length, error: leaguesError?.message })
-    leagues = data || []
-  } else {
-    // 参加しているリーグがない場合は自分がオーナーのリーグのみ
-    console.log("[v0] LeaguesPage: Fetching owner leagues only")
-    const { data, error: leaguesError } = await supabase
-      .from("leagues")
-      .select(`
-        *,
-        league_members (count)
-      `)
-      .eq("owner_id", userData.user.id)
-      .order("created_at", { ascending: false })
-    console.log("[v0] LeaguesPage: Owner leagues result", { count: data?.length, error: leaguesError?.message })
-    leagues = data || []
-  }
-
-  console.log("[v0] LeaguesPage: Rendering with", leagues.length, "leagues")
+  const leagues = (leaguesQuery.data as any[]) || []
 
   return (
     <div className="space-y-6 pb-20 md:pb-0">
@@ -76,7 +89,11 @@ export default async function LeaguesPage() {
         </Link>
       </div>
 
-      {leagues && leagues.length > 0 ? (
+      {leaguesQuery.isLoading ? (
+        <Card>
+          <CardContent className="py-12 text-center text-muted-foreground">読み込み中...</CardContent>
+        </Card>
+      ) : leagues.length > 0 ? (
         <div className="grid gap-4 md:grid-cols-2">
           {leagues.map((league) => (
             <Link key={league.id} href={`/leagues/${league.id}`}>

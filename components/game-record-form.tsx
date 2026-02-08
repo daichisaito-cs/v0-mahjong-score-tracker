@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils"
 import { SessionSummaryDialog, type SessionResult, type SessionPlayer } from "@/components/session-summary-dialog"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import Link from "next/link"
+import { useQueryClient } from "@tanstack/react-query"
 
 interface League {
   id: string
@@ -175,6 +176,7 @@ export function GameRecordForm({
   sessionData,
 }: GameRecordFormProps) {
   const router = useRouter()
+  const queryClient = useQueryClient()
 
   const normalizeSessionResults = (results?: SessionResult[]) =>
     (results || []).map((result) => ({
@@ -494,6 +496,7 @@ export function GameRecordForm({
           setFinalSessionResults(allSessionResults)
           setShowSummaryDialog(true)
         } else {
+          queryClient.invalidateQueries({ queryKey: ["games", currentUserId] })
           window.location.href = "/games"
         }
       }
@@ -511,6 +514,7 @@ export function GameRecordForm({
 
   const handleCloseSummary = () => {
     setShowSummaryDialog(false)
+    queryClient.invalidateQueries({ queryKey: ["games", currentUserId] })
     window.location.href = "/games"
   }
 

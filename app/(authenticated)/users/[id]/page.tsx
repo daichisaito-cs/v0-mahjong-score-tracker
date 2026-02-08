@@ -1,58 +1,136 @@
+"use client"
+
 import type React from "react"
-import { createClient } from "@/lib/supabase/server"
-import { redirect, notFound } from "next/navigation"
+
+import { useEffect, useMemo } from "react"
+import Link from "next/link"
+import { useParams, useRouter } from "next/navigation"
+import { useQuery } from "@tanstack/react-query"
+import { createClient } from "@/lib/supabase/client"
+import { useAuthUser } from "@/lib/hooks/use-auth-user"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { TrendingUp, Target, Award, Percent, ArrowLeft } from "lucide-react"
 import { cn } from "@/lib/utils"
-import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { PointsHistoryChart } from "@/components/points-history-chart"
 
-export default async function UserProfilePage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
-  const supabase = await createClient()
+export default function UserProfilePage() {
+  const router = useRouter()
+  const params = useParams()
+  const supabase = createClient()
 
-  // 現在のユーザー確認
-  const { data: userData, error } = await supabase.auth.getUser()
-  if (error || !userData?.user) {
-    redirect("/auth/login")
+  const userId = useMemo(() => {
+    const raw = params?.id
+    return Array.isArray(raw) ? raw[0] : raw
+  }, [params])
+
+  const userQuery = useAuthUser()
+
+  const user = userQuery.data
+
+  useEffect(() => {
+    if (userQuery.isFetched && !user) router.replace("/auth/login")
+  }, [router, user, userQuery.isFetched])
+
+  const dataQuery = useQuery({
+    queryKey: ["user-profile", user?.id, userId],
+    enabled: Boolean(user?.id && userId),
+    queryFn: async () => {
+      const [profileRes, friendshipRes, resultsRes, rollupsRes] = await Promise.all([
+        supabase.from("profiles").select("*").eq("id", userId!).single(),
+        supabase
+          .from("friendships")
+          .select("*")
+          .eq("status", "accepted")
+          .or(
+            `and(requester_id.eq.${user!.id},addressee_id.eq.${userId}),and(requester_id.eq.${userId},addressee_id.eq.${user!.id})`,
+          )
+          .maybeSingle(),
+        supabase
+          .from("game_results")
+          .select("*, games(game_type, created_at)")
+          .eq("user_id", userId!)
+          .order("created_at", { ascending: false }),
+        supabase.from("user_game_rollups").select("*").eq("user_id", userId!),
+      ])
+
+      if (profileRes.error) throw profileRes.error
+      if (friendshipRes.error) throw friendshipRes.error
+      if (resultsRes.error) throw resultsRes.error
+      if (rollupsRes.error) {
+        // rollups がまだ導入されていない環境でもページが落ちないようにする
+        // eslint-disable-next-line no-console
+        console.warn("[v0] failed to load user_game_rollups:", rollupsRes.error)
+      }
+
+      return {
+        profile: profileRes.data,
+        friendship: friendshipRes.data,
+        results: resultsRes.data || [],
+        rollups: rollupsRes.data || [],
+      }
+    },
+  })
+
+  if (userQuery.isLoading || (userQuery.isFetched && !user)) {
+    return (
+      <div className="space-y-6 pb-20 md:pb-0">
+        <Card>
+          <CardContent className="py-12 text-center text-muted-foreground">読み込み中...</CardContent>
+        </Card>
+      </div>
+    )
   }
 
-  // プロフィール取得
-  const { data: profile } = await supabase.from("profiles").select("*").eq("id", id).single()
+  if (!userId) {
+    return (
+      <div className="space-y-6 pb-20 md:pb-0">
+        <Card>
+          <CardContent className="py-12 text-center text-muted-foreground">ユーザーが見つかりません</CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  if (dataQuery.isLoading) {
+    return (
+      <div className="space-y-6 pb-20 md:pb-0">
+        <Card>
+          <CardContent className="py-12 text-center text-muted-foreground">読み込み中...</CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  const profile = (dataQuery.data as any)?.profile
+  const friendship = (dataQuery.data as any)?.friendship
+  const results = (dataQuery.data as any)?.results as any[]
+  const rollups = (dataQuery.data as any)?.rollups as any[]
 
   if (!profile) {
-    notFound()
-  }
-
-  // フレンド関係確認
-  const { data: friendship } = await supabase
-    .from("friendships")
-    .select("*")
-    .eq("status", "accepted")
-    .or(
-      `and(requester_id.eq.${userData.user.id},addressee_id.eq.${id}),and(requester_id.eq.${id},addressee_id.eq.${userData.user.id})`,
+    return (
+      <div className="space-y-6 pb-20 md:pb-0">
+        <Card>
+          <CardContent className="py-12 text-center text-muted-foreground">ユーザーが見つかりません</CardContent>
+        </Card>
+      </div>
     )
-    .single()
-
-  // 自分自身またはフレンドでない場合はアクセス拒否
-  if (id !== userData.user.id && !friendship) {
-    notFound()
   }
 
-  // 成績データ取得
-  const { data: results } = await supabase
-    .from("game_results")
-    .select("*, games(game_type, created_at)")
-    .eq("user_id", id)
-    .order("created_at", { ascending: false })
-
-  const { data: rollups, error: rollupsError } = await supabase.from("user_game_rollups").select("*").eq("user_id", id)
-  if (rollupsError) {
-    // rollups がまだ導入されていない環境でもページが落ちないようにする
-    // eslint-disable-next-line no-console
-    console.warn("[v0] failed to load user_game_rollups:", rollupsError)
+  if (userId !== user?.id && !friendship) {
+    return (
+      <div className="space-y-6 pb-20 md:pb-0">
+        <Card>
+          <CardContent className="py-12 text-center">
+            <p className="text-muted-foreground mb-4">このユーザーの成績は閲覧できません</p>
+            <Link href="/mypage">
+              <Button>マイページに戻る</Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   const fourPlayerResults = results?.filter((r) => r.games?.game_type === "four_player") || []
@@ -149,7 +227,6 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
 
   return (
     <div className="space-y-6 pb-20 md:pb-0">
-      {/* Header with back button */}
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="sm" asChild>
           <Link href="/mypage">
@@ -169,9 +246,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
           <TabsTrigger value="three_player">三人麻雀</TabsTrigger>
         </TabsList>
 
-        {/* 四人麻雀タブ */}
         <TabsContent value="four_player" className="space-y-6">
-          {/* Stats Grid */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard title="総対戦数" value={`${fourPlayerStats.totalGames}戦`} icon={Target} color="text-blue-500" />
             <StatCard
@@ -198,7 +273,6 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
             />
           </div>
 
-          {/* 総合pt推移 */}
           {fourPlayerPointsHistory.length > 0 && (
             <Card className="border border-slate-100 shadow-sm bg-white pt-4 pb-2">
               <CardHeader className="pt-1 pb-1 px-4">
@@ -210,7 +284,6 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
             </Card>
           )}
 
-          {/* 順位分布 */}
           {fourPlayerStats.totalGames > 0 && (
             <Card className="border border-slate-100 shadow-sm bg-white">
               <CardHeader className="pb-2 px-4">
@@ -252,7 +325,6 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
             </Card>
           )}
 
-          {/* 記録 */}
           {(fourPlayerStats.highScore !== null || fourPlayerStats.lowScore !== null) && (
             <Card className="border border-slate-100 shadow-sm bg-white">
               <CardHeader className="pb-1 px-4">
@@ -278,9 +350,7 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
           )}
         </TabsContent>
 
-        {/* 三人麻雀タブ */}
         <TabsContent value="three_player" className="space-y-6">
-          {/* Stats Grid */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard title="総対戦数" value={`${threePlayerStats.totalGames}戦`} icon={Target} color="text-blue-500" />
             <StatCard
@@ -307,7 +377,6 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
             />
           </div>
 
-          {/* 総合pt推移 */}
           {threePlayerPointsHistory.length > 0 && (
             <Card className="border border-slate-100 shadow-sm bg-white pt-4 pb-2">
               <CardHeader className="pt-1 pb-1 px-4">
@@ -319,7 +388,6 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
             </Card>
           )}
 
-          {/* 順位分布 */}
           {threePlayerStats.totalGames > 0 && (
             <Card className="border border-slate-100 shadow-sm bg-white">
               <CardHeader className="pb-2 px-4">
@@ -360,7 +428,6 @@ export default async function UserProfilePage({ params }: { params: Promise<{ id
             </Card>
           )}
 
-          {/* 記録 */}
           {(threePlayerStats.highScore !== null || threePlayerStats.lowScore !== null) && (
             <Card className="border border-slate-100 shadow-sm bg-white">
               <CardHeader className="pb-1 px-4">

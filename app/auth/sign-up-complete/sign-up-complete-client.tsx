@@ -24,7 +24,7 @@ export default function SignUpCompleteClient() {
     if (accessToken && refreshToken) {
       supabase.auth
         .setSession({ access_token: accessToken, refresh_token: refreshToken })
-        .then(({ error }) => {
+        .then(({ error }: any) => {
           if (error) {
             setError("セッションの復元に失敗しました。メールのリンクをもう一度開いてください。")
           } else {

@@ -1,11 +1,15 @@
-import { createClient } from "@/lib/supabase/server"
-import { redirect, notFound } from "next/navigation"
+"use client"
+
+import { useEffect, useMemo } from "react"
 import Link from "next/link"
+import { useParams, useRouter } from "next/navigation"
+import { useQuery } from "@tanstack/react-query"
+import { createClient } from "@/lib/supabase/client"
+import { useAuthUser } from "@/lib/hooks/use-auth-user"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Edit, Trophy } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { GameRecordForm } from "@/components/game-record-form"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 function isValidUUID(str: string): boolean {
@@ -13,141 +17,114 @@ function isValidUUID(str: string): boolean {
   return uuidRegex.test(str)
 }
 
-export default async function GameDetailPage({
-  params,
-  searchParams,
-}: {
-  params: Promise<{ id: string }>
-  searchParams: Promise<{ league?: string; session?: string }>
-}) {
-  const { id } = await params
-  const { league: leagueParam, session: sessionParam } = await searchParams
-  const supabase = await createClient()
+export default function GameDetailPage() {
+  const router = useRouter()
+  const params = useParams()
+  const supabase = createClient()
 
-  const { data: userData, error } = await supabase.auth.getUser()
-  if (error || !userData?.user) {
-    redirect("/auth/login")
-  }
+  const gameId = useMemo(() => {
+    const raw = params?.id
+    return Array.isArray(raw) ? raw[0] : raw
+  }, [params])
 
-  if (id === "new") {
-    const { data: myProfile } = await supabase.from("profiles").select("*").eq("id", userData.user.id).single()
+  const userQuery = useAuthUser()
 
-    const friends: { id: string; display_name: string; avatar_url?: string | null }[] = []
+  const user = userQuery.data
 
-    try {
-      const { data: friendships, error: friendshipsError } = await supabase
-        .from("friendships")
-        .select("requester_id, addressee_id")
-        .eq("status", "accepted")
-        .or(`requester_id.eq.${userData.user.id},addressee_id.eq.${userData.user.id}`)
+  useEffect(() => {
+    if (userQuery.isFetched && !user) router.replace("/auth/login")
+  }, [router, user, userQuery.isFetched])
 
-      if (friendshipsError) {
-        console.error("[v0] Failed to fetch friendships:", friendshipsError)
-      } else if (friendships && friendships.length > 0) {
-        const friendIds = friendships.map((fs) => {
-          return fs.requester_id === userData.user.id ? fs.addressee_id : fs.requester_id
-        })
+  const gameQuery = useQuery({
+    queryKey: ["game", gameId, user?.id],
+    enabled: Boolean(user?.id && gameId && isValidUUID(gameId)),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("games")
+        .select(
+          `
+          *,
+          creator:profiles!games_created_by_fkey (
+            display_name,
+            avatar_url
+          ),
+          leagues (name),
+          game_results (
+            id,
+            game_id,
+            user_id,
+            player_name,
+            rank,
+            raw_score,
+            point,
+            bonus_points,
+            created_at,
+            profiles (display_name, avatar_url)
+          )
+        `,
+        )
+        .eq("id", gameId!)
+        .single()
 
-        const { data: profiles, error: profilesError } = await supabase
-          .from("profiles")
-          .select("id, display_name, avatar_url")
-          .in("id", friendIds)
+      if (error) throw error
+      return data || null
+    },
+  })
 
-        if (profilesError) {
-          console.error("[v0] Failed to fetch friend profiles:", profilesError)
-        } else if (profiles) {
-          friends.push(...profiles)
-        }
-      }
-    } catch (err) {
-      console.error("[v0] Error fetching friends:", err)
-    }
-
-    const { data: ownedLeagues } = await supabase.from("leagues").select("*").eq("owner_id", userData.user.id)
-
-    const { data: memberships } = await supabase
-      .from("league_members")
-      .select("leagues(*)")
-      .eq("user_id", userData.user.id)
-
-    const memberLeagues = memberships?.map((m) => m.leagues).filter(Boolean) || []
-    const allLeagues = [...(ownedLeagues || []), ...memberLeagues]
-    const uniqueLeagues = allLeagues.filter(
-      (league, index, self) => league && index === self.findIndex((l) => l?.id === league?.id),
-    )
-
-    const { data: rules } = await supabase
-      .from("rules")
-      .select("id, name, game_type, starting_points, return_points, uma_first, uma_second, uma_third, uma_fourth")
-      .order("created_at", { ascending: false })
-
-    let sessionData = null
-    if (sessionParam) {
-      try {
-        sessionData = JSON.parse(decodeURIComponent(sessionParam))
-      } catch (err) {
-        console.error("[v0] Failed to parse session data:", err)
-      }
-    }
-
+  if (userQuery.isLoading || (userQuery.isFetched && !user)) {
     return (
       <div className="space-y-6 pb-20 md:pb-0 max-w-2xl mx-auto">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">対局を記録</h1>
-          <p className="text-muted-foreground">対局結果を入力してください</p>
-        </div>
-
-        <GameRecordForm
-          currentUserId={userData.user.id}
-          currentUserName={myProfile?.display_name || "自分"}
-          currentUserAvatarUrl={myProfile?.avatar_url || null}
-          leagues={(uniqueLeagues as any[]) || []}
-          rules={(rules as any[]) || []}
-          friends={friends}
-          defaultLeagueId={leagueParam}
-          sessionData={sessionData}
-        />
+        <Card>
+          <CardContent className="py-12 text-center text-muted-foreground">読み込み中...</CardContent>
+        </Card>
       </div>
     )
   }
 
-  if (!isValidUUID(id)) {
-    notFound()
+  if (!gameId || !isValidUUID(gameId)) {
+    return (
+      <div className="space-y-6 pb-20 md:pb-0 max-w-2xl mx-auto">
+        <Card>
+          <CardContent className="py-12 text-center">
+            <p className="text-muted-foreground mb-4">対局が見つかりませんでした</p>
+            <Link href="/games">
+              <Button>対局一覧に戻る</Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
-  const { data: game } = await supabase
-    .from("games")
-    .select(`
-      *,
-      creator:profiles!games_created_by_fkey (
-        display_name,
-        avatar_url
-      ),
-      leagues (name),
-      game_results (
-        id,
-        game_id,
-        user_id,
-        player_name,
-        rank,
-        raw_score,
-        point,
-        bonus_points,
-        created_at,
-        profiles (display_name, avatar_url)
-      )
-    `)
-    .eq("id", id)
-    .single()
+  if (gameQuery.isLoading) {
+    return (
+      <div className="space-y-6 pb-20 md:pb-0 max-w-2xl mx-auto">
+        <Card>
+          <CardContent className="py-12 text-center text-muted-foreground">読み込み中...</CardContent>
+        </Card>
+      </div>
+    )
+  }
 
+  const game = gameQuery.data as any
   if (!game) {
-    notFound()
+    return (
+      <div className="space-y-6 pb-20 md:pb-0 max-w-2xl mx-auto">
+        <Card>
+          <CardContent className="py-12 text-center">
+            <p className="text-muted-foreground mb-4">対局が見つかりませんでした</p>
+            <Link href="/games">
+              <Button>対局一覧に戻る</Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   const sortedResults = [...(game.game_results || [])].sort((a, b) => a.rank - b.rank)
   const creatorName = game.creator?.display_name || "不明"
-
-  const isOwner = game.created_by === userData.user.id
+  const isOwner = game.created_by === user?.id
 
   return (
     <div className="space-y-6 pb-20 md:pb-0 max-w-2xl mx-auto">
@@ -171,7 +148,7 @@ export default async function GameDetailPage({
           </div>
         </div>
         {isOwner && (
-          <Link href={`/games/${id}/edit`}>
+          <Link href={`/games/${gameId}/edit`}>
             <Button variant="outline" size="sm" className="gap-2 bg-transparent">
               <Edit className="h-4 w-4" />
               編集
