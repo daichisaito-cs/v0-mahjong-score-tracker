@@ -400,7 +400,7 @@ export function FriendSection({ currentUserId, friendCode, friends, pendingReque
                   key={friend.id}
                   className="flex items-center justify-between p-3 border border-border rounded-lg hover:bg-accent/5 transition-colors group"
                 >
-                  <Link href={`/users/${friend.id}`} className="flex-1">
+                  <Link href={`/users/${friend.id}?from=friends`} className="flex-1">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10">
                         <AvatarImage src={friend.avatar_url || undefined} />

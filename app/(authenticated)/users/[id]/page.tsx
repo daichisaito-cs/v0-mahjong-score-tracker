@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useEffect, useMemo } from "react"
 import Link from "next/link"
-import { useParams, useRouter } from "next/navigation"
+import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { useQuery } from "@tanstack/react-query"
 import { createClient } from "@/lib/supabase/client"
 import { useAuthUser } from "@/lib/hooks/use-auth-user"
@@ -18,12 +18,15 @@ import { PointsHistoryChart } from "@/components/points-history-chart"
 export default function UserProfilePage() {
   const router = useRouter()
   const params = useParams()
+  const searchParams = useSearchParams()
   const supabase = createClient()
 
   const userId = useMemo(() => {
     const raw = params?.id
     return Array.isArray(raw) ? raw[0] : raw
   }, [params])
+  const fromFriendsTab = searchParams.get("from") === "friends"
+  const backHref = fromFriendsTab ? "/mypage?tab=friends" : "/mypage"
 
   const userQuery = useAuthUser()
 
@@ -227,11 +230,11 @@ export default function UserProfilePage() {
 
   return (
     <div className="space-y-6 pb-20 md:pb-0">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" asChild>
-          <Link href="/mypage">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            戻る
+      <div className="flex items-start gap-3">
+        <Button variant="outline" size="sm" className="gap-1.5 shrink-0 mt-1 bg-transparent" asChild>
+          <Link href={backHref}>
+            <ArrowLeft className="w-4 h-4 mr-0" />
+            {fromFriendsTab ? "戻る" : "戻る"}
           </Link>
         </Button>
         <div>

@@ -1,7 +1,7 @@
 "use client"
 
-import { useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useEffect, useMemo, useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useQuery } from "@tanstack/react-query"
 import { createClient } from "@/lib/supabase/client"
 import { useAuthUser } from "@/lib/hooks/use-auth-user"
@@ -12,15 +12,22 @@ import { Card, CardContent } from "@/components/ui/card"
 
 export default function MyPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const supabase = createClient()
 
   const userQuery = useAuthUser()
 
   const user = userQuery.data
+  const initialTab = useMemo(() => (searchParams.get("tab") === "friends" ? "friends" : "profile"), [searchParams])
+  const [activeTab, setActiveTab] = useState<"profile" | "friends">(initialTab)
 
   useEffect(() => {
     if (userQuery.isFetched && !user) router.replace("/auth/login")
   }, [router, user, userQuery.isFetched])
+
+  useEffect(() => {
+    setActiveTab(initialTab)
+  }, [initialTab])
 
   const dataQuery = useQuery({
     queryKey: ["mypage", user?.id],
@@ -123,7 +130,7 @@ export default function MyPage() {
           <CardContent className="py-12 text-center text-muted-foreground">読み込み中...</CardContent>
         </Card>
       ) : (
-        <Tabs defaultValue="profile" className="w-full">
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "profile" | "friends")} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="profile">プロフィール</TabsTrigger>
             <TabsTrigger value="friends">フレンド</TabsTrigger>
