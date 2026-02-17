@@ -60,41 +60,12 @@ export default function LeagueDetailPage() {
     if (userQuery.isFetched && !user) router.replace("/auth/login")
   }, [router, user, userQuery.isFetched])
 
-  if (userQuery.isLoading || (userQuery.isFetched && !user)) {
-    return (
-      <div className="space-y-6 pb-20 md:pb-0 max-w-xl mx-auto">
-        <Card>
-          <CardContent className="py-12 text-center text-muted-foreground">読み込み中...</CardContent>
-        </Card>
-      </div>
-    )
-  }
-
-  if (leagueId === "new") {
-    return (
-      <div className="space-y-6 pb-20 md:pb-0 max-w-xl mx-auto">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">リーグを作成</h1>
-          <p className="text-muted-foreground">新しいリーグの設定を入力してください</p>
-        </div>
-        <LeagueCreateForm userId={user!.id} />
-      </div>
-    )
-  }
-
-  if (!leagueId || !isValidUUID(leagueId)) {
-    return (
-      <div className="space-y-6 pb-20 md:pb-0 max-w-xl mx-auto">
-        <Card>
-          <CardContent className="py-12 text-center text-muted-foreground">リーグが見つかりません</CardContent>
-        </Card>
-      </div>
-    )
-  }
+  const isCreatePage = leagueId === "new"
+  const isValidLeagueId = Boolean(leagueId && isValidUUID(leagueId))
 
   const leagueQuery = useQuery({
     queryKey: ["league-detail", leagueId, user?.id],
-    enabled: Boolean(user?.id && leagueId && isValidUUID(leagueId)),
+    enabled: Boolean(user?.id && isValidLeagueId),
     queryFn: async () => {
       const { data: league, error: leagueError } = await supabase.from("leagues").select("*").eq("id", leagueId).single()
       if (leagueError) throw leagueError
@@ -137,7 +108,6 @@ export default function LeagueDetailPage() {
         .select("*")
         .eq("league_id", leagueId)
       if (leagueRollupsError) {
-        // eslint-disable-next-line no-console
         console.warn("[v0] failed to load league_user_game_rollups:", leagueRollupsError)
       }
 
@@ -150,7 +120,6 @@ export default function LeagueDetailPage() {
           .select("id, display_name, avatar_url")
           .in("id", seedIds)
         if (profilesError) {
-          // eslint-disable-next-line no-console
           console.warn("[v0] failed to load profiles:", profilesError)
         } else {
           extraProfiles = profilesData || []
@@ -160,6 +129,38 @@ export default function LeagueDetailPage() {
       return { league, members: members || [], ownerProfile, games: games || [], leagueRollups: leagueRollups || [], extraProfiles }
     },
   })
+
+  if (userQuery.isLoading || (userQuery.isFetched && !user)) {
+    return (
+      <div className="space-y-6 pb-20 md:pb-0 max-w-xl mx-auto">
+        <Card>
+          <CardContent className="py-12 text-center text-muted-foreground">読み込み中...</CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  if (isCreatePage) {
+    return (
+      <div className="space-y-6 pb-20 md:pb-0 max-w-xl mx-auto">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">リーグを作成</h1>
+          <p className="text-muted-foreground">新しいリーグの設定を入力してください</p>
+        </div>
+        <LeagueCreateForm userId={user!.id} />
+      </div>
+    )
+  }
+
+  if (!isValidLeagueId) {
+    return (
+      <div className="space-y-6 pb-20 md:pb-0 max-w-xl mx-auto">
+        <Card>
+          <CardContent className="py-12 text-center text-muted-foreground">リーグが見つかりません</CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   if (leagueQuery.isLoading) {
     return (
@@ -387,7 +388,7 @@ export default function LeagueDetailPage() {
       const result = (game.game_results || []).find((r: any) => r.user_id === player.odIndex)
       if (!result) return
       total += Number(result.point)
-      series.push(Number(total.toFixed(1)))
+      series.push(Number(total.toFixed(2)))
     })
     perPlayerSeries.set(player.odIndex, series)
   })
@@ -505,7 +506,7 @@ export default function LeagueDetailPage() {
                         )}
                       >
                         {player.totalPoints >= 0 ? "+" : ""}
-                        {player.totalPoints.toFixed(1)}
+                        {player.totalPoints.toFixed(2)}
                       </p>
                       <p className="text-xs text-muted-foreground">pt</p>
                     </div>
@@ -726,7 +727,42 @@ export default function LeagueDetailPage() {
           {games && games.length > 0 ? (
             <div className="space-y-3">
               {games.map((game: any) => {
-                const sortedResults = [...(game.game_results || [])].sort((a, b) => a.rank - b.rank)
+                const seatCount = game.game_type === "four_player" ? 4 : 3
+                const seatBuckets = new Map<number, any[]>()
+                ;(game.game_results || []).forEach((result: any) => {
+                  const seat = Number(result.seat_index ?? result.rank)
+                  if (!Number.isFinite(seat) || seat < 1 || seat > seatCount) return
+                  if (!seatBuckets.has(seat)) seatBuckets.set(seat, [])
+                  seatBuckets.get(seat)!.push(result)
+                })
+                const seatSummaries = Array.from({ length: seatCount }, (_, idx) => {
+                  const seat = idx + 1
+                  const members = (seatBuckets.get(seat) || []).slice().sort((a, b) => a.rank - b.rank)
+                  const first = members[0]
+                  const names = members.map((m) => m.player_name || m.profiles?.display_name || "Unknown").join(" / ")
+                  const pointBase = Number(first?.point ?? 0)
+                  const allSamePoint = members.every((m) => Math.abs(Number(m.point) - pointBase) < 0.01)
+                  const pointText =
+                    members.length === 0
+                      ? "-"
+                      : members.length === 1
+                        ? `${pointBase >= 0 ? "+" : ""}${pointBase.toFixed(2)}`
+                        : allSamePoint
+                          ? `${pointBase >= 0 ? "+" : ""}${pointBase.toFixed(2)}ずつ`
+                          : members
+                              .map((m) => {
+                                const p = Number(m.point)
+                                return `${p >= 0 ? "+" : ""}${p.toFixed(2)}`
+                              })
+                              .join(" / ")
+                  return { seat, first, names, pointText, hasData: members.length > 0, isPositive: pointBase >= 0 }
+                }).sort((a, b) => {
+                  if (!a.hasData && !b.hasData) return a.seat - b.seat
+                  if (!a.hasData) return 1
+                  if (!b.hasData) return -1
+                  if ((a.first?.rank ?? 999) !== (b.first?.rank ?? 999)) return (a.first?.rank ?? 999) - (b.first?.rank ?? 999)
+                  return a.seat - b.seat
+                })
                 return (
                   <Link key={game.id} href={`/games/${game.id}`} className="block">
                     <div className="p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
@@ -735,32 +771,27 @@ export default function LeagueDetailPage() {
                           {new Date(game.played_at).toLocaleDateString("ja-JP")}
                         </span>
                       </div>
-                      <div className="grid grid-cols-4 gap-2">
-                        {sortedResults.map((result: any) => (
-                          <div key={result.id} className="text-center min-w-0">
+                      <div className={cn("gap-2", seatCount === 4 ? "grid grid-cols-4" : "grid grid-cols-3")}>
+                        {seatSummaries.map((seat: any) => (
+                          <div key={`${game.id}-seat-${seat.seat}`} className="text-center min-w-0">
                             <div className="flex flex-col items-center gap-1">
                               <Avatar className="h-10 w-10">
-                                <AvatarImage src={(result.profiles as any)?.avatar_url || undefined} />
+                                <AvatarImage src={(seat.first?.profiles as any)?.avatar_url || undefined} />
                                 <AvatarFallback>
-                                  {(result.player_name || result.profiles?.display_name || "?")
+                                  {(seat.first?.player_name || seat.first?.profiles?.display_name || "?")
                                     .charAt(0)
                                     .toUpperCase()}
                                 </AvatarFallback>
                               </Avatar>
-                              <div className="text-xs text-muted-foreground">{result.rank}位</div>
+                              <div className="text-xs text-muted-foreground">{seat.hasData ? `${seat.first?.rank}位` : "-"}</div>
                               <div
                                 className="text-sm font-medium truncate w-full"
-                                title={result.player_name || result.profiles?.display_name || "Unknown"}
+                                title={seat.hasData ? seat.names : "-"}
                               >
-                                {result.player_name || result.profiles?.display_name || "Unknown"}
+                                {seat.hasData ? seat.names : "-"}
                               </div>
                             </div>
-                            <div
-                              className={cn("text-xs", Number(result.point) >= 0 ? "text-chart-1" : "text-destructive")}
-                            >
-                              {Number(result.point) >= 0 ? "+" : ""}
-                              {Number(result.point).toFixed(1)}
-                            </div>
+                            <div className={cn("text-xs", seat.isPositive ? "text-chart-1" : "text-destructive")}>{seat.pointText}</div>
                           </div>
                         ))}
                       </div>

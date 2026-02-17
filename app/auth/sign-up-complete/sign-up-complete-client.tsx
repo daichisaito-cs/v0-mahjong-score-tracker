@@ -43,7 +43,7 @@ export default function SignUpCompleteClient() {
         })
         .finally(() => setIsSettingSession(false))
     } else {
-      setIsSettingSession(false)
+      queueMicrotask(() => setIsSettingSession(false))
     }
   }, [router, searchParams])
 

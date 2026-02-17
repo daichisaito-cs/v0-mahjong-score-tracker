@@ -20,6 +20,7 @@ export type SessionPlayer = {
   name: string
   userId?: string
   avatarUrl?: string | null
+  isManual?: boolean
 }
 
 export type SessionResult = {
@@ -151,7 +152,7 @@ export function SessionSummaryDialog({ open, sessionResults, leagueName, onClose
                     )}
                   >
                     {player.total > 0 ? "+" : ""}
-                    {player.total.toFixed(1)}
+                    {player.total.toFixed(2)}
                   </div>
                 </CardContent>
               </Card>

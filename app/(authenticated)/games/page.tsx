@@ -62,6 +62,7 @@ export default function GamesPage() {
           game_results (
             id,
             game_id,
+            seat_index,
             user_id,
             player_name,
             rank,

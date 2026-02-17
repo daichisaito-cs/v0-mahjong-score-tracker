@@ -1,19 +1,19 @@
 "use client"
 
 import type React from "react"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
+import { useQueryClient } from "@tanstack/react-query"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { cn } from "@/lib/utils"
-import { SessionSummaryDialog, type SessionResult, type SessionPlayer } from "@/components/session-summary-dialog"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import Link from "next/link"
-import { useQueryClient } from "@tanstack/react-query"
+import { SessionSummaryDialog, type SessionResult } from "@/components/session-summary-dialog"
+import { cn } from "@/lib/utils"
 
 interface League {
   id: string
@@ -47,12 +47,33 @@ interface Friend {
   avatar_url?: string | null
 }
 
-interface PlayerResult {
+interface SeatMemberInput {
   name: string
-  score: string
   userId?: string
   avatarUrl?: string | null
   isManual?: boolean
+}
+
+interface SeatInput {
+  seatIndex: number
+  score: string
+  bonusPoints: number
+  members: SeatMemberInput[]
+}
+
+interface SessionData {
+  gameType: string
+  leagueId: string
+  ruleId?: string
+  seats?: SeatInput[]
+  players?: Array<{
+    name: string
+    score: string
+    userId?: string
+    avatarUrl?: string | null
+    isManual?: boolean
+  }>
+  sessionResults?: SessionResult[]
 }
 
 interface GameRecordFormProps {
@@ -63,39 +84,62 @@ interface GameRecordFormProps {
   rules: Rule[]
   friends: Friend[]
   defaultLeagueId?: string
-  sessionData?: SessionData // セッションデータを受け取る
+  sessionData?: SessionData
 }
 
-interface SessionData {
-  gameType: string
-  leagueId: string
-  ruleId?: string
-  players: PlayerResult[]
-  sessionResults: SessionResult[]
+type SeatCalcResult = {
+  rank: number
+  seatPoint: number
 }
 
-function calculatePoints(
-  results: PlayerResult[],
-  gameType: string,
+const EPSILON = 0.01
+
+function round2(num: number) {
+  return Number(num.toFixed(2))
+}
+
+function createEmptyMember(): SeatMemberInput {
+  return { name: "", userId: undefined, avatarUrl: undefined, isManual: false }
+}
+
+function createDefaultSeats(playerCount: number): SeatInput[] {
+  return Array.from({ length: playerCount }, (_, idx) => ({
+    seatIndex: idx + 1,
+    score: "",
+    bonusPoints: 0,
+    members: [createEmptyMember()],
+  }))
+}
+
+function normalizeSessionResults(results?: SessionResult[]) {
+  return (results || []).map((result) => ({
+    players: (result?.players || []).map((player: any) =>
+      typeof player === "string"
+        ? { name: player }
+        : { name: player.name, userId: player.userId, avatarUrl: player.avatarUrl, isManual: player.isManual },
+    ),
+    points: (result?.points || []).map((point: any) => Number(point) || 0),
+  }))
+}
+
+function calculateSeatPoints(
+  seats: SeatInput[],
+  playerCount: number,
   uma: number[],
   oka: number,
   startingPoints: number,
   returnPoints: number,
-) {
-  const playerCount = gameType === "four_player" ? 4 : 3
-
-  const sorted = results
+): SeatCalcResult[] {
+  const sorted = seats
     .slice(0, playerCount)
-    .map((r, originalIndex) => ({
-      ...r,
-      scoreNum: Number.parseInt(r.score) || 0,
+    .map((seat, originalIndex) => ({
       originalIndex,
+      scoreNum: Number.parseInt(seat.score) || 0,
     }))
     .sort((a, b) => b.scoreNum - a.scoreNum)
 
   const okaPoints = ((returnPoints - startingPoints) * playerCount) / 1000
 
-  // 同じ点数のプレイヤーをグループ化
   const groups: Array<typeof sorted> = []
   let currentGroup: typeof sorted = [sorted[0]]
 
@@ -109,56 +153,39 @@ function calculatePoints(
   }
   groups.push(currentGroup)
 
-  // 各グループに順位とポイントを割り当て
-  const calculated: Array<{
-    name: string
-    scoreNum: number
-    originalIndex: number
-    userId?: string
-    rank: number
-    point: number
-  }> = []
-
+  const calculated: Array<{ originalIndex: number; rank: number; seatPoint: number }> = []
   let currentRank = 1
 
   for (const group of groups) {
-    // グループ内の順位範囲（例：同率1位が2人なら1位と2位）
     const rankStart = currentRank
     const rankEnd = currentRank + group.length - 1
 
-    // ウマの合計を計算
     let totalUma = 0
     for (let rank = rankStart; rank <= rankEnd; rank++) {
       totalUma += uma[rank - 1] || 0
     }
+
     const averageUma = totalUma / group.length
+    const averageOka = rankStart === 1 ? okaPoints / group.length : 0
 
-    // オカはグループ内に1位が含まれる場合のみ分配
-    let averageOka = 0
-    if (rankStart === 1) {
-      averageOka = okaPoints / group.length
-    }
-
-    group.forEach((player) => {
-      const basePoint = (player.scoreNum - returnPoints) / 1000
-      const totalPoint = basePoint + averageUma + averageOka
-
+    group.forEach((seat) => {
+      const basePoint = (seat.scoreNum - returnPoints) / 1000
+      const seatPoint = basePoint + averageUma + averageOka
       calculated.push({
-        ...player,
-        rank: rankStart, // 同点の場合も同じ順位（例: 両方とも1位）
-        point: totalPoint,
+        originalIndex: seat.originalIndex,
+        rank: rankStart,
+        seatPoint,
       })
     })
 
     currentRank += group.length
   }
 
-  // 元の順序に戻す
   const finalResults = new Array(playerCount)
-  calculated.forEach((player) => {
-    finalResults[player.originalIndex] = {
-      rank: player.rank,
-      point: player.point,
+  calculated.forEach((entry) => {
+    finalResults[entry.originalIndex] = {
+      rank: entry.rank,
+      seatPoint: entry.seatPoint,
     }
   })
 
@@ -178,16 +205,6 @@ export function GameRecordForm({
   const router = useRouter()
   const queryClient = useQueryClient()
 
-  const normalizeSessionResults = (results?: SessionResult[]) =>
-    (results || []).map((result) => ({
-      players: (result?.players || []).map((player: any) =>
-        typeof player === "string"
-          ? { name: player }
-          : { name: player.name, userId: player.userId, avatarUrl: player.avatarUrl, isManual: player.isManual },
-      ),
-      points: result?.points || [],
-    }))
-
   const [gameType, setGameType] = useState<"four_player" | "three_player">(
     (sessionData?.gameType as "four_player" | "three_player") || "four_player",
   )
@@ -196,48 +213,96 @@ export function GameRecordForm({
   const [isLoading, setIsLoading] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [bonusPoints, setBonusPoints] = useState<number[]>([0, 0, 0, 0])
-  const [continueSession, setContinueSession] = useState(false) // 連続記録モード
+  const [continueSession, setContinueSession] = useState(false)
 
   const [sessionResults, setSessionResults] = useState<SessionResult[]>(normalizeSessionResults(sessionData?.sessionResults))
-
-  const [players, setPlayers] = useState<PlayerResult[]>(
-    sessionData?.players
-      ? sessionData.players.map((p) => ({
-          name: p.name,
-          score: p.score ?? "",
-          userId: p.userId,
-          avatarUrl: p.avatarUrl,
-          isManual: p.isManual,
-        }))
-      : [
-          { name: "", score: "", userId: undefined, avatarUrl: undefined, isManual: false },
-          { name: "", score: "", userId: undefined, avatarUrl: undefined, isManual: false },
-          { name: "", score: "", userId: undefined, avatarUrl: undefined, isManual: false },
-          { name: "", score: "", userId: undefined, avatarUrl: undefined, isManual: false },
-        ],
-  )
-
   const [showSummaryDialog, setShowSummaryDialog] = useState(false)
   const [finalSessionResults, setFinalSessionResults] = useState<SessionResult[]>([])
 
   const playerCount = gameType === "four_player" ? 4 : 3
+
+  const initialSeats = useMemo(() => {
+    if (sessionData?.seats && sessionData.seats.length > 0) {
+      return sessionData.seats.map((seat, index) => ({
+        seatIndex: seat.seatIndex || index + 1,
+        score: seat.score || "",
+        bonusPoints: Number(seat.bonusPoints || 0),
+        members:
+          seat.members && seat.members.length > 0
+            ? seat.members.map((m) => ({
+                name: m.name || "",
+                userId: m.userId,
+                avatarUrl: m.avatarUrl,
+                isManual: m.isManual,
+              }))
+            : [createEmptyMember()],
+      }))
+    }
+
+    if (sessionData?.players && sessionData.players.length > 0) {
+      return sessionData.players.map((p, index) => ({
+        seatIndex: index + 1,
+        score: p.score || "",
+        bonusPoints: 0,
+        members: [
+          {
+            name: p.name || "",
+            userId: p.userId,
+            avatarUrl: p.avatarUrl,
+            isManual: p.isManual,
+          },
+        ],
+      }))
+    }
+
+    return createDefaultSeats(playerCount)
+  }, [sessionData, playerCount])
+
+  const [seats, setSeats] = useState<SeatInput[]>(() => {
+    const normalized = initialSeats
+      .slice(0, playerCount)
+      .map((seat, idx) => ({
+        seatIndex: idx + 1,
+        score: seat.score || "",
+        bonusPoints: Number(seat.bonusPoints || 0),
+        members: seat.members && seat.members.length > 0 ? seat.members.slice(0, 2) : [createEmptyMember()],
+      }))
+
+    while (normalized.length < playerCount) {
+      normalized.push({
+        seatIndex: normalized.length + 1,
+        score: "",
+        bonusPoints: 0,
+        members: [createEmptyMember()],
+      })
+    }
+
+    return normalized
+  })
+
+  useEffect(() => {
+    setSeats((prev) => {
+      const next = prev
+        .slice(0, playerCount)
+        .map((seat, idx) => ({ ...seat, seatIndex: idx + 1, members: seat.members.slice(0, 2) }))
+
+      while (next.length < playerCount) {
+        next.push({ seatIndex: next.length + 1, score: "", bonusPoints: 0, members: [createEmptyMember()] })
+      }
+
+      return next
+    })
+  }, [playerCount])
+
   const selectedLeague = leagues.find((l) => l.id === leagueId)
   const selectedRule = rules.find((rule) => rule.id === ruleId)
-  const selectedLeagueRule = selectedLeague?.rule_id
-    ? rules.find((rule) => rule.id === selectedLeague.rule_id)
-    : null
+  const selectedLeagueRule = selectedLeague?.rule_id ? rules.find((rule) => rule.id === selectedLeague.rule_id) : null
   const isFreeGame = leagueId === "none"
   const activeRule = isFreeGame ? selectedRule : selectedLeagueRule
 
   const umaSource = activeRule ?? selectedLeague ?? null
   const uma = umaSource
-    ? [
-        umaSource.uma_first,
-        umaSource.uma_second,
-        umaSource.uma_third,
-        umaSource.uma_fourth ?? -30,
-      ]
+    ? [umaSource.uma_first, umaSource.uma_second, umaSource.uma_third, umaSource.uma_fourth ?? -30]
     : gameType === "four_player"
       ? [30, 10, -10, -30]
       : [30, 0, -30, 0]
@@ -256,90 +321,145 @@ export function GameRecordForm({
     }
   }, [gameType, selectedRule])
 
-  const handleFriendSelect = (index: number, value: string) => {
-    if (value === "manual") {
-      // 手動入力モードを有効化
-      setPlayers((prev) => {
-        const updated = [...prev]
-        updated[index] = { name: "", score: updated[index].score, userId: undefined, avatarUrl: undefined, isManual: true }
-        return updated
-      })
-    } else if (value === "self") {
-      // 手動入力モードを無効化
-      setPlayers((prev) => {
-        const updated = [...prev]
-        updated[index] = {
-          name: currentUserName,
-          score: updated[index].score,
-          userId: currentUserId,
-          avatarUrl: currentUserAvatarUrl,
-          isManual: false,
-        }
-        return updated
-      })
-    } else {
-      // 手動入力モードを無効化
-      const friend = friends.find((f) => f.id === value)
-      if (friend) {
-        setPlayers((prev) => {
-          const updated = [...prev]
-          updated[index] = {
-            name: friend.display_name,
-            score: updated[index].score,
-            userId: friend.id,
-            avatarUrl: friend.avatar_url,
-            isManual: false,
-          }
-          return updated
-        })
+  const updateSeatField = (seatIndex: number, field: "score" | "bonusPoints", value: string) => {
+    setSeats((prev) => {
+      const updated = [...prev]
+      if (field === "score") {
+        updated[seatIndex] = { ...updated[seatIndex], score: value }
+      } else {
+        updated[seatIndex] = { ...updated[seatIndex], bonusPoints: Number.parseFloat(value) || 0 }
       }
+      return updated
+    })
+  }
+
+  const setMember = (seatIndex: number, memberIndex: number, member: SeatMemberInput) => {
+    setSeats((prev) => {
+      const updated = [...prev]
+      const seat = updated[seatIndex]
+      const members = [...seat.members]
+      members[memberIndex] = member
+      updated[seatIndex] = { ...seat, members }
+      return updated
+    })
+  }
+
+  const handleMemberSelect = (seatIndex: number, memberIndex: number, value: string) => {
+    if (value === "manual") {
+      const existing = seats[seatIndex].members[memberIndex]
+      setMember(seatIndex, memberIndex, {
+        name: existing?.isManual ? existing.name : "",
+        userId: undefined,
+        avatarUrl: undefined,
+        isManual: true,
+      })
+      return
+    }
+
+    if (value === "self") {
+      setMember(seatIndex, memberIndex, {
+        name: currentUserName,
+        userId: currentUserId,
+        avatarUrl: currentUserAvatarUrl,
+        isManual: false,
+      })
+      return
+    }
+
+    const friend = friends.find((f) => f.id === value)
+    if (friend) {
+      setMember(seatIndex, memberIndex, {
+        name: friend.display_name,
+        userId: friend.id,
+        avatarUrl: friend.avatar_url,
+        isManual: false,
+      })
     }
   }
 
-  const updatePlayer = (index: number, field: "name" | "score", value: string) => {
-    setPlayers((prev) => {
+  const updateManualMemberName = (seatIndex: number, memberIndex: number, value: string) => {
+    const existing = seats[seatIndex].members[memberIndex]
+    setMember(seatIndex, memberIndex, {
+      ...existing,
+      name: value,
+      isManual: true,
+      userId: undefined,
+      avatarUrl: undefined,
+    })
+  }
+
+  const addMemberToSeat = (seatIndex: number) => {
+    setSeats((prev) => {
       const updated = [...prev]
-      updated[index] = { ...updated[index], [field]: value }
+      const seat = updated[seatIndex]
+      if (seat.members.length >= 2) return prev
+      updated[seatIndex] = { ...seat, members: [...seat.members, createEmptyMember()] }
       return updated
     })
   }
 
-  const updateBonusPoint = (index: number, value: string) => {
-    const numValue = Number.parseFloat(value) || 0
-    setBonusPoints((prev) => {
+  const removeMemberFromSeat = (seatIndex: number, memberIndex: number) => {
+    setSeats((prev) => {
       const updated = [...prev]
-      updated[index] = numValue
+      const seat = updated[seatIndex]
+      if (seat.members.length <= 1) return prev
+      const members = seat.members.filter((_, idx) => idx !== memberIndex)
+      updated[seatIndex] = { ...seat, members }
       return updated
     })
   }
 
-  // 4人全員分の名前と素点が入力されたかチェック
-  const allFieldsFilled = players.slice(0, playerCount).every((p) => p.name && p.score)
+  const activeSeats = seats.slice(0, playerCount)
+  const expectedTotalScore = startingPoints * playerCount
 
-  // ポイント計算は全員分入力完了後のみ
-  const previewResults = allFieldsFilled
-    ? calculatePoints(players, gameType, uma, oka, startingPoints, returnPoints)
+  const allSeatsHaveMembers = activeSeats.every((seat) => seat.members.length >= 1 && seat.members.length <= 2)
+  const allMembersHaveNames = activeSeats.every((seat) => seat.members.every((member) => member.name.trim().length > 0))
+  const allScoresFilled = activeSeats.every((seat) => seat.score !== "")
+  const allFieldsFilled = allScoresFilled && allSeatsHaveMembers && allMembersHaveNames
+
+  const userIds = activeSeats.flatMap((seat) => seat.members.map((member) => member.userId).filter(Boolean) as string[])
+  const uniqueUserIdCount = new Set(userIds).size
+  const hasDuplicateUsers = uniqueUserIdCount !== userIds.length
+
+  const seatCountInvalid = activeSeats.some((seat) => seat.members.length < 1 || seat.members.length > 2)
+
+  const totalScore = activeSeats.reduce((sum, seat) => sum + (Number.parseInt(seat.score) || 0), 0)
+  const scoreBalanceError = allScoresFilled && totalScore !== expectedTotalScore
+
+  const seatCalcResults = allFieldsFilled
+    ? calculateSeatPoints(activeSeats, playerCount, uma, oka, startingPoints, returnPoints)
     : null
 
-  const totalScore = players.slice(0, playerCount).reduce((sum, p) => sum + (Number.parseInt(p.score) || 0), 0)
-  const expectedTotalScore = startingPoints * playerCount
-  const scoreBalanceError = allFieldsFilled && totalScore !== expectedTotalScore
+  const previewSeatTotals =
+    seatCalcResults &&
+    activeSeats.map((seat, seatIndex) => {
+      const seatCalc = seatCalcResults[seatIndex]
+      const memberCount = seat.members.length
+      const splitSeatPoint = seatCalc ? seatCalc.seatPoint / memberCount : 0
+      const splitBonus = memberCount > 0 ? (seat.bonusPoints || 0) / memberCount : 0
+      const perMemberPoint = round2(splitSeatPoint + splitBonus)
 
-  const totalPoints = previewResults ? previewResults.reduce((sum, r, i) => sum + r.point + bonusPoints[i], 0) : 0
-  const pointBalanceError = previewResults && Math.abs(totalPoints) > 0.1
+      return {
+        rank: seatCalc?.rank || 0,
+        seatPoint: seatCalc?.seatPoint || 0,
+        perMemberPoint,
+      }
+    })
 
-  const maybeAutofillFourth = () => {
-    if (playerCount !== 4 && playerCount !== 3) return
-    const targetIndex = playerCount === 4 ? 3 : 2
-    const targetPlayer = players[targetIndex]
-    if (targetPlayer.isManual) return
-    if (targetPlayer.score) return
+  const totalPoints =
+    previewSeatTotals?.reduce((sum, seat, seatIndex) => sum + seat.perMemberPoint * activeSeats[seatIndex].members.length, 0) || 0
+  const pointBalanceError = previewSeatTotals ? Math.abs(totalPoints) > EPSILON : false
 
-    const filledScores = players.slice(0, targetIndex).map((p) => Number.parseInt(p.score))
-    if (filledScores.some((s) => Number.isNaN(s))) return
+  const maybeAutofillLastSeat = () => {
+    const targetIndex = playerCount - 1
+    const target = activeSeats[targetIndex]
+    if (!target || target.score) return
 
-    const remaining = expectedTotalScore - filledScores.reduce((sum, s) => sum + s, 0)
-    setPlayers((prev) => {
+    const prevScores = activeSeats.slice(0, targetIndex).map((seat) => Number.parseInt(seat.score))
+    if (prevScores.some((score) => Number.isNaN(score))) return
+
+    const remaining = expectedTotalScore - prevScores.reduce((sum, score) => sum + score, 0)
+    setSeats((prev) => {
       const updated = [...prev]
       updated[targetIndex] = { ...updated[targetIndex], score: remaining.toString() }
       return updated
@@ -357,28 +477,31 @@ export function GameRecordForm({
         if (!totals[key]) {
           totals[key] = { name: player.name, avatarUrl: player.avatarUrl, total: 0 }
         }
-        totals[key].total += result.points[index] || 0
+        totals[key].total += Number(result.points[index] || 0)
         if (!totals[key].avatarUrl && player.avatarUrl) {
           totals[key].avatarUrl = player.avatarUrl
         }
       })
     })
 
-    // 現在の対局結果も追加
-    if (allFieldsFilled && previewResults) {
-      players.slice(0, playerCount).forEach((player, index) => {
-        const key = player.userId || player.name
-        if (!totals[key]) {
-          totals[key] = { name: player.name, avatarUrl: player.avatarUrl, total: 0 }
-        }
-        totals[key].total += (previewResults[index]?.point || 0) + bonusPoints[index]
-        if (!totals[key].avatarUrl && player.avatarUrl) {
-          totals[key].avatarUrl = player.avatarUrl
-        }
+    if (allFieldsFilled && previewSeatTotals) {
+      activeSeats.forEach((seat, seatIndex) => {
+        seat.members.forEach((member) => {
+          const key = member.userId || member.name
+          if (!totals[key]) {
+            totals[key] = { name: member.name, avatarUrl: member.avatarUrl, total: 0 }
+          }
+          totals[key].total += previewSeatTotals[seatIndex].perMemberPoint
+          if (!totals[key].avatarUrl && member.avatarUrl) {
+            totals[key].avatarUrl = member.avatarUrl
+          }
+        })
       })
     }
 
-    return Object.values(totals).sort((a, b) => b.total - a.total)
+    return Object.values(totals)
+      .map((t) => ({ ...t, total: round2(t.total) }))
+      .sort((a, b) => b.total - a.total)
   }
 
   const sessionTotals = sessionResults.length > 0 ? calculateSessionTotals() : []
@@ -397,6 +520,21 @@ export function GameRecordForm({
       return
     }
 
+    if (seatCountInvalid) {
+      setError("各席の参加者は1〜2名で入力してください")
+      return
+    }
+
+    if (!allMembersHaveNames) {
+      setError("全員の名前を入力してください")
+      return
+    }
+
+    if (hasDuplicateUsers) {
+      setError("同じユーザーを複数の席に設定できません")
+      return
+    }
+
     if (scoreBalanceError) {
       setError(
         `素点の合計が${expectedTotalScore.toLocaleString()}になっていません（現在: ${totalScore.toLocaleString()}）`,
@@ -405,7 +543,12 @@ export function GameRecordForm({
     }
 
     if (pointBalanceError) {
-      setError(`ポイントの合計がゼロになっていません（現在: ${totalPoints.toFixed(1)}）`)
+      setError(`ポイントの合計がゼロになっていません（現在: ${totalPoints.toFixed(2)}）`)
+      return
+    }
+
+    if (!seatCalcResults || !previewSeatTotals) {
+      setError("入力値を確認してください")
       return
     }
 
@@ -428,24 +571,27 @@ export function GameRecordForm({
 
       if (gameError) throw gameError
 
-      const calculatedResults = calculatePoints(players, gameType, uma, oka, startingPoints, returnPoints)
+      const gameResults = activeSeats.flatMap((seat, seatIndex) => {
+        const seatCalc = seatCalcResults[seatIndex]
+        const memberCount = seat.members.length
+        const splitSeatPoint = seatCalc.seatPoint / memberCount
+        const splitBonus = (seat.bonusPoints || 0) / memberCount
 
-      const gameResults = players.slice(0, playerCount).map((player, index) => ({
-        game_id: game.id,
-        user_id: player.userId || null,
-        player_name: player.name,
-        rank: calculatedResults[index].rank,
-        raw_score: Number.parseInt(player.score),
-        point: calculatedResults[index].point + bonusPoints[index],
-        bonus_points: bonusPoints[index],
-      }))
+        return seat.members.map((member) => ({
+          game_id: game.id,
+          user_id: member.userId || null,
+          player_name: member.name,
+          seat_index: seat.seatIndex,
+          rank: seatCalc.rank,
+          raw_score: Number.parseInt(seat.score),
+          point: round2(splitSeatPoint + splitBonus),
+          bonus_points: round2(splitBonus),
+        }))
+      })
 
       const { error: resultsError } = await supabase.from("game_results").insert(gameResults)
-
       if (resultsError) throw resultsError
 
-      // Keep only recent games per creator; stats are preserved via rollups.
-      // Non-fatal: recording the game should succeed even if pruning fails.
       const { error: pruneError } = await supabase.rpc("rollup_and_prune_games_for_user", { p_keep: 30 })
       if (pruneError) {
         // eslint-disable-next-line no-console
@@ -453,29 +599,32 @@ export function GameRecordForm({
       }
 
       const newSessionResult: SessionResult = {
-        players: players.slice(0, playerCount).map((p) => ({
-          name: p.name,
-          userId: p.userId,
-          // avatarUrlはURLが長くなるのでセッション保存時は持たせない
-          isManual: p.isManual,
-        })),
-        points: players.slice(0, playerCount).map((_, index) => calculatedResults[index].point + bonusPoints[index]),
+        players: activeSeats.flatMap((seat) =>
+          seat.members.map((member) => ({
+            name: member.name,
+            userId: member.userId,
+            isManual: member.isManual,
+          })),
+        ),
+        points: activeSeats.flatMap((seat, seatIndex) => seat.members.map(() => previewSeatTotals[seatIndex].perMemberPoint)),
       }
       const allSessionResults = [...sessionResults, newSessionResult]
 
       if (continueSession) {
-        // セッションデータをURLパラメータに保存
         const sessionDataEncoded = encodeURIComponent(
           JSON.stringify({
             gameType,
             leagueId,
             ruleId,
-            players: players.slice(0, playerCount).map((p) => ({
-              name: p.name,
+            seats: activeSeats.map((seat) => ({
+              seatIndex: seat.seatIndex,
               score: "",
-              userId: p.userId,
-              // セッションURLを短く保つためavatarUrlは持たせない
-              isManual: p.isManual,
+              bonusPoints: 0,
+              members: seat.members.map((member) => ({
+                name: member.name,
+                userId: member.userId,
+                isManual: member.isManual,
+              })),
             })),
             sessionResults: allSessionResults.map((res) => ({
               players: res.players.map((p) => ({
@@ -488,6 +637,7 @@ export function GameRecordForm({
           }),
         )
 
+        setSessionResults(allSessionResults)
         setIsSubmitted(true)
         window.location.href = `/games/new?session=${sessionDataEncoded}`
       } else {
@@ -524,9 +674,7 @@ export function GameRecordForm({
         {sessionResults.length > 0 && (
           <Card className="bg-primary/5 border-primary">
             <CardHeader>
-              <CardTitle className="text-sm flex items-center gap-2">
-                連続記録中（{sessionResults.length + 1}戦目） - 暫定合計
-              </CardTitle>
+              <CardTitle className="text-sm flex items-center gap-2">連続記録中（{sessionResults.length + 1}戦目） - 暫定合計</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -535,7 +683,7 @@ export function GameRecordForm({
                     <div className="text-sm font-medium truncate">{player.name}</div>
                     <div className={`text-lg font-bold ${player.total >= 0 ? "text-chart-1" : "text-destructive"}`}>
                       {player.total >= 0 ? "+" : ""}
-                      {player.total.toFixed(1)}
+                      {player.total.toFixed(2)}
                     </div>
                   </div>
                 ))}
@@ -616,17 +764,13 @@ export function GameRecordForm({
                 </Select>
               ) : (
                 <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">
-                    この対局タイプのルールがありません。先にルールを作成してください。
-                  </p>
+                  <p className="text-sm text-muted-foreground">この対局タイプのルールがありません。先にルールを作成してください。</p>
                   <Button asChild variant="outline" size="sm">
                     <Link href="/rules/new">ルールを作成</Link>
                   </Button>
                 </div>
               )}
-              {ruleSelectionMissing && (
-                <p className="text-xs text-destructive">フリー対局はルールを選択してください</p>
-              )}
+              {ruleSelectionMissing && <p className="text-xs text-destructive">フリー対局はルールを選択してください</p>}
             </CardContent>
           </Card>
         )}
@@ -636,147 +780,168 @@ export function GameRecordForm({
             <CardTitle className="text-lg">対局結果</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {Array.from({ length: playerCount }).map((_, index) => {
-              const selectedValue = players[index].userId
-                ? players[index].userId === currentUserId
-                  ? "self"
-                  : players[index].userId
-                : ""
-              const preview = allFieldsFilled && previewResults ? previewResults[index] : null
-              const basePoint = preview?.point ?? 0
-              const bonusPoint = bonusPoints[index] || 0
-              const totalPoint = basePoint + bonusPoint
-              const rankBadgeClass = cn(
+            {activeSeats.map((seat, seatIndex) => {
+              const seatPreview = previewSeatTotals?.[seatIndex]
+              const seatRankClass = cn(
                 "text-xs font-semibold px-2 py-1 rounded-full border",
-                preview
-                  ? preview.rank === 1
+                seatPreview
+                  ? seatPreview.rank === 1
                     ? "bg-chart-1/10 text-chart-1 border-chart-1/30"
-                    : basePoint < 0
+                    : seatPreview.seatPoint < 0
                       ? "bg-destructive/10 text-destructive border-destructive/20"
                       : "bg-secondary text-secondary-foreground border-secondary/50"
                   : "text-muted-foreground bg-muted border-transparent",
               )
-              const pointBadgeClass = cn(
-                "text-sm font-semibold px-3 py-1 rounded-full border",
-                totalPoint >= 0
-                  ? "bg-chart-1/10 text-chart-1 border-chart-1/30"
-                  : "bg-destructive/10 text-destructive border-destructive/20",
-              )
+
               return (
-                <div key={index} className="rounded-lg border bg-card/50 p-3 space-y-3 sm:p-4">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm font-semibold">プレイヤー{index + 1}</Label>
-                    {preview && (
-                      <div className="flex items-center gap-2">
-                        <span className={rankBadgeClass}>{preview.rank ? `${preview.rank}位` : "-"}</span>
-                        <span className={pointBadgeClass}>
-                          {totalPoint >= 0 ? "+" : ""}
-                          {totalPoint.toFixed(1)}pt
+                <div key={seat.seatIndex} className="rounded-lg border bg-card/50 p-3 space-y-3 sm:p-4">
+                  <div className="flex items-center gap-2">
+                    {seatPreview && (
+                      <>
+                        <span className={seatRankClass}>{seatPreview.rank}位</span>
+                        <span
+                          className={cn(
+                            "text-sm font-semibold",
+                            (seat.members.length > 1 ? seatPreview.perMemberPoint : seatPreview.seatPoint) >= 0
+                              ? "text-chart-1"
+                              : "text-destructive",
+                          )}
+                        >
+                          {(seat.members.length > 1 ? seatPreview.perMemberPoint : seatPreview.seatPoint) >= 0 ? "+" : ""}
+                          {(seat.members.length > 1 ? seatPreview.perMemberPoint : seatPreview.seatPoint).toFixed(2)}
+                          pt
+                          {seat.members.length > 1 ? "ずつ" : ""}
                         </span>
-                      </div>
+                      </>
                     )}
                   </div>
-                  <div className="grid gap-3 sm:grid-cols-3">
-                    <div className="space-y-3 sm:col-span-2">
-                      <Select value={selectedValue} onValueChange={(value) => handleFriendSelect(index, value)}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="フレンドを選択" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="self">自分 ({currentUserName})</SelectItem>
-                          {friends.map((friend) => (
-                            <SelectItem key={friend.id} value={friend.id}>
-                              <div className="flex items-center gap-2">
-                                <Avatar className="h-6 w-6">
-                                  <AvatarImage src={friend.avatar_url || undefined} />
-                                  <AvatarFallback>{friend.display_name.charAt(0).toUpperCase()}</AvatarFallback>
-                                </Avatar>
-                                <span>{friend.display_name}</span>
-                              </div>
-                            </SelectItem>
-                          ))}
-                          <SelectItem value="manual">手動入力</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      {players[index].isManual && (
-                        <div className="space-y-1">
-                          <Label className="text-xs text-muted-foreground">名前</Label>
-                          <Input
-                            type="text"
-                            placeholder="プレイヤー名"
-                            value={players[index].name}
-                            onChange={(e) => updatePlayer(index, "name", e.target.value)}
-                          />
-                        </div>
-                      )}
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="space-y-1">
-                          <Label className="text-xs text-muted-foreground">素点</Label>
-                          <div className="relative">
-                            <Input
-                              type="number"
-                              placeholder="25000"
-                              value={players[index].score}
-                              onChange={(e) => updatePlayer(index, "score", e.target.value)}
-                              className="text-right pr-10"
-                              onWheel={(e) => (e.currentTarget as HTMLInputElement).blur()}
-                              onBlur={() => maybeAutofillFourth()}
-                            />
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
-                              点
-                            </span>
+
+                  <div className="space-y-2">
+                    {seat.members.map((member, memberIndex) => {
+                      const selectedValue = member.isManual
+                        ? "manual"
+                        : member.userId
+                          ? member.userId === currentUserId
+                            ? "self"
+                            : member.userId
+                          : ""
+                      return (
+                        <div key={`${seat.seatIndex}-${memberIndex}`} className="rounded-md border p-2 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <Label className="text-xs text-muted-foreground">参加者{memberIndex + 1}</Label>
+                            {seat.members.length > 1 && (
+                              <Button type="button" variant="ghost" size="sm" onClick={() => removeMemberFromSeat(seatIndex, memberIndex)}>
+                                削除
+                              </Button>
+                            )}
                           </div>
+
+                          <Select value={selectedValue} onValueChange={(value) => handleMemberSelect(seatIndex, memberIndex, value)}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="プレイヤーを選択" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="self">自分 ({currentUserName})</SelectItem>
+                              {friends.map((friend) => (
+                                <SelectItem key={friend.id} value={friend.id}>
+                                  <div className="flex items-center gap-2">
+                                    <Avatar className="h-6 w-6">
+                                      <AvatarImage src={friend.avatar_url || undefined} />
+                                      <AvatarFallback>{friend.display_name.charAt(0).toUpperCase()}</AvatarFallback>
+                                    </Avatar>
+                                    <span>{friend.display_name}</span>
+                                  </div>
+                                </SelectItem>
+                              ))}
+                              <SelectItem value="manual">手動入力</SelectItem>
+                            </SelectContent>
+                          </Select>
+
+                          {member.isManual && (
+                            <div className="space-y-1">
+                              <Label className="text-xs text-muted-foreground">名前</Label>
+                              <Input
+                                type="text"
+                                placeholder="プレイヤー名"
+                                value={member.name}
+                                onChange={(e) => updateManualMemberName(seatIndex, memberIndex, e.target.value)}
+                              />
+                            </div>
+                          )}
+
+                          {!member.isManual && member.name && (
+                            <p className="text-xs text-muted-foreground">{member.name}</p>
+                          )}
                         </div>
-                        <div className="space-y-1">
-                          <Label className="text-xs text-muted-foreground">飛び賞</Label>
-                          <div className="relative">
-                            <Input
-                              type="number"
-                              step="0.1"
-                              placeholder="0"
-                              value={bonusPoints[index] || ""}
-                              onChange={(e) => updateBonusPoint(index, e.target.value)}
-                              className="h-9 text-right text-sm pr-10"
-                              disabled={!allFieldsFilled}
-                              onWheel={(e) => (e.currentTarget as HTMLInputElement).blur()}
-                            />
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
-                              pt
-                            </span>
-                          </div>
-                        </div>
+                      )
+                    })}
+
+                    {seat.members.length < 2 && (
+                      <Button type="button" variant="outline" size="sm" className="w-full" onClick={() => addMemberToSeat(seatIndex)}>
+                        参加者を追加（ペア）
+                      </Button>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 border-t pt-3">
+                    <div className="space-y-1">
+                      <Label className="text-xs text-muted-foreground">素点</Label>
+                      <div className="relative">
+                        <Input
+                          type="number"
+                          placeholder="25000"
+                          value={seat.score}
+                          onChange={(e) => updateSeatField(seatIndex, "score", e.target.value)}
+                          onBlur={() => maybeAutofillLastSeat()}
+                          className="text-right pr-10"
+                          onWheel={(e) => (e.currentTarget as HTMLInputElement).blur()}
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">点</span>
                       </div>
-                      {preview && bonusPoint !== 0 && (
-                        <p className="text-xs text-muted-foreground">
-                          {bonusPoint > 0 ? "飛び賞" : "飛ばされたプレイヤー"}: {bonusPoint > 0 ? "+" : ""}
-                          {bonusPoint.toFixed(1)}pt
-                        </p>
-                      )}
+                    </div>
+
+                    <div className="space-y-1">
+                      <Label className="text-xs text-muted-foreground">飛び賞</Label>
+                      <div className="relative">
+                        <Input
+                          type="number"
+                          step="0.01"
+                          placeholder="0"
+                          value={seat.bonusPoints || ""}
+                          onChange={(e) => updateSeatField(seatIndex, "bonusPoints", e.target.value)}
+                          disabled={!allFieldsFilled}
+                          className="text-right pr-10"
+                          onWheel={(e) => (e.currentTarget as HTMLInputElement).blur()}
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">pt</span>
+                      </div>
                     </div>
                   </div>
                 </div>
               )
             })}
 
-            <div className="pt-4 border-t border-border space-y-2">
+            <div className="pt-4 border-t border-border space-y-1">
               <p className="text-xs text-muted-foreground">
-                ウマ: {uma.slice(0, playerCount).join(" / ")} ／ 持ち点: {startingPoints.toLocaleString()} ／ 返し:{" "}
-                {returnPoints.toLocaleString()}
-                <br />
-                <span className="text-[10px]">※ 同点の場合は順位点を分け合います</span>
+                ウマ: {uma.slice(0, playerCount).join(" / ")} ／ 持ち点: {startingPoints.toLocaleString()} ／ 返し: {returnPoints.toLocaleString()}
               </p>
-              {/* 全員分入力完了後のみ合計値を表示 */}
-              {allFieldsFilled && (
-                <div className="space-y-1">
-                  <div className={cn("text-xs", scoreBalanceError ? "text-destructive" : "text-muted-foreground")}>
-                    素点合計: {totalScore.toLocaleString()}点 {scoreBalanceError && "⚠️ 合計が一致しません"}
-                  </div>
-                  <div className={cn("text-xs font-semibold", pointBalanceError ? "text-destructive" : "text-chart-1")}>
-                    ポイント合計: {totalPoints >= 0 ? "+" : ""}
-                    {totalPoints.toFixed(1)}pt {pointBalanceError && "⚠️ ゼロになっていません"}
-                  </div>
+              <p className="text-[10px] text-muted-foreground">※ 同点の場合は順位点を分け合います</p>
+
+              {allScoresFilled && (
+                <div className={cn("text-xs", scoreBalanceError ? "text-destructive" : "text-muted-foreground")}>
+                  素点合計: {totalScore.toLocaleString()}点 {scoreBalanceError && "⚠️ 合計が一致しません"}
                 </div>
               )}
+
+              {previewSeatTotals && (
+                <div className={cn("text-xs font-semibold", pointBalanceError ? "text-destructive" : "text-chart-1")}>
+                  ポイント合計: {totalPoints >= 0 ? "+" : ""}
+                  {totalPoints.toFixed(2)}pt {pointBalanceError && "⚠️ ゼロになっていません"}
+                </div>
+              )}
+
+              {hasDuplicateUsers && <p className="text-xs text-destructive">同じユーザーを複数の席に設定できません</p>}
+              {seatCountInvalid && <p className="text-xs text-destructive">各席の参加者は1〜2名で入力してください</p>}
             </div>
           </CardContent>
         </Card>
@@ -790,7 +955,6 @@ export function GameRecordForm({
             className="flex-1 bg-transparent"
             onClick={() => {
               if (sessionResults.length > 0) {
-                // セッション中の場合は対局一覧に戻る
                 window.location.href = "/games"
               } else {
                 router.back()
@@ -810,6 +974,8 @@ export function GameRecordForm({
                 ruleUnavailable ||
                 ruleSelectionMissing ||
                 !allFieldsFilled ||
+                hasDuplicateUsers ||
+                seatCountInvalid ||
                 scoreBalanceError ||
                 pointBalanceError
               }
@@ -827,6 +993,8 @@ export function GameRecordForm({
               ruleUnavailable ||
               ruleSelectionMissing ||
               !allFieldsFilled ||
+              hasDuplicateUsers ||
+              seatCountInvalid ||
               scoreBalanceError ||
               pointBalanceError
             }

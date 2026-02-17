@@ -50,12 +50,12 @@ CREATE TABLE IF NOT EXISTS game_results (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   game_id UUID NOT NULL REFERENCES games(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  seat_index INTEGER NOT NULL CHECK (seat_index >= 1),
   rank INTEGER NOT NULL CHECK (rank >= 1 AND rank <= 4),
   raw_score INTEGER NOT NULL, -- 素点（例: 45000）
-  point DECIMAL(10, 1) NOT NULL, -- 計算後のポイント（例: +50.0）
+  point DECIMAL(10, 2) NOT NULL, -- 計算後のポイント（例: +50.00）
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(game_id, user_id),
-  UNIQUE(game_id, rank)
+  UNIQUE(game_id, user_id)
 );
 
 -- RLS有効化

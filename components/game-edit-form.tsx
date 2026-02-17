@@ -50,7 +50,7 @@ function calculatePoints(scores: string[], gameType: string, uma: number[], star
     const rank = rankIndex + 1
     const basePoint = (player.score - startingPoints) / 1000
     const umaPoint = uma[rankIndex] || 0
-    const totalPoint = basePoint + umaPoint
+    const totalPoint = Number((basePoint + umaPoint).toFixed(2))
 
     return {
       ...player,
@@ -114,7 +114,7 @@ export function GameEditForm({ gameId, gameType, results }: GameEditFormProps) {
             raw_score: Number.parseInt(scores[i]),
             rank: calculatedResults[i].rank,
             point: calculatedResults[i].point + bonusPoints[i],
-            bonus_points: bonusPoints[i],
+            bonus_points: Number(bonusPoints[i].toFixed(2)),
           })
           .eq("id", results[i].id)
 
@@ -179,7 +179,7 @@ export function GameEditForm({ gameId, gameType, results }: GameEditFormProps) {
                 <Label className="text-sm">飛び賞</Label>
                 <Input
                   type="number"
-                  step="0.1"
+                  step="0.01"
                   value={bonusPoints[index] || ""}
                   onChange={(e) => updateBonusPoint(index, e.target.value)}
                   disabled={isDisabled}
@@ -195,7 +195,7 @@ export function GameEditForm({ gameId, gameType, results }: GameEditFormProps) {
                     )}
                   >
                     {previewResults[index].point + bonusPoints[index] >= 0 ? "+" : ""}
-                    {(previewResults[index].point + bonusPoints[index]).toFixed(1)}
+                    {(previewResults[index].point + bonusPoints[index]).toFixed(2)}
                   </div>
                 </div>
               )}

@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Users, Search, UserPlus, Check, X, Copy, Clock, TrendingUp, Mail } from "lucide-react"
 import Link from "next/link"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 
 type Friend = {
   id: string
@@ -66,6 +67,8 @@ export function FriendSection({ currentUserId, friendCode, friends, pendingReque
   const [inviteEmail, setInviteEmail] = useState("")
   const [isInviting, setIsInviting] = useState(false)
   const [inviteMessage, setInviteMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
+  const [friendToRemove, setFriendToRemove] = useState<Friend | null>(null)
+  const [isRemovingFriend, setIsRemovingFriend] = useState(false)
 
   const supabase = createClient()
   const notifyPendingUpdate = () => {
@@ -170,6 +173,7 @@ export function FriendSection({ currentUserId, friendCode, friends, pendingReque
   }
 
   const removeFriend = async (friendId: string) => {
+    setIsRemovingFriend(true)
     // 双方向のフレンドシップを削除
     const { error } = await supabase
       .from("friendships")
@@ -181,6 +185,8 @@ export function FriendSection({ currentUserId, friendCode, friends, pendingReque
     if (!error) {
       setLocalFriends(localFriends.filter((f) => f.id !== friendId))
     }
+    setIsRemovingFriend(false)
+    setFriendToRemove(null)
   }
 
   const sendEmailInvite = async () => {
@@ -411,7 +417,7 @@ export function FriendSection({ currentUserId, friendCode, friends, pendingReque
                     size="sm"
                     variant="ghost"
                     className="text-destructive"
-                    onClick={() => removeFriend(friend.id)}
+                    onClick={() => setFriendToRemove(friend)}
                   >
                     <X className="w-4 h-4" />
                   </Button>
@@ -421,6 +427,27 @@ export function FriendSection({ currentUserId, friendCode, friends, pendingReque
           )}
         </div>
       </CardContent>
+
+      <AlertDialog open={Boolean(friendToRemove)} onOpenChange={(open) => !open && setFriendToRemove(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>本当に削除しますか？</AlertDialogTitle>
+            <AlertDialogDescription>
+              {friendToRemove?.display_name} さんをフレンドから削除します。この操作は元に戻せません。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isRemovingFriend}>キャンセル</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={isRemovingFriend}
+              onClick={() => friendToRemove && removeFriend(friendToRemove.id)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isRemovingFriend ? "削除中..." : "削除する"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   )
 }

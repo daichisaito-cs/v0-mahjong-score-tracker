@@ -52,6 +52,7 @@ export default function GameDetailPage() {
           game_results (
             id,
             game_id,
+            seat_index,
             user_id,
             player_name,
             rank,
@@ -122,7 +123,13 @@ export default function GameDetailPage() {
     )
   }
 
-  const sortedResults = [...(game.game_results || [])].sort((a, b) => a.rank - b.rank)
+  const sortedResults = [...(game.game_results || [])].sort((a, b) => {
+    if (a.rank !== b.rank) return a.rank - b.rank
+    const seatA = Number(a.seat_index ?? 999)
+    const seatB = Number(b.seat_index ?? 999)
+    if (seatA !== seatB) return seatA - seatB
+    return 0
+  })
   const creatorName = game.creator?.display_name || "不明"
   const isOwner = game.created_by === user?.id
 
@@ -177,14 +184,14 @@ export default function GameDetailPage() {
               <div
                 key={result.id}
                 className={cn(
-                  "flex items-center justify-between p-4 rounded-lg",
+                  "flex items-center gap-1 p-4 rounded-lg",
                   index === 0 ? "bg-accent/20" : "bg-muted/50",
                 )}
               >
-                <div className="flex items-center gap-4">
+                <div className="flex min-w-0 flex-1 items-center gap-3">
                   <div
                     className={cn(
-                      "w-10 h-10 rounded-full flex items-center justify-center font-bold",
+                      "w-10 h-10 shrink-0 rounded-full flex items-center justify-center font-bold",
                       result.rank === 1 && "bg-accent text-accent-foreground",
                       result.rank === 2 && "bg-secondary text-secondary-foreground",
                       result.rank === 3 && "bg-muted text-muted-foreground",
@@ -193,32 +200,44 @@ export default function GameDetailPage() {
                   >
                     {result.rank === 1 ? <Trophy className="h-5 w-5" /> : `${result.rank}位`}
                   </div>
-                  <Avatar className="h-11 w-11">
+                  <Avatar className="h-8.5 w-8.5 shrink-0">
                     <AvatarImage src={(result.profiles as any)?.avatar_url || undefined} />
                     <AvatarFallback>
                       {(result.player_name || result.profiles?.display_name || "?").charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
-                  <div>
-                    <p className="font-semibold">{result.player_name || result.profiles?.display_name || "Unknown"}</p>
-                    <p className="text-sm text-muted-foreground">{result.raw_score.toLocaleString()}点</p>
+                  <div className="min-w-0">
+                    <p className="font-semibold break-all leading-tight">
+                      {result.player_name || result.profiles?.display_name || "Unknown"}
+                    </p>
+                    <p className="text-xs text-muted-foreground">席{result.seat_index ?? "-"}</p>
+                    <p className="text-sm text-muted-foreground font-bold">{result.raw_score.toLocaleString()}点</p>
+                    {Number(result.bonus_points) !== 0 && (
+                      <p className="text-xs text-muted-foreground">
+                        <span
+                          className={cn(
+                            "inline-flex items-center justify-center rounded-full border px-2 py-0.5 text-[10px] font-semibold leading-none whitespace-nowrap",
+                            Number(result.bonus_points) > 0
+                              ? "border-chart-1/40 bg-chart-1/10 text-chart-1"
+                              : "border-destructive/40 bg-destructive/10 text-destructive",
+                          )}
+                        >
+                          {Number(result.bonus_points) > 0 ? "飛び賞" : "飛び"}{" "}
+                          {Number(result.bonus_points) > 0 ? "+" : ""}
+                          {Number(result.bonus_points).toFixed(2)}pt
+                        </span>
+                      </p>
+                    )}
                   </div>
                 </div>
-                <div className="text-right">
+                <div className="text-right shrink-0 w-[85px]">
                   <p
                     className={cn("text-xl font-bold", Number(result.point) >= 0 ? "text-chart-1" : "text-destructive")}
                   >
                     {Number(result.point) >= 0 ? "+" : ""}
-                    {Number(result.point).toFixed(1)}
+                    {Number(result.point).toFixed(2)}
                   </p>
                   <p className="text-xs text-muted-foreground">ポイント</p>
-                  {Number(result.bonus_points) !== 0 && (
-                    <p className="text-xs text-muted-foreground">
-                      {Number(result.bonus_points) > 0 ? "飛び賞" : "飛ばされたプレイヤー"}{" "}
-                      {Number(result.bonus_points) > 0 ? "+" : ""}
-                      {Number(result.bonus_points).toFixed(1)}pt
-                    </p>
-                  )}
                 </div>
               </div>
             ))}

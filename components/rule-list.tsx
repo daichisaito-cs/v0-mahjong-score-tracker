@@ -39,7 +39,8 @@ export function RuleList({ rules, currentUserId }: { rules: Rule[]; currentUserI
       return
     }
 
-    window.location.href = "/rules"
+    router.push("/rules")
+    router.refresh()
   }
 
   const getGameTypeLabel = (type: string) => {

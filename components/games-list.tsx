@@ -22,6 +22,7 @@ interface Game {
   } | null
   game_results: Array<{
     id: string
+    seat_index?: number
     user_id: string | null
     player_name: string
     rank: number
@@ -113,6 +114,53 @@ export function GamesList({ games }: GamesListProps) {
     }
   }
 
+  const formatPoint = (value: number) => `${value >= 0 ? "+" : ""}${value.toFixed(2)}`
+
+  const buildSeatSummaries = (game: Game) => {
+    const seatCount = game.game_type === "four_player" ? 4 : 3
+    const seatBuckets = new Map<number, Game["game_results"]>()
+
+    game.game_results.forEach((result) => {
+      const seat = Number(result.seat_index ?? result.rank)
+      if (!Number.isFinite(seat) || seat < 1 || seat > seatCount) return
+      if (!seatBuckets.has(seat)) seatBuckets.set(seat, [])
+      seatBuckets.get(seat)!.push(result)
+    })
+
+    const summaries = Array.from({ length: seatCount }, (_, idx) => {
+      const seat = idx + 1
+      const members = (seatBuckets.get(seat) || []).slice().sort((a, b) => a.rank - b.rank)
+      const first = members[0]
+      const names = members.map((m) => m.player_name || m.profiles?.display_name || "Unknown")
+      const allSamePoint = members.every((m) => Math.abs(Number(m.point) - Number(first?.point ?? 0)) < 0.01)
+      const pointText =
+        members.length === 0
+          ? "-"
+          : members.length === 1
+            ? formatPoint(Number(first.point))
+            : allSamePoint
+              ? `${formatPoint(Number(first.point))}ずつ`
+              : members.map((m) => formatPoint(Number(m.point))).join(" / ")
+
+      return {
+        seat,
+        hasData: members.length > 0,
+        rank: first?.rank,
+        nameText: names.join(" / "),
+        pointText,
+        isPositive: Number(first?.point ?? 0) >= 0,
+      }
+    })
+
+    return summaries.sort((a, b) => {
+      if (!a.hasData && !b.hasData) return a.seat - b.seat
+      if (!a.hasData) return 1
+      if (!b.hasData) return -1
+      if ((a.rank ?? 999) !== (b.rank ?? 999)) return (a.rank ?? 999) - (b.rank ?? 999)
+      return a.seat - b.seat
+    })
+  }
+
   if (games.length === 0) {
     return (
       <Card>
@@ -192,7 +240,7 @@ export function GamesList({ games }: GamesListProps) {
                       )}
                     >
                       {player.total > 0 ? "+" : ""}
-                      {player.total.toFixed(1)}
+                      {player.total.toFixed(2)}
                     </div>
                   </CardContent>
                 </Card>
@@ -219,7 +267,8 @@ export function GamesList({ games }: GamesListProps) {
       </Dialog>
 
       {games.map((game) => {
-        const sortedResults = [...(game.game_results || [])].sort((a, b) => a.rank - b.rank)
+        const seatSummaries = buildSeatSummaries(game)
+        const seatCount = game.game_type === "four_player" ? 4 : 3
         const isSelected = selectedGames.includes(game.id)
 
         return (
@@ -246,24 +295,14 @@ export function GamesList({ games }: GamesListProps) {
                       <div>作成者: {game.creator?.display_name || "不明"}</div>
                     </div>
                   </div>
-                  <div className="grid grid-cols-4 gap-3 mt-3">
-                    {sortedResults.map((result) => (
-                      <div key={result.id} className="text-center min-w-0">
-                        <div className="text-[11px] text-muted-foreground">{result.rank}位</div>
-                        <div className="text-sm font-semibold truncate w-full">
-                          {result.player_name || "Unknown"}
+                  <div className={cn("mt-3 gap-3", seatCount === 4 ? "grid grid-cols-4" : "grid grid-cols-3")}>
+                    {seatSummaries.map((seat) => (
+                      <div key={`${game.id}-seat-${seat.seat}`} className="text-center min-w-0">
+                        <div className="text-[11px] text-muted-foreground">{seat.hasData ? `${seat.rank}位` : "-"}</div>
+                        <div className="text-sm font-semibold truncate w-full">{seat.hasData ? seat.nameText : "-"}</div>
+                        <div className={cn("text-xs", seat.isPositive ? "text-chart-1" : "text-destructive")}>
+                          {seat.pointText}
                         </div>
-                        <div className={`text-xs ${Number(result.point) >= 0 ? "text-chart-1" : "text-destructive"}`}>
-                          {Number(result.point) >= 0 ? "+" : ""}
-                          {Number(result.point).toFixed(1)}
-                        </div>
-                        {Number(result.bonus_points) !== 0 && (
-                          <div className="text-[10px] text-muted-foreground">
-                            {Number(result.bonus_points) > 0 ? "飛び賞" : "飛ばされたプレイヤー"}{" "}
-                            {Number(result.bonus_points) > 0 ? "+" : ""}
-                            {Number(result.bonus_points).toFixed(1)}pt
-                          </div>
-                        )}
                       </div>
                     ))}
                   </div>
