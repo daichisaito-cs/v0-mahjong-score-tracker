@@ -473,7 +473,7 @@ export default function LeagueDetailPage() {
                       (rankNumber === null || rankNumber > 3) && "border border-border",
                     )}
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 flex-1 min-w-0 pr-3">
                       <div className="flex items-center gap-2">
                         <div
                           className={cn(
@@ -491,10 +491,12 @@ export default function LeagueDetailPage() {
                           <AvatarFallback>{player.name.charAt(0).toUpperCase()}</AvatarFallback>
                         </Avatar>
                       </div>
-                      <div>
-                        <p className="font-semibold">{player.name}</p>
+                      <div className="min-w-0">
+                        <p className="font-semibold truncate" title={player.name}>
+                          {player.name}
+                        </p>
                         <p className="text-xs text-muted-foreground">
-                          {player.gameCount}戦 / 平均{avgRank !== null ? `${avgRank.toFixed(2)}位` : "-"}
+                          {player.gameCount}戦 / 平均{avgRank !== null ? `${avgRank.toFixed(1)}位` : "-"}
                         </p>
                       </div>
                     </div>
@@ -506,7 +508,7 @@ export default function LeagueDetailPage() {
                         )}
                       >
                         {player.totalPoints >= 0 ? "+" : ""}
-                        {player.totalPoints.toFixed(2)}
+                        {player.totalPoints.toFixed(1)}
                       </p>
                       <p className="text-xs text-muted-foreground">pt</p>
                     </div>
@@ -545,7 +547,9 @@ export default function LeagueDetailPage() {
                           <AvatarImage src={player.avatarUrl || undefined} />
                           <AvatarFallback>{player.name.charAt(0).toUpperCase()}</AvatarFallback>
                         </Avatar>
-                        <span className="font-semibold">{player.name}</span>
+                        <span className="font-semibold inline-block max-w-[180px] truncate align-middle" title={player.name}>
+                          {player.name}
+                        </span>
                       </div>
                     </td>
                     <td className="text-center tabular-nums">{player.rankCounts[0]}</td>
@@ -609,13 +613,14 @@ export default function LeagueDetailPage() {
                               key={id}
                               onClick={() => setSelectedPlayerId(isSelected ? null : id)}
                               className={cn(
-                                "flex items-center gap-1 text-xs font-semibold transition-opacity",
+                                "flex items-center gap-1 text-xs font-semibold transition-opacity max-w-[160px]",
                                 isDimmed && "opacity-40",
                               )}
                               style={{ color: entry.color }}
+                              title={String(entry.value)}
                             >
                               <span className="inline-block h-2.5 w-2.5 rounded-full border" style={{ borderColor: entry.color }} />
-                              {entry.value}
+                              <span className="truncate">{entry.value}</span>
                             </button>
                           )
                         })}
@@ -663,14 +668,16 @@ export default function LeagueDetailPage() {
                   key={player.odIndex}
                   className="flex items-center justify-between rounded-lg border border-border/70 px-3 py-2"
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 flex-1 min-w-0 pr-3">
                     <span className="text-sm font-semibold text-muted-foreground">#{player.rankLabel}</span>
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={player.avatarUrl || undefined} />
                       <AvatarFallback>{player.name.charAt(0).toUpperCase()}</AvatarFallback>
                     </Avatar>
-                    <div>
-                      <p className="font-semibold text-sm">{player.name}</p>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-sm truncate" title={player.name}>
+                        {player.name}
+                      </p>
                       <p className="text-xs text-muted-foreground">{player.gameCount}戦</p>
                     </div>
                   </div>
@@ -696,14 +703,16 @@ export default function LeagueDetailPage() {
                   key={player.odIndex}
                   className="flex items-center justify-between rounded-lg border border-border/70 px-3 py-2"
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 flex-1 min-w-0 pr-3">
                     <span className="text-sm font-semibold text-muted-foreground">#{player.rankLabel}</span>
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={player.avatarUrl || undefined} />
                       <AvatarFallback>{player.name.charAt(0).toUpperCase()}</AvatarFallback>
                     </Avatar>
-                    <div>
-                      <p className="font-semibold text-sm">{player.name}</p>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-sm truncate" title={player.name}>
+                        {player.name}
+                      </p>
                       <p className="text-xs text-muted-foreground">{player.gameCount}戦</p>
                     </div>
                   </div>

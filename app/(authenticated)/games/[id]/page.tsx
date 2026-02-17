@@ -184,11 +184,11 @@ export default function GameDetailPage() {
               <div
                 key={result.id}
                 className={cn(
-                  "flex items-center gap-1 p-4 rounded-lg",
+                  "flex items-center gap-1 py-4 px-3 rounded-lg",
                   index === 0 ? "bg-accent/20" : "bg-muted/50",
                 )}
               >
-                <div className="flex min-w-0 flex-1 items-center gap-3">
+                <div className="flex min-w-0 flex-1 items-center gap-2">
                   <div
                     className={cn(
                       "w-10 h-10 shrink-0 rounded-full flex items-center justify-center font-bold",
@@ -207,7 +207,7 @@ export default function GameDetailPage() {
                     </AvatarFallback>
                   </Avatar>
                   <div className="min-w-0">
-                    <p className="font-semibold break-all leading-tight">
+                    <p className="font-semibold truncate leading-tight" title={result.player_name || result.profiles?.display_name || "Unknown"}>
                       {result.player_name || result.profiles?.display_name || "Unknown"}
                     </p>
                     <p className="text-xs text-muted-foreground">席{result.seat_index ?? "-"}</p>

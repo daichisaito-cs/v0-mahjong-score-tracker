@@ -168,6 +168,7 @@ export default function UserProfilePage() {
   const threePlayerPointsHistory = createPointsHistory(threePlayerResults, "three_player")
 
   const calculateStats = (gameResults: typeof results, gameType: "four_player" | "three_player") => {
+    const rankLimit = gameType === "four_player" ? 4 : 3
     const rollup = getRollupForType(gameType)
     const rolledGameCount = Number(rollup?.rolled_game_count ?? 0)
     const rolledTotalPoints = Number(rollup?.rolled_total_points ?? 0)
@@ -176,9 +177,8 @@ export default function UserProfilePage() {
       Number(rollup?.rolled_rank2_count ?? 0),
       Number(rollup?.rolled_rank3_count ?? 0),
       Number(rollup?.rolled_rank4_count ?? 0),
-    ]
-    const rolledRankSum =
-      rolledRankCounts[0] * 1 + rolledRankCounts[1] * 2 + rolledRankCounts[2] * 3 + rolledRankCounts[3] * 4
+    ].slice(0, rankLimit)
+    const rolledRankSum = rolledRankCounts.reduce((sum, count, index) => sum + count * (index + 1), 0)
 
     const currentGames = gameResults?.length || 0
     const currentTotalPoints = gameResults?.reduce((sum, r) => sum + Number(r.point), 0) || 0
@@ -191,16 +191,15 @@ export default function UserProfilePage() {
     const rentaiCount = rolledRankCounts[0] + rolledRankCounts[1] + currentRentaiCount
     const rentaiRate = totalGames > 0 ? (rentaiCount / totalGames) * 100 : 0
 
-    const rankCounts = [0, 0, 0, 0]
+    const rankCounts = Array.from({ length: rankLimit }, () => 0)
     gameResults?.forEach((r) => {
-      if (r.rank >= 1 && r.rank <= 4) {
+      if (r.rank >= 1 && r.rank <= rankLimit) {
         rankCounts[r.rank - 1]++
       }
     })
-    rankCounts[0] += rolledRankCounts[0]
-    rankCounts[1] += rolledRankCounts[1]
-    rankCounts[2] += rolledRankCounts[2]
-    rankCounts[3] += rolledRankCounts[3]
+    rolledRankCounts.forEach((count, index) => {
+      rankCounts[index] += count
+    })
 
     const maxRankCount = Math.max(...rankCounts)
 
@@ -305,18 +304,26 @@ export default function UserProfilePage() {
                       fourPlayerStats.maxRankCount > 0 ? (count / fourPlayerStats.maxRankCount) * 100 : 0
                     return (
                       <div key={index} className="text-center">
-                        <div className="w-full h-32 rounded-xl flex items-end justify-center relative overflow-hidden bg-gradient-to-b from-slate-50 to-muted">
-                          <div
-                            className={cn(
-                              "absolute bottom-0 w-full transition-all rounded-t-xl",
-                              index === 0 && "bg-gradient-to-t from-amber-300 to-amber-200",
-                              index === 1 && "bg-gradient-to-t from-emerald-400 to-emerald-300",
-                              index === 2 && "bg-gradient-to-t from-slate-300 to-slate-200",
-                              index === 3 && "bg-gradient-to-t from-rose-300 to-rose-200",
-                            )}
-                            style={{ height: `${heightPercentage}%` }}
-                          />
-                          <span className="relative z-10 font-bold text-sm mb-2">{count}回</span>
+                        <div className="w-full h-36 relative flex items-end justify-center">
+                          <div className="absolute inset-x-0 bottom-0 border-b border-slate-300/90" />
+                          {count > 0 ? (
+                            <div
+                              className={cn(
+                                "relative z-10 w-[84%] max-w-[96px] transition-all rounded-none flex items-end justify-center",
+                                index === 0 && "bg-gradient-to-t from-amber-300 to-amber-200",
+                                index === 1 && "bg-gradient-to-t from-emerald-400 to-emerald-300",
+                                index === 2 && "bg-gradient-to-t from-sky-300 to-sky-200",
+                                index === 3 && "bg-gradient-to-t from-rose-300 to-rose-200",
+                              )}
+                              style={{ height: `${Math.max(heightPercentage, 16)}%` }}
+                            >
+                              <span className="font-bold text-sm mb-2 leading-none">{count}回</span>
+                            </div>
+                          ) : (
+                            <span className="relative z-10 text-sm font-bold text-muted-foreground mb-2 leading-none">
+                              {count}回
+                            </span>
+                          )}
                         </div>
                         <p className="text-sm mt-2 font-medium">{index + 1}位</p>
                         <p className="text-xs text-muted-foreground">{percentage.toFixed(1)}%</p>
@@ -409,17 +416,25 @@ export default function UserProfilePage() {
                       threePlayerStats.maxRankCount > 0 ? (count / threePlayerStats.maxRankCount) * 100 : 0
                     return (
                       <div key={index} className="text-center">
-                        <div className="w-full h-32 rounded-xl flex items-end justify-center relative overflow-hidden bg-gradient-to-b from-slate-50 to-muted">
-                          <div
-                            className={cn(
-                              "absolute bottom-0 w-full transition-all rounded-t-xl",
-                              index === 0 && "bg-gradient-to-t from-amber-300 to-amber-200",
-                              index === 1 && "bg-gradient-to-t from-emerald-400 to-emerald-300",
-                              index === 2 && "bg-gradient-to-t from-slate-300 to-slate-200",
-                            )}
-                            style={{ height: `${heightPercentage}%` }}
-                          />
-                          <span className="relative z-10 font-bold text-sm mb-2">{count}回</span>
+                        <div className="w-full h-36 relative flex items-end justify-center">
+                          <div className="absolute inset-x-0 bottom-0 border-b border-slate-300/90" />
+                          {count > 0 ? (
+                            <div
+                              className={cn(
+                                "relative z-10 w-[84%] max-w-[96px] transition-all rounded-none flex items-end justify-center",
+                                index === 0 && "bg-gradient-to-t from-amber-300 to-amber-200",
+                                index === 1 && "bg-gradient-to-t from-emerald-400 to-emerald-300",
+                                index === 2 && "bg-gradient-to-t from-sky-300 to-sky-200",
+                              )}
+                              style={{ height: `${Math.max(heightPercentage, 16)}%` }}
+                            >
+                              <span className="font-bold text-sm mb-2 leading-none">{count}回</span>
+                            </div>
+                          ) : (
+                            <span className="relative z-10 text-sm font-bold text-muted-foreground mb-2 leading-none">
+                              {count}回
+                            </span>
+                          )}
                         </div>
                         <p className="text-sm mt-2 font-medium">{index + 1}位</p>
                         <p className="text-xs text-muted-foreground">{percentage.toFixed(1)}%</p>
