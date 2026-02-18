@@ -1,5 +1,6 @@
 import type React from "react"
 import type { Metadata, Viewport } from "next"
+import { Suspense } from "react"
 import { Analytics } from "@vercel/analytics/next"
 import { NavigationProgressBar } from "@/components/navigation-progress-bar"
 import "./globals.css"
@@ -25,7 +26,9 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body className={`font-sans antialiased`}>
-        <NavigationProgressBar />
+        <Suspense fallback={null}>
+          <NavigationProgressBar />
+        </Suspense>
         {children}
         <Analytics />
       </body>
