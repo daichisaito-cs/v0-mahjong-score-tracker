@@ -122,8 +122,7 @@ export default function GamesPage() {
               raw_score,
               point,
               bonus_points,
-              created_at,
-              profiles (display_name, avatar_url)
+              created_at
             `,
             )
             .in("game_id", ids),
@@ -135,10 +134,31 @@ export default function GamesPage() {
       }
 
       const gameResults = gameResultsResponses.flatMap((res) => (res.data as any[]) || [])
+      const profileIds = Array.from(new Set(gameResults.map((row) => row.user_id).filter(Boolean)))
+      const profileMap = new Map<string, { display_name: string; avatar_url: string | null }>()
+      if (profileIds.length > 0) {
+        const profileChunks = chunk(profileIds, 100)
+        const profileResponses = await Promise.all(
+          profileChunks.map((ids) =>
+            supabase.from("profiles").select("id, display_name, avatar_url").in("id", ids as string[]),
+          ),
+        )
+        for (const res of profileResponses) {
+          if (res.error) throw res.error
+          ;((res.data as any[]) || []).forEach((p) => {
+            profileMap.set(p.id, { display_name: p.display_name, avatar_url: p.avatar_url })
+          })
+        }
+      }
+
       const resultMap = new Map<string, any[]>()
       for (const row of gameResults) {
+        const hydratedRow = {
+          ...row,
+          profiles: row.user_id ? profileMap.get(row.user_id) || null : null,
+        }
         const list = resultMap.get(row.game_id) || []
-        list.push(row)
+        list.push(hydratedRow)
         resultMap.set(row.game_id, list)
       }
 

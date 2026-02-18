@@ -102,16 +102,32 @@ export default function LeagueDetailPage() {
           .from("game_results")
           .select(
             `
-            *,
-            profiles (display_name, avatar_url)
+            *
           `,
           )
           .in("game_id", gameIds)
         if (gameResultsError) throw gameResultsError
 
+        const profileIds = Array.from(new Set((gameResults || []).map((row: any) => row.user_id).filter(Boolean)))
+        const profileMap = new Map<string, { display_name: string; avatar_url: string | null }>()
+        if (profileIds.length > 0) {
+          const { data: profilesData, error: gameResultProfilesError } = await supabase
+            .from("profiles")
+            .select("id, display_name, avatar_url")
+            .in("id", profileIds)
+          if (gameResultProfilesError) throw gameResultProfilesError
+          ;(profilesData || []).forEach((p: any) => {
+            profileMap.set(p.id, { display_name: p.display_name, avatar_url: p.avatar_url })
+          })
+        }
+
         ;(gameResults || []).forEach((row: any) => {
+          const hydratedRow = {
+            ...row,
+            profiles: row.user_id ? profileMap.get(row.user_id) || null : null,
+          }
           const list = gameResultsByGameId.get(row.game_id) || []
-          list.push(row)
+          list.push(hydratedRow)
           gameResultsByGameId.set(row.game_id, list)
         })
       }
@@ -462,7 +478,7 @@ export default function LeagueDetailPage() {
             </Link>
           )}
           {isOwner && (
-            <LeagueMemberAdd leagueId={leagueId} userId={user!.id} existingMemberIds={existingMemberIds} />
+            <LeagueMemberAdd leagueId={leagueId!} userId={user!.id} existingMemberIds={existingMemberIds} />
           )}
           <Link href={`/games/new?league=${leagueId}`}>
             <Button size="sm" className="gap-2 w-full sm:w-auto">
