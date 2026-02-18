@@ -48,7 +48,10 @@ export default function GameDetailPage() {
             display_name,
             avatar_url
           ),
-          leagues (name),
+          leagues (
+            name,
+            rules (name)
+          ),
           game_results (
             id,
             game_id,
@@ -132,6 +135,19 @@ export default function GameDetailPage() {
   })
   const creatorName = game.creator?.display_name || "不明"
   const isOwner = game.created_by === user?.id
+  const appliedRuleName = game.applied_rule_name || game.leagues?.rules?.name || "（未保存）"
+  const appliedRuleSummary =
+    game.applied_starting_points != null &&
+    game.applied_return_points != null &&
+    game.applied_uma_first != null &&
+    game.applied_uma_second != null &&
+    game.applied_uma_third != null
+      ? `${game.applied_starting_points.toLocaleString()} / ${game.applied_return_points.toLocaleString()} ・ ${
+          game.applied_uma_first
+        } / ${game.applied_uma_second} / ${game.applied_uma_third}${
+          game.game_type === "four_player" ? ` / ${game.applied_uma_fourth ?? "-"}` : ""
+        }`
+      : null
 
   return (
     <div className="space-y-6 pb-20 md:pb-0 max-w-2xl mx-auto">
@@ -180,6 +196,11 @@ export default function GameDetailPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
+            <div className="rounded-md border bg-muted/30 px-3 py-2">
+              <p className="text-xs text-muted-foreground">使用ルール</p>
+              <p className="text-sm font-medium">{appliedRuleName}</p>
+              {appliedRuleSummary && <p className="text-xs text-muted-foreground mt-0.5">持ち点/返し・ウマ: {appliedRuleSummary}</p>}
+            </div>
             {sortedResults.map((result, index) => (
               <div
                 key={result.id}

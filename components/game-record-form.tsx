@@ -298,7 +298,7 @@ export function GameRecordForm({
   const selectedRule = rules.find((rule) => rule.id === ruleId)
   const selectedLeagueRule = selectedLeague?.rule_id ? rules.find((rule) => rule.id === selectedLeague.rule_id) : null
   const isFreeGame = leagueId === "none"
-  const activeRule = isFreeGame ? selectedRule : selectedLeagueRule
+  const activeRule = isFreeGame ? selectedRule : selectedRule ?? selectedLeagueRule
 
   const umaSource = activeRule ?? selectedLeague ?? null
   const uma = umaSource
@@ -309,7 +309,7 @@ export function GameRecordForm({
   const startingPoints = activeRule?.starting_points ?? selectedLeague?.starting_points ?? 25000
   const returnPoints = activeRule?.return_points ?? selectedLeague?.return_points ?? 30000
   const oka = selectedLeague?.oka || 0
-  const appliedRuleId = activeRule?.id ?? selectedLeague?.rule_id ?? null
+  const appliedRuleId = activeRule?.id ?? null
   const appliedRuleName = activeRule?.name ?? null
 
   const rulesForGameType = rules.filter((rule) => rule.game_type === gameType)
@@ -322,6 +322,11 @@ export function GameRecordForm({
       setRuleId("")
     }
   }, [gameType, selectedRule])
+
+  useEffect(() => {
+    if (isFreeGame) return
+    setRuleId(selectedLeague?.rule_id || "")
+  }, [isFreeGame, selectedLeague?.rule_id])
 
   const updateSeatField = (seatIndex: number, field: "score" | "bonusPoints", value: string) => {
     setSeats((prev) => {
@@ -518,7 +523,7 @@ export function GameRecordForm({
     }
 
     if (ruleSelectionMissing) {
-      setError("フリー対局はルールを選択してください")
+      setError("ルールを選択してください")
       return
     }
 
@@ -761,16 +766,16 @@ export function GameRecordForm({
           </Card>
         )}
 
-        {isFreeGame && (
+        {(isFreeGame || leagues.length > 0) && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">ルール（必須）</CardTitle>
+              <CardTitle className="text-lg">{isFreeGame ? "ルール（必須）" : "ルール（リーグ既定を初期選択）"}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               {rulesForGameType.length > 0 ? (
                 <Select value={ruleId} onValueChange={setRuleId}>
                   <SelectTrigger>
-                    <SelectValue placeholder="ルールを選択" />
+                    <SelectValue placeholder={isFreeGame ? "ルールを選択" : "リーグ既定ルールを使用"} />
                   </SelectTrigger>
                   <SelectContent>
                     {rulesForGameType.map((rule) => (
@@ -788,7 +793,10 @@ export function GameRecordForm({
                   </Button>
                 </div>
               )}
-              {ruleSelectionMissing && <p className="text-xs text-destructive">フリー対局はルールを選択してください</p>}
+              {!isFreeGame && selectedLeagueRule && selectedRule?.id !== selectedLeagueRule.id && (
+                <p className="text-xs text-muted-foreground">リーグ既定: {selectedLeagueRule.name}（今回のみ上書き中）</p>
+              )}
+              {ruleSelectionMissing && <p className="text-xs text-destructive">ルールを選択してください</p>}
             </CardContent>
           </Card>
         )}
