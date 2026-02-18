@@ -90,18 +90,36 @@ export default function LeagueDetailPage() {
 
       const { data: games, error: gamesError } = await supabase
         .from("games")
-        .select(
-          `
-          *,
-          game_results (
-            *,
-            profiles (display_name, avatar_url)
-          )
-        `,
-        )
+        .select("*")
         .eq("league_id", leagueId)
         .order("played_at", { ascending: false })
       if (gamesError) throw gamesError
+
+      const gameIds = (games || []).map((g: any) => g.id).filter(Boolean)
+      const gameResultsByGameId = new Map<string, any[]>()
+      if (gameIds.length > 0) {
+        const { data: gameResults, error: gameResultsError } = await supabase
+          .from("game_results")
+          .select(
+            `
+            *,
+            profiles (display_name, avatar_url)
+          `,
+          )
+          .in("game_id", gameIds)
+        if (gameResultsError) throw gameResultsError
+
+        ;(gameResults || []).forEach((row: any) => {
+          const list = gameResultsByGameId.get(row.game_id) || []
+          list.push(row)
+          gameResultsByGameId.set(row.game_id, list)
+        })
+      }
+
+      const gamesWithResults = (games || []).map((game: any) => ({
+        ...game,
+        game_results: gameResultsByGameId.get(game.id) || [],
+      }))
 
       const { data: leagueRollups, error: leagueRollupsError } = await supabase
         .from("league_user_game_rollups")
@@ -126,7 +144,14 @@ export default function LeagueDetailPage() {
         }
       }
 
-      return { league, members: members || [], ownerProfile, games: games || [], leagueRollups: leagueRollups || [], extraProfiles }
+      return {
+        league,
+        members: members || [],
+        ownerProfile,
+        games: gamesWithResults,
+        leagueRollups: leagueRollups || [],
+        extraProfiles,
+      }
     },
   })
 

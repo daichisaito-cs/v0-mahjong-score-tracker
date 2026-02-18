@@ -33,19 +33,6 @@ export default function GamesPage() {
           creator:profiles!games_created_by_fkey (
             display_name,
             avatar_url
-          ),
-          game_results (
-            id,
-            game_id,
-            seat_index,
-            user_id,
-            player_name,
-            rank,
-            raw_score,
-            point,
-            bonus_points,
-            created_at,
-            profiles (display_name, avatar_url)
           )
         `
       const chunk = <T,>(items: T[], size: number) =>
@@ -112,9 +99,53 @@ export default function GamesPage() {
         }
       }
 
-      return Array.from(deduped.values())
+      const sortedGames = Array.from(deduped.values())
         .sort((a, b) => new Date(b.played_at).getTime() - new Date(a.played_at).getTime())
         .slice(0, 50)
+
+      if (sortedGames.length === 0) return []
+
+      const sortedGameIds = sortedGames.map((g) => g.id)
+      const gameResultsChunks = chunk(sortedGameIds, 50)
+      const gameResultsResponses = await Promise.all(
+        gameResultsChunks.map((ids) =>
+          supabase
+            .from("game_results")
+            .select(
+              `
+              id,
+              game_id,
+              seat_index,
+              user_id,
+              player_name,
+              rank,
+              raw_score,
+              point,
+              bonus_points,
+              created_at,
+              profiles (display_name, avatar_url)
+            `,
+            )
+            .in("game_id", ids),
+        ),
+      )
+
+      for (const res of gameResultsResponses) {
+        if (res.error) throw res.error
+      }
+
+      const gameResults = gameResultsResponses.flatMap((res) => (res.data as any[]) || [])
+      const resultMap = new Map<string, any[]>()
+      for (const row of gameResults) {
+        const list = resultMap.get(row.game_id) || []
+        list.push(row)
+        resultMap.set(row.game_id, list)
+      }
+
+      return sortedGames.map((game) => ({
+        ...game,
+        game_results: resultMap.get(game.id) || [],
+      }))
     },
   })
 
