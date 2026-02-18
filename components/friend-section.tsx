@@ -246,7 +246,7 @@ export function FriendSection({ currentUserId, friendCode, friends, pendingReque
               {copied ? <Check className="w-4 h-4 text-chart-1" /> : <Copy className="w-4 h-4" />}
             </Button>
           </div>
-          <p className="text-xs text-muted-foreground mt-1">このIDを友達に共有してフレンド申請を受け取りましょう</p>
+          <p className="text-xs text-muted-foreground mt-1">友達に共有してフレンド申請を受け取りましょう</p>
         </div>
 
         <div className="space-y-3">

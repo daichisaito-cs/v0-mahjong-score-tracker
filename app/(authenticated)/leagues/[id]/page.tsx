@@ -225,6 +225,7 @@ export default function LeagueDetailPage() {
   }
 
   const { league, members, ownerProfile, games, leagueRollups, extraProfiles } = data
+  const rankLabels = league.game_type === "four_player" ? ["1位", "2位", "3位", "4位"] : ["1位", "2位", "3位"]
 
   const profileMap = new Map<string, { name: string; avatarUrl?: string | null }>()
   extraProfiles?.forEach((p: any) => {
@@ -373,6 +374,7 @@ export default function LeagueDetailPage() {
     ...rankedWithLabels,
     ...rankingUnplayed.map((player) => ({ ...player, rankLabel: "—" as const })),
   ]
+  const avoidTargetRank = league.game_type === "four_player" ? 4 : 3
   const bestScoreCandidates = Object.values(playerStats)
     .filter((p) => p.gameCount > 0 && Number.isFinite(p.bestScore))
     .sort((a, b) => (b.bestScore ?? -Infinity) - (a.bestScore ?? -Infinity))
@@ -383,7 +385,7 @@ export default function LeagueDetailPage() {
     .filter((p) => p.gameCount > 0)
     .map((p) => ({
       ...p,
-      avoidRate: p.gameCount > 0 ? 1 - p.rankCounts[3] / p.gameCount : null,
+      avoidRate: p.gameCount > 0 ? 1 - p.rankCounts[avoidTargetRank - 1] / p.gameCount : null,
     }))
     .filter((p) => Number.isFinite(p.avoidRate))
     .sort((a, b) => (b.avoidRate as number) - (a.avoidRate as number))
@@ -573,10 +575,11 @@ export default function LeagueDetailPage() {
               <thead>
                 <tr className="text-muted-foreground border-b">
                   <th className="text-left py-2 font-medium">プレイヤー</th>
-                  <th className="text-center py-2 font-medium">1位</th>
-                  <th className="text-center py-2 font-medium">2位</th>
-                  <th className="text-center py-2 font-medium">3位</th>
-                  <th className="text-center py-2 font-medium">4位</th>
+                  {rankLabels.map((label) => (
+                    <th key={label} className="text-center py-2 font-medium">
+                      {label}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
@@ -593,10 +596,11 @@ export default function LeagueDetailPage() {
                         </span>
                       </div>
                     </td>
-                    <td className="text-center tabular-nums">{player.rankCounts[0]}</td>
-                    <td className="text-center tabular-nums">{player.rankCounts[1]}</td>
-                    <td className="text-center tabular-nums">{player.rankCounts[2]}</td>
-                    <td className="text-center tabular-nums">{player.rankCounts[3]}</td>
+                    {rankLabels.map((_, index) => (
+                      <td key={`${player.odIndex}-rank-${index}`} className="text-center tabular-nums">
+                        {player.rankCounts[index]}
+                      </td>
+                    ))}
                   </tr>
                 ))}
               </tbody>
@@ -735,7 +739,7 @@ export default function LeagueDetailPage() {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg">4着回避率 TOP3</CardTitle>
+            <CardTitle className="text-lg">{avoidTargetRank}着回避率 TOP3</CardTitle>
           </CardHeader>
           <CardContent className="pt-0 space-y-2">
             {avoidRanking.length > 0 ? (

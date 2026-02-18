@@ -466,16 +466,22 @@ export function GameRecordForm({
     previewSeatTotals?.reduce((sum, seat, seatIndex) => sum + seat.perMemberPoint * activeSeats[seatIndex].members.length, 0) || 0
   const pointBalanceError = previewSeatTotals ? Math.abs(totalPoints) > EPSILON : false
 
-  const maybeAutofillLastSeat = () => {
-    const targetIndex = playerCount - 1
-    const target = activeSeats[targetIndex]
-    if (!target || target.score) return
+  const maybeAutofillSingleMissingSeat = () => {
+    const missingIndexes = activeSeats
+      .map((seat, index) => ({ index, isMissing: seat.score === "" }))
+      .filter((entry) => entry.isMissing)
+      .map((entry) => entry.index)
 
-    const prevScores = activeSeats.slice(0, targetIndex).map((seat) => parseRawScore(seat.score))
-    if (prevScores.some((score) => score === null)) return
-    const normalizedPrevScores = prevScores as number[]
+    if (missingIndexes.length !== 1) return
 
-    const remaining = expectedTotalScore - normalizedPrevScores.reduce((sum, score) => sum + score, 0)
+    const targetIndex = missingIndexes[0]
+    const knownScores = activeSeats
+      .map((seat, index) => (index === targetIndex ? null : parseRawScore(seat.score)))
+      .filter((score): score is number => score !== null)
+
+    if (knownScores.length !== playerCount - 1) return
+
+    const remaining = expectedTotalScore - knownScores.reduce((sum, score) => sum + score, 0)
     setSeats((prev) => {
       const updated = [...prev]
       updated[targetIndex] = { ...updated[targetIndex], score: (remaining / 100).toString() }
@@ -819,12 +825,13 @@ export function GameRecordForm({
           <CardContent className="space-y-4">
             {activeSeats.map((seat, seatIndex) => {
               const seatPreview = previewSeatTotals?.[seatIndex]
+              const displayPoint = seatPreview?.perMemberPoint ?? 0
               const seatRankClass = cn(
                 "text-xs font-semibold px-2 py-1 rounded-full border",
                 seatPreview
                   ? seatPreview.rank === 1
                     ? "bg-chart-1/10 text-chart-1 border-chart-1/30"
-                    : seatPreview.seatPoint < 0
+                    : displayPoint < 0
                       ? "bg-destructive/10 text-destructive border-destructive/20"
                       : "bg-secondary text-secondary-foreground border-secondary/50"
                   : "text-muted-foreground bg-muted border-transparent",
@@ -839,13 +846,11 @@ export function GameRecordForm({
                         <span
                           className={cn(
                             "text-sm font-semibold",
-                            (seat.members.length > 1 ? seatPreview.perMemberPoint : seatPreview.seatPoint) >= 0
-                              ? "text-chart-1"
-                              : "text-destructive",
+                            displayPoint >= 0 ? "text-chart-1" : "text-destructive",
                           )}
                         >
-                          {(seat.members.length > 1 ? seatPreview.perMemberPoint : seatPreview.seatPoint) >= 0 ? "+" : ""}
-                          {(seat.members.length > 1 ? seatPreview.perMemberPoint : seatPreview.seatPoint).toFixed(2)}
+                          {displayPoint >= 0 ? "+" : ""}
+                          {displayPoint.toFixed(2)}
                           pt
                           {seat.members.length > 1 ? "ずつ" : ""}
                         </span>
@@ -914,15 +919,6 @@ export function GameRecordForm({
                             </div>
                           )}
 
-                          {!member.isManual && member.name && (
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                              <Avatar className="h-5 w-5">
-                                <AvatarImage src={member.avatarUrl || undefined} />
-                                <AvatarFallback>{member.name.charAt(0).toUpperCase()}</AvatarFallback>
-                              </Avatar>
-                              <span>{member.name}</span>
-                            </div>
-                          )}
                         </div>
                       )
                     })}
@@ -943,7 +939,7 @@ export function GameRecordForm({
                           placeholder="250"
                           value={seat.score}
                           onChange={(e) => updateSeatField(seatIndex, "score", e.target.value)}
-                          onBlur={() => maybeAutofillLastSeat()}
+                          onBlur={() => maybeAutofillSingleMissingSeat()}
                           className="text-right pr-10"
                           onWheel={(e) => (e.currentTarget as HTMLInputElement).blur()}
                         />
