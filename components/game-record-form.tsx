@@ -98,6 +98,14 @@ function round2(num: number) {
   return Number(num.toFixed(2))
 }
 
+function parseRawScore(value: string): number | null {
+  const trimmed = value.trim()
+  if (!trimmed) return null
+  const parsed = Number.parseInt(trimmed, 10)
+  if (Number.isNaN(parsed)) return null
+  return parsed * 100
+}
+
 function createEmptyMember(): SeatMemberInput {
   return { name: "", userId: undefined, avatarUrl: undefined, isManual: false }
 }
@@ -134,7 +142,7 @@ function calculateSeatPoints(
     .slice(0, playerCount)
     .map((seat, originalIndex) => ({
       originalIndex,
-      scoreNum: Number.parseInt(seat.score) || 0,
+      scoreNum: parseRawScore(seat.score) || 0,
     }))
     .sort((a, b) => b.scoreNum - a.scoreNum)
 
@@ -422,7 +430,8 @@ export function GameRecordForm({
   const allSeatsHaveMembers = activeSeats.every((seat) => seat.members.length >= 1 && seat.members.length <= 2)
   const allMembersHaveNames = activeSeats.every((seat) => seat.members.every((member) => member.name.trim().length > 0))
   const allScoresFilled = activeSeats.every((seat) => seat.score !== "")
-  const allFieldsFilled = allScoresFilled && allSeatsHaveMembers && allMembersHaveNames
+  const allScoresValid = activeSeats.every((seat) => parseRawScore(seat.score) !== null)
+  const allFieldsFilled = allScoresFilled && allScoresValid && allSeatsHaveMembers && allMembersHaveNames
 
   const userIds = activeSeats.flatMap((seat) => seat.members.map((member) => member.userId).filter(Boolean) as string[])
   const uniqueUserIdCount = new Set(userIds).size
@@ -430,7 +439,7 @@ export function GameRecordForm({
 
   const seatCountInvalid = activeSeats.some((seat) => seat.members.length < 1 || seat.members.length > 2)
 
-  const totalScore = activeSeats.reduce((sum, seat) => sum + (Number.parseInt(seat.score) || 0), 0)
+  const totalScore = activeSeats.reduce((sum, seat) => sum + (parseRawScore(seat.score) || 0), 0)
   const scoreBalanceError = allScoresFilled && totalScore !== expectedTotalScore
 
   const seatCalcResults = allFieldsFilled
@@ -462,13 +471,14 @@ export function GameRecordForm({
     const target = activeSeats[targetIndex]
     if (!target || target.score) return
 
-    const prevScores = activeSeats.slice(0, targetIndex).map((seat) => Number.parseInt(seat.score))
-    if (prevScores.some((score) => Number.isNaN(score))) return
+    const prevScores = activeSeats.slice(0, targetIndex).map((seat) => parseRawScore(seat.score))
+    if (prevScores.some((score) => score === null)) return
+    const normalizedPrevScores = prevScores as number[]
 
-    const remaining = expectedTotalScore - prevScores.reduce((sum, score) => sum + score, 0)
+    const remaining = expectedTotalScore - normalizedPrevScores.reduce((sum, score) => sum + score, 0)
     setSeats((prev) => {
       const updated = [...prev]
-      updated[targetIndex] = { ...updated[targetIndex], score: remaining.toString() }
+      updated[targetIndex] = { ...updated[targetIndex], score: (remaining / 100).toString() }
       return updated
     })
   }
@@ -599,6 +609,10 @@ export function GameRecordForm({
         const memberCount = seat.members.length
         const splitSeatPoint = seatCalc.seatPoint / memberCount
         const splitBonus = (seat.bonusPoints || 0) / memberCount
+        const rawScore = parseRawScore(seat.score)
+        if (rawScore === null) {
+          throw new Error("素点を数値で入力してください")
+        }
 
         return seat.members.map((member) => ({
           game_id: game.id,
@@ -606,7 +620,7 @@ export function GameRecordForm({
           player_name: member.name,
           seat_index: seat.seatIndex,
           rank: seatCalc.rank,
-          raw_score: Number.parseInt(seat.score),
+          raw_score: rawScore,
           point: round2(splitSeatPoint + splitBonus),
           bonus_points: round2(splitBonus),
         }))
@@ -769,13 +783,13 @@ export function GameRecordForm({
         {(isFreeGame || leagues.length > 0) && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">{isFreeGame ? "ルール（必須）" : "ルール（リーグ既定を初期選択）"}</CardTitle>
+              <CardTitle className="text-lg">ルール{isFreeGame ? "（必須）" : ""}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               {rulesForGameType.length > 0 ? (
                 <Select value={ruleId} onValueChange={setRuleId}>
                   <SelectTrigger>
-                    <SelectValue placeholder={isFreeGame ? "ルールを選択" : "リーグ既定ルールを使用"} />
+                    <SelectValue placeholder="ルールを選択" />
                   </SelectTrigger>
                   <SelectContent>
                     {rulesForGameType.map((rule) => (
@@ -792,9 +806,6 @@ export function GameRecordForm({
                     <Link href="/rules/new">ルールを作成</Link>
                   </Button>
                 </div>
-              )}
-              {!isFreeGame && selectedLeagueRule && selectedRule?.id !== selectedLeagueRule.id && (
-                <p className="text-xs text-muted-foreground">リーグ既定: {selectedLeagueRule.name}（今回のみ上書き中）</p>
               )}
               {ruleSelectionMissing && <p className="text-xs text-destructive">ルールを選択してください</p>}
             </CardContent>
@@ -867,7 +878,15 @@ export function GameRecordForm({
                               <SelectValue placeholder="プレイヤーを選択" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="self">自分 ({currentUserName})</SelectItem>
+                              <SelectItem value="self">
+                                <div className="flex items-center gap-2">
+                                  <Avatar className="h-6 w-6">
+                                    <AvatarImage src={currentUserAvatarUrl || undefined} />
+                                    <AvatarFallback>{currentUserName.charAt(0).toUpperCase()}</AvatarFallback>
+                                  </Avatar>
+                                  <span>{currentUserName}</span>
+                                </div>
+                              </SelectItem>
                               {friends.map((friend) => (
                                 <SelectItem key={friend.id} value={friend.id}>
                                   <div className="flex items-center gap-2">
@@ -896,7 +915,13 @@ export function GameRecordForm({
                           )}
 
                           {!member.isManual && member.name && (
-                            <p className="text-xs text-muted-foreground">{member.name}</p>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <Avatar className="h-5 w-5">
+                                <AvatarImage src={member.avatarUrl || undefined} />
+                                <AvatarFallback>{member.name.charAt(0).toUpperCase()}</AvatarFallback>
+                              </Avatar>
+                              <span>{member.name}</span>
+                            </div>
                           )}
                         </div>
                       )
@@ -915,14 +940,14 @@ export function GameRecordForm({
                       <div className="relative">
                         <Input
                           type="number"
-                          placeholder="25000"
+                          placeholder="250"
                           value={seat.score}
                           onChange={(e) => updateSeatField(seatIndex, "score", e.target.value)}
                           onBlur={() => maybeAutofillLastSeat()}
                           className="text-right pr-10"
                           onWheel={(e) => (e.currentTarget as HTMLInputElement).blur()}
                         />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">点</span>
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">00</span>
                       </div>
                     </div>
 

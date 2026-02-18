@@ -38,12 +38,20 @@ export function RuleCreateForm({ currentUserId }: { currentUserId: string }) {
     const umaThird = Number(formData.uma_third)
     const umaFourth =
       formData.game_type === "four_player" ? Number(formData.uma_fourth) : null
+    const umaTotal =
+      formData.game_type === "four_player" ? umaFirst + umaSecond + umaThird + Number(umaFourth) : umaFirst + umaSecond + umaThird
 
     if (
       [startingPoints, returnPoints, umaFirst, umaSecond, umaThird].some((value) => Number.isNaN(value)) ||
       (formData.game_type === "four_player" && Number.isNaN(umaFourth))
     ) {
       alert("数値を入力してください")
+      setIsSubmitting(false)
+      return
+    }
+
+    if (umaTotal !== 0) {
+      alert("ウマの合計は0にしてください")
       setIsSubmitting(false)
       return
     }
