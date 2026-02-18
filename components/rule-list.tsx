@@ -7,6 +7,7 @@ import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { useQueryClient } from "@tanstack/react-query"
 
 interface Rule {
   id: string
@@ -23,6 +24,7 @@ interface Rule {
 
 export function RuleList({ rules, currentUserId }: { rules: Rule[]; currentUserId: string }) {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const [deleting, setDeleting] = useState<string | null>(null)
 
   const handleDelete = async (ruleId: string) => {
@@ -39,8 +41,8 @@ export function RuleList({ rules, currentUserId }: { rules: Rule[]; currentUserI
       return
     }
 
+    await queryClient.invalidateQueries({ queryKey: ["rules"] })
     router.push("/rules")
-    router.refresh()
   }
 
   const getGameTypeLabel = (type: string) => {

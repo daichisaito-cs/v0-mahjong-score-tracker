@@ -3,32 +3,48 @@
 import type React from "react"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { createClient } from "@/lib/supabase/client"
+import { useQueryClient } from "@tanstack/react-query"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { createClient } from "@/lib/supabase/client"
-import { useQueryClient } from "@tanstack/react-query"
-import { useRouter } from "next/navigation"
 
-export function RuleCreateForm({ currentUserId }: { currentUserId: string }) {
+interface RuleEditFormProps {
+  rule: {
+    id: string
+    name: string
+    game_type: string
+    starting_points: number
+    return_points: number
+    uma_first: number
+    uma_second: number
+    uma_third: number
+    uma_fourth: number | null
+  }
+}
+
+export function RuleEditForm({ rule }: RuleEditFormProps) {
   const router = useRouter()
   const queryClient = useQueryClient()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState({
-    name: "",
-    game_type: "four_player",
-    starting_points: 25000 as number | "",
-    return_points: 30000 as number | "",
-    uma_first: 30 as number | "",
-    uma_second: 10 as number | "",
-    uma_third: -10 as number | "",
-    uma_fourth: -30 as number | null | "",
+    name: rule.name,
+    game_type: rule.game_type,
+    starting_points: rule.starting_points as number | "",
+    return_points: rule.return_points as number | "",
+    uma_first: rule.uma_first as number | "",
+    uma_second: rule.uma_second as number | "",
+    uma_third: rule.uma_third as number | "",
+    uma_fourth: (rule.uma_fourth ?? -30) as number | null | "",
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (isSubmitting) return
+
     setIsSubmitting(true)
 
     const startingPoints = Number(formData.starting_points)
@@ -36,8 +52,7 @@ export function RuleCreateForm({ currentUserId }: { currentUserId: string }) {
     const umaFirst = Number(formData.uma_first)
     const umaSecond = Number(formData.uma_second)
     const umaThird = Number(formData.uma_third)
-    const umaFourth =
-      formData.game_type === "four_player" ? Number(formData.uma_fourth) : null
+    const umaFourth = formData.game_type === "four_player" ? Number(formData.uma_fourth) : null
 
     if (
       [startingPoints, returnPoints, umaFirst, umaSecond, umaThird].some((value) => Number.isNaN(value)) ||
@@ -49,21 +64,23 @@ export function RuleCreateForm({ currentUserId }: { currentUserId: string }) {
     }
 
     const supabase = createClient()
-    const { error } = await supabase.from("rules").insert({
-      name: formData.name,
-      game_type: formData.game_type,
-      starting_points: startingPoints,
-      return_points: returnPoints,
-      uma_first: umaFirst,
-      uma_second: umaSecond,
-      uma_third: umaThird,
-      uma_fourth: umaFourth,
-      created_by: currentUserId,
-    })
+    const { error } = await supabase
+      .from("rules")
+      .update({
+        name: formData.name,
+        game_type: formData.game_type,
+        starting_points: startingPoints,
+        return_points: returnPoints,
+        uma_first: umaFirst,
+        uma_second: umaSecond,
+        uma_third: umaThird,
+        uma_fourth: umaFourth,
+      })
+      .eq("id", rule.id)
 
     if (error) {
-      console.error("Error creating rule:", error)
-      alert("作成に失敗しました")
+      console.error("Error updating rule:", error)
+      alert("更新に失敗しました")
       setIsSubmitting(false)
       return
     }
@@ -96,7 +113,7 @@ export function RuleCreateForm({ currentUserId }: { currentUserId: string }) {
       <Card>
         <CardHeader>
           <CardTitle>基本設定</CardTitle>
-          <CardDescription>ルールの基本情報と得点設定を入力してください</CardDescription>
+          <CardDescription>ルールの基本情報と得点設定を編集してください</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-4">
@@ -126,10 +143,10 @@ export function RuleCreateForm({ currentUserId }: { currentUserId: string }) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-              <SelectItem value="four_player">四麻</SelectItem>
-              <SelectItem value="three_player">三麻</SelectItem>
-            </SelectContent>
-          </Select>
+                <SelectItem value="four_player">四麻</SelectItem>
+                <SelectItem value="three_player">三麻</SelectItem>
+              </SelectContent>
+            </Select>
             <p className="text-xs text-muted-foreground">対局タイプに応じて必要な項目が変わります</p>
           </div>
 
@@ -265,9 +282,14 @@ export function RuleCreateForm({ currentUserId }: { currentUserId: string }) {
             <div className="text-sm text-muted-foreground">オカ（自動計算）: {oka}pt</div>
           </div>
 
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? "作成中..." : "作成する"}
-          </Button>
+          <div className="flex gap-3">
+            <Button type="button" variant="outline" className="flex-1 bg-transparent" onClick={() => router.back()}>
+              キャンセル
+            </Button>
+            <Button type="submit" className="flex-1" disabled={isSubmitting}>
+              {isSubmitting ? "更新中..." : "更新する"}
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </form>

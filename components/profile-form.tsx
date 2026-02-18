@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useRouter } from "next/navigation"
 import { Eye, EyeOff, Upload } from "lucide-react"
+import { useQueryClient } from "@tanstack/react-query"
 
 interface ProfileFormProps {
   initialData: {
@@ -58,6 +59,7 @@ export function ProfileForm({ initialData, currentEmail }: ProfileFormProps) {
   const [deleteMessage, setDeleteMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
 
   const router = useRouter()
+  const queryClient = useQueryClient()
   const deleteKeyword = "DELETE"
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -112,6 +114,13 @@ export function ProfileForm({ initialData, currentEmail }: ProfileFormProps) {
         }),
       )
 
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["mypage"] }),
+        queryClient.invalidateQueries({ queryKey: ["games"] }),
+        queryClient.invalidateQueries({ queryKey: ["game"] }),
+        queryClient.invalidateQueries({ queryKey: ["dashboard"] }),
+        queryClient.invalidateQueries({ queryKey: ["league-detail"] }),
+      ])
       router.refresh()
     }
 

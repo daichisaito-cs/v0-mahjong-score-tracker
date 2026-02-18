@@ -92,6 +92,15 @@ export default async function GameEditPage({
         <GameEditForm
           gameId={game.id}
           gameType={game.game_type}
+          appliedRule={{
+            returnPoints: Number(game.applied_return_points ?? 30000),
+            uma: [
+              Number(game.applied_uma_first ?? 30),
+              Number(game.applied_uma_second ?? (game.game_type === "four_player" ? 10 : 0)),
+              Number(game.applied_uma_third ?? (game.game_type === "four_player" ? -10 : -30)),
+              Number(game.applied_uma_fourth ?? -30),
+            ],
+          }}
           results={sortedResults.map((r) => ({
             id: r.id,
             name: r.player_name || r.profiles?.display_name || "",

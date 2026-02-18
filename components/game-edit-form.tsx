@@ -22,10 +22,15 @@ import {
 } from "@/components/ui/alert-dialog"
 import { cn } from "@/lib/utils"
 import { Trash2 } from "lucide-react"
+import { useQueryClient } from "@tanstack/react-query"
 
 interface GameEditFormProps {
   gameId: string
   gameType: string
+  appliedRule?: {
+    returnPoints: number
+    uma: number[]
+  }
   results: {
     id: string
     name: string
@@ -35,7 +40,12 @@ interface GameEditFormProps {
   }[]
 }
 
-function calculatePoints(scores: string[], gameType: string, uma: number[], startingPoints: number) {
+function calculatePoints(
+  scores: string[],
+  gameType: string,
+  uma: number[],
+  returnPoints: number,
+) {
   const playerCount = gameType === "four_player" ? 4 : 3
 
   const sorted = scores
@@ -46,32 +56,53 @@ function calculatePoints(scores: string[], gameType: string, uma: number[], star
     }))
     .sort((a, b) => b.score - a.score)
 
-  const calculated = sorted.map((player, rankIndex) => {
-    const rank = rankIndex + 1
-    const basePoint = (player.score - startingPoints) / 1000
-    const umaPoint = uma[rankIndex] || 0
-    const totalPoint = Number((basePoint + umaPoint).toFixed(2))
+  const calculated = sorted.map((player) => ({ ...player }))
 
-    return {
-      ...player,
-      rank,
-      point: totalPoint,
+  const groups: Array<typeof calculated> = []
+  let currentGroup: typeof calculated = [calculated[0]]
+  for (let i = 1; i < calculated.length; i++) {
+    if (calculated[i].score === calculated[i - 1].score) {
+      currentGroup.push(calculated[i])
+    } else {
+      groups.push(currentGroup)
+      currentGroup = [calculated[i]]
     }
-  })
+  }
+  groups.push(currentGroup)
+
+  const resolved = new Array(playerCount).fill(null).map(() => ({ rank: 0, point: 0 }))
+  let rankCursor = 1
+  for (const group of groups) {
+    const rankStart = rankCursor
+    const rankEnd = rankCursor + group.length - 1
+    let totalUma = 0
+    for (let rank = rankStart; rank <= rankEnd; rank++) {
+      totalUma += uma[rank - 1] || 0
+    }
+    const avgUma = totalUma / group.length
+
+    group.forEach((player) => {
+      const basePoint = (player.score - returnPoints) / 1000
+      resolved[player.originalIndex] = {
+        rank: rankStart,
+        point: Number((basePoint + avgUma).toFixed(2)),
+      }
+    })
+
+    rankCursor += group.length
+  }
 
   const finalResults = new Array(playerCount)
-  calculated.forEach((player) => {
-    finalResults[player.originalIndex] = {
-      rank: player.rank,
-      point: player.point,
-    }
+  resolved.forEach((player, idx) => {
+    finalResults[idx] = player
   })
 
   return finalResults
 }
 
-export function GameEditForm({ gameId, gameType, results }: GameEditFormProps) {
+export function GameEditForm({ gameId, gameType, appliedRule, results }: GameEditFormProps) {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const [scores, setScores] = useState(results.map((r) => r.score))
   const [bonusPoints, setBonusPoints] = useState(results.map((r) => r.bonusPoints || 0))
   const [isLoading, setIsLoading] = useState(false)
@@ -80,10 +111,16 @@ export function GameEditForm({ gameId, gameType, results }: GameEditFormProps) {
   const [error, setError] = useState<string | null>(null)
 
   const playerCount = gameType === "four_player" ? 4 : 3
-  const uma = gameType === "four_player" ? [30, 10, -10, -30] : [30, 0, -30, 0]
-  const startingPoints = 25000
+  const uma =
+    appliedRule?.uma && appliedRule.uma.length > 0
+      ? appliedRule.uma
+      : gameType === "four_player"
+        ? [30, 10, -10, -30]
+        : [30, 0, -30, 0]
+  const returnPoints = appliedRule?.returnPoints ?? 30000
 
-  const previewResults = scores.every((s) => s) ? calculatePoints(scores, gameType, uma, startingPoints) : null
+  const previewResults =
+    scores.every((s) => s) ? calculatePoints(scores, gameType, uma, returnPoints) : null
 
   const updateBonusPoint = (index: number, value: string) => {
     const numValue = Number.parseFloat(value) || 0
@@ -105,7 +142,7 @@ export function GameEditForm({ gameId, gameType, results }: GameEditFormProps) {
     const supabase = createClient()
 
     try {
-      const calculatedResults = calculatePoints(scores, gameType, uma, startingPoints)
+      const calculatedResults = calculatePoints(scores, gameType, uma, returnPoints)
 
       for (let i = 0; i < results.length && i < playerCount; i++) {
         const { error: updateError } = await supabase
@@ -122,7 +159,13 @@ export function GameEditForm({ gameId, gameType, results }: GameEditFormProps) {
       }
 
       setIsSubmitted(true)
-      window.location.href = `/games/${gameId}`
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["games"] }),
+        queryClient.invalidateQueries({ queryKey: ["game", gameId] }),
+        queryClient.invalidateQueries({ queryKey: ["dashboard"] }),
+        queryClient.invalidateQueries({ queryKey: ["league-detail"] }),
+      ])
+      router.push(`/games/${gameId}`)
     } catch (err) {
       setError(err instanceof Error ? err.message : "更新に失敗しました")
       setIsLoading(false)
@@ -140,7 +183,13 @@ export function GameEditForm({ gameId, gameType, results }: GameEditFormProps) {
 
       if (error) throw error
 
-      window.location.href = "/games"
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["games"] }),
+        queryClient.invalidateQueries({ queryKey: ["game", gameId] }),
+        queryClient.invalidateQueries({ queryKey: ["dashboard"] }),
+        queryClient.invalidateQueries({ queryKey: ["league-detail"] }),
+      ])
+      router.push("/games")
     } catch (err) {
       setError(err instanceof Error ? err.message : "削除に失敗しました")
       setIsDeleting(false)

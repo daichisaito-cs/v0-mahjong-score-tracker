@@ -309,6 +309,8 @@ export function GameRecordForm({
   const startingPoints = activeRule?.starting_points ?? selectedLeague?.starting_points ?? 25000
   const returnPoints = activeRule?.return_points ?? selectedLeague?.return_points ?? 30000
   const oka = selectedLeague?.oka || 0
+  const appliedRuleId = activeRule?.id ?? selectedLeague?.rule_id ?? null
+  const appliedRuleName = activeRule?.name ?? null
 
   const rulesForGameType = rules.filter((rule) => rule.game_type === gameType)
   const ruleUnavailable = isFreeGame && rulesForGameType.length === 0
@@ -558,16 +560,32 @@ export function GameRecordForm({
     const supabase = createClient()
 
     try {
-      const { data: game, error: gameError } = await supabase
-        .from("games")
-        .insert({
-          game_type: gameType,
-          league_id: leagueId === "none" ? null : leagueId,
-          created_by: currentUserId,
-          played_at: new Date().toISOString(),
-        })
-        .select()
-        .single()
+      const baseGamePayload = {
+        game_type: gameType,
+        league_id: leagueId === "none" ? null : leagueId,
+        created_by: currentUserId,
+        played_at: new Date().toISOString(),
+      }
+      const snapshotPayload = {
+        ...baseGamePayload,
+        applied_rule_id: appliedRuleId,
+        applied_rule_name: appliedRuleName,
+        applied_starting_points: startingPoints,
+        applied_return_points: returnPoints,
+        applied_uma_first: uma[0] ?? null,
+        applied_uma_second: uma[1] ?? null,
+        applied_uma_third: uma[2] ?? null,
+        applied_uma_fourth: gameType === "four_player" ? (uma[3] ?? null) : null,
+      }
+
+      let gameRes = await supabase.from("games").insert(snapshotPayload).select().single()
+      const missingSnapshotColumns =
+        gameRes.error &&
+        /applied_rule_|applied_starting_points|applied_return_points|applied_uma_/i.test(gameRes.error.message || "")
+      if (missingSnapshotColumns) {
+        gameRes = await supabase.from("games").insert(baseGamePayload).select().single()
+      }
+      const { data: game, error: gameError } = gameRes
 
       if (gameError) throw gameError
 
