@@ -33,6 +33,53 @@ interface ProfileFormProps {
   currentEmail: string
 }
 
+const MAX_UPLOAD_FILE_SIZE = 10 * 1024 * 1024
+const MAX_AVATAR_SIDE_PX = 320
+const MAX_AVATAR_DATA_URL_LENGTH = 180_000
+
+async function compressAvatarToDataUrl(file: File): Promise<string> {
+  const objectUrl = URL.createObjectURL(file)
+  try {
+    const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const img = new Image()
+      img.onload = () => resolve(img)
+      img.onerror = () => reject(new Error("画像の読み込みに失敗しました"))
+      img.src = objectUrl
+    })
+
+    const scale = Math.min(1, MAX_AVATAR_SIDE_PX / Math.max(image.width, image.height))
+    const targetWidth = Math.max(1, Math.round(image.width * scale))
+    const targetHeight = Math.max(1, Math.round(image.height * scale))
+    const canvas = document.createElement("canvas")
+    canvas.width = targetWidth
+    canvas.height = targetHeight
+
+    const context = canvas.getContext("2d")
+    if (!context) {
+      throw new Error("画像の変換に失敗しました")
+    }
+
+    context.fillStyle = "#ffffff"
+    context.fillRect(0, 0, targetWidth, targetHeight)
+    context.drawImage(image, 0, 0, targetWidth, targetHeight)
+
+    let quality = 0.85
+    let dataUrl = canvas.toDataURL("image/jpeg", quality)
+    while (dataUrl.length > MAX_AVATAR_DATA_URL_LENGTH && quality > 0.45) {
+      quality -= 0.1
+      dataUrl = canvas.toDataURL("image/jpeg", quality)
+    }
+
+    if (dataUrl.length > MAX_AVATAR_DATA_URL_LENGTH) {
+      throw new Error("画像サイズが大きすぎます。別の画像を選択してください")
+    }
+
+    return dataUrl
+  } finally {
+    URL.revokeObjectURL(objectUrl)
+  }
+}
+
 export function ProfileForm({ initialData, currentEmail }: ProfileFormProps) {
   const [displayName, setDisplayName] = useState(initialData.displayName)
   const [avatarUrl, setAvatarUrl] = useState(initialData.avatarUrl)
@@ -66,10 +113,25 @@ export function ProfileForm({ initialData, currentEmail }: ProfileFormProps) {
     const file = e.target.files?.[0]
     if (!file) return
 
-    const reader = new FileReader()
-    reader.readAsDataURL(file)
-    reader.onload = () => {
-      setTempAvatarUrl(reader.result as string)
+    if (file.size > MAX_UPLOAD_FILE_SIZE) {
+      setMessage({ type: "error", text: "画像は10MB以下を選択してください" })
+      e.currentTarget.value = ""
+      return
+    }
+
+    setIsUploading(true)
+    setMessage(null)
+    try {
+      const compressedAvatar = await compressAvatarToDataUrl(file)
+      setTempAvatarUrl(compressedAvatar)
+    } catch (error) {
+      setMessage({
+        type: "error",
+        text: error instanceof Error ? error.message : "画像の処理に失敗しました",
+      })
+    } finally {
+      setIsUploading(false)
+      e.currentTarget.value = ""
     }
   }
 
@@ -239,6 +301,7 @@ export function ProfileForm({ initialData, currentEmail }: ProfileFormProps) {
                   </div>
                   <Input id="avatar" type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                 </Label>
+                {isUploading && <p className="text-xs text-muted-foreground mt-1">画像を最適化中...</p>}
                 {tempAvatarUrl && (
                   <p className="text-xs text-muted-foreground mt-1">「更新する」ボタンを押して保存してください</p>
                 )}

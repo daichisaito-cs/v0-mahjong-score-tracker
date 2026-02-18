@@ -31,8 +31,7 @@ export default function GamesPage() {
       const gameSelect = `
           *,
           creator:profiles!games_created_by_fkey (
-            display_name,
-            avatar_url
+            display_name
           )
         `
       const chunk = <T,>(items: T[], size: number) =>
@@ -135,18 +134,18 @@ export default function GamesPage() {
 
       const gameResults = gameResultsResponses.flatMap((res) => (res.data as any[]) || [])
       const profileIds = Array.from(new Set(gameResults.map((row) => row.user_id).filter(Boolean)))
-      const profileMap = new Map<string, { display_name: string; avatar_url: string | null }>()
+      const profileMap = new Map<string, { display_name: string }>()
       if (profileIds.length > 0) {
         const profileChunks = chunk(profileIds, 100)
         const profileResponses = await Promise.all(
           profileChunks.map((ids) =>
-            supabase.from("profiles").select("id, display_name, avatar_url").in("id", ids as string[]),
+            supabase.from("profiles").select("id, display_name").in("id", ids as string[]),
           ),
         )
         for (const res of profileResponses) {
           if (res.error) throw res.error
           ;((res.data as any[]) || []).forEach((p) => {
-            profileMap.set(p.id, { display_name: p.display_name, avatar_url: p.avatar_url })
+            profileMap.set(p.id, { display_name: p.display_name })
           })
         }
       }

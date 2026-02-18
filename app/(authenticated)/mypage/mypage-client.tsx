@@ -44,8 +44,8 @@ export function MyPageClient() {
               requester_id,
               addressee_id,
               status,
-              requester:profiles!friendships_requester_id_fkey(id, display_name, friend_code, avatar_url),
-              addressee:profiles!friendships_addressee_id_fkey(id, display_name, friend_code, avatar_url)
+              requester:profiles!friendships_requester_id_fkey(id, display_name, friend_code),
+              addressee:profiles!friendships_addressee_id_fkey(id, display_name, friend_code)
             `,
           )
           .eq("status", "accepted")
@@ -56,7 +56,7 @@ export function MyPageClient() {
             `
               id,
               requester_id,
-              requester:profiles!friendships_requester_id_fkey(id, display_name, friend_code, avatar_url)
+              requester:profiles!friendships_requester_id_fkey(id, display_name, friend_code)
             `,
           )
           .eq("addressee_id", userId)
@@ -67,7 +67,7 @@ export function MyPageClient() {
             `
               id,
               addressee_id,
-              addressee:profiles!friendships_addressee_id_fkey(id, display_name, friend_code, avatar_url)
+              addressee:profiles!friendships_addressee_id_fkey(id, display_name, friend_code)
             `,
           )
           .eq("requester_id", userId)
@@ -114,7 +114,6 @@ export function MyPageClient() {
         id: friend.id,
         display_name: friend.display_name,
         friend_code: friend.friend_code,
-        avatar_url: friend.avatar_url,
       }
     }) || []
 
