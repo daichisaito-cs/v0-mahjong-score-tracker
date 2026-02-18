@@ -28,32 +28,7 @@ export default function GamesPage() {
     enabled: Boolean(user?.id),
     queryFn: async () => {
       const userId = user!.id
-
-      const [myResultsRes, memberLeaguesRes, ownedLeaguesRes] = await Promise.all([
-        supabase.from("game_results").select("game_id").eq("user_id", userId),
-        supabase.from("league_members").select("league_id").eq("user_id", userId),
-        supabase.from("leagues").select("id").eq("owner_id", userId),
-      ])
-
-      if (myResultsRes.error) throw myResultsRes.error
-      if (memberLeaguesRes.error) throw memberLeaguesRes.error
-      if (ownedLeaguesRes.error) throw ownedLeaguesRes.error
-
-      const gameIds = (myResultsRes.data || []).map((r: any) => r.game_id).filter(Boolean)
-      const leagueIds = Array.from(
-        new Set([...(memberLeaguesRes.data || []).map((m: any) => m.league_id), ...(ownedLeaguesRes.data || []).map((l: any) => l.id)]),
-      ).filter(Boolean)
-
-      const orConditions: string[] = []
-      orConditions.push(`created_by.eq.${userId}`)
-      if (gameIds.length > 0) orConditions.push(`id.in.(${gameIds.join(",")})`)
-      if (leagueIds.length > 0) orConditions.push(`league_id.in.(${leagueIds.join(",")})`)
-
-      if (orConditions.length === 0) return []
-
-      const { data, error } = await supabase
-        .from("games")
-        .select(`
+      const gameSelect = `
           *,
           creator:profiles!games_created_by_fkey (
             display_name,
@@ -72,13 +47,74 @@ export default function GamesPage() {
             created_at,
             profiles (display_name, avatar_url)
           )
-        `)
-        .or(orConditions.join(","))
+        `
+      const chunk = <T,>(items: T[], size: number) =>
+        items.reduce<T[][]>((acc, item, idx) => {
+          const i = Math.floor(idx / size)
+          if (!acc[i]) acc[i] = []
+          acc[i].push(item)
+          return acc
+        }, [])
+
+      const [myResultsRes, memberLeaguesRes, ownedLeaguesRes] = await Promise.all([
+        supabase.from("game_results").select("game_id").eq("user_id", userId),
+        supabase.from("league_members").select("league_id").eq("user_id", userId),
+        supabase.from("leagues").select("id").eq("owner_id", userId),
+      ])
+
+      if (myResultsRes.error) throw myResultsRes.error
+      if (memberLeaguesRes.error) throw memberLeaguesRes.error
+      if (ownedLeaguesRes.error) throw ownedLeaguesRes.error
+
+      const gameIds = (myResultsRes.data || []).map((r: any) => r.game_id).filter(Boolean)
+      const leagueIds = Array.from(
+        new Set([...(memberLeaguesRes.data || []).map((m: any) => m.league_id), ...(ownedLeaguesRes.data || []).map((l: any) => l.id)]),
+      ).filter(Boolean)
+      const uniqueGameIds = Array.from(new Set(gameIds))
+      const uniqueLeagueIds = Array.from(new Set(leagueIds))
+
+      const createdGamesPromise = supabase
+        .from("games")
+        .select(gameSelect)
+        .eq("created_by", userId)
         .order("played_at", { ascending: false })
         .limit(50)
 
-      if (error) throw error
-      return data || []
+      const participantGamePromises = chunk(uniqueGameIds, 20).map((ids) =>
+        supabase.from("games").select(gameSelect).in("id", ids).order("played_at", { ascending: false }).limit(50),
+      )
+
+      const leagueGamePromises = chunk(uniqueLeagueIds, 20).map((ids) =>
+        supabase
+          .from("games")
+          .select(gameSelect)
+          .in("league_id", ids)
+          .order("played_at", { ascending: false })
+          .limit(50),
+      )
+
+      const [createdGamesRes, ...rest] = await Promise.all([createdGamesPromise, ...participantGamePromises, ...leagueGamePromises])
+      if (createdGamesRes.error) throw createdGamesRes.error
+
+      for (const res of rest) {
+        if (res.error) throw res.error
+      }
+
+      const allGames = [
+        ...((createdGamesRes.data as any[]) || []),
+        ...rest.flatMap((res) => (res.data as any[]) || []),
+      ]
+
+      const deduped = new Map<string, any>()
+      for (const game of allGames) {
+        if (!deduped.has(game.id)) {
+          deduped.set(game.id, game)
+        }
+      }
+
+      return Array.from(deduped.values())
+        .sort((a, b) => new Date(b.played_at).getTime() - new Date(a.played_at).getTime())
+        .slice(0, 50)
     },
   })
 
