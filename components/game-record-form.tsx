@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { SessionSummaryDialog, type SessionResult } from "@/components/session-summary-dialog"
+import { getOptimizedAvatarUrl } from "@/lib/avatar"
 import { cn } from "@/lib/utils"
 
 interface League {
@@ -637,7 +638,6 @@ export function GameRecordForm({
 
       const { error: pruneError } = await supabase.rpc("rollup_and_prune_games_for_user", { p_keep: 30 })
       if (pruneError) {
-        // eslint-disable-next-line no-console
         console.warn("[v0] rollup_and_prune_games_for_user failed:", pruneError)
       }
 
@@ -886,7 +886,7 @@ export function GameRecordForm({
                               <SelectItem value="self">
                                 <div className="flex items-center gap-2">
                                   <Avatar className="h-6 w-6">
-                                    <AvatarImage src={currentUserAvatarUrl || undefined} />
+                                    <AvatarImage src={getOptimizedAvatarUrl(currentUserAvatarUrl, { size: 48, quality: 50 })} />
                                     <AvatarFallback>{currentUserName.charAt(0).toUpperCase()}</AvatarFallback>
                                   </Avatar>
                                   <span>{currentUserName}</span>
@@ -896,7 +896,7 @@ export function GameRecordForm({
                                 <SelectItem key={friend.id} value={friend.id}>
                                   <div className="flex items-center gap-2">
                                     <Avatar className="h-6 w-6">
-                                      <AvatarImage src={friend.avatar_url || undefined} />
+                                      <AvatarImage src={getOptimizedAvatarUrl(friend.avatar_url, { size: 48, quality: 50 })} />
                                       <AvatarFallback>{friend.display_name.charAt(0).toUpperCase()}</AvatarFallback>
                                     </Avatar>
                                     <span>{friend.display_name}</span>

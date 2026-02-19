@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { UserPlus } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { getOptimizedAvatarUrl } from "@/lib/avatar"
 
 interface Friend {
   id: string
@@ -176,7 +177,7 @@ export function LeagueMemberAdd({ leagueId, userId, existingMemberIds, onMembers
                     />
                     <div className="flex items-center gap-3 flex-1">
                       <Avatar className="h-10 w-10">
-                        <AvatarImage src={friend.avatar_url || undefined} />
+                        <AvatarImage src={getOptimizedAvatarUrl(friend.avatar_url, { size: 80, quality: 50 })} />
                         <AvatarFallback>{friend.display_name.charAt(0).toUpperCase()}</AvatarFallback>
                       </Avatar>
                       <div className="flex-1">

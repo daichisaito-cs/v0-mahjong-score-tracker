@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Home, List, Trophy, User, LogOut, Plus, Settings } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { getOptimizedAvatarUrl } from "@/lib/avatar"
 import { useEffect, useState } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { BrandLogo } from "@/components/brand-logo"
@@ -172,7 +173,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="rounded-full relative">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={profile?.avatar_url || undefined} />
+                    <AvatarImage src={getOptimizedAvatarUrl(profile?.avatar_url, { size: 64, quality: 50 })} />
                     <AvatarFallback>{profile?.display_name?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
                   </Avatar>
                   {pendingCount > 0 && (
@@ -211,7 +212,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 container mx-auto px-4 pt-6 pb-24 md:pb-6">{children}</main>
+      <main className="flex-1 container mx-auto px-4 pt-4 pb-24 md:pb-6">{children}</main>
 
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 border-t border-border bg-card">

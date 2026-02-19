@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { ArrowLeft, Edit, Trophy } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { getOptimizedAvatarUrl } from "@/lib/avatar"
 
 function isValidUUID(str: string): boolean {
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -30,6 +31,14 @@ export default function GameDetailPage() {
   const userQuery = useAuthUser()
 
   const user = userQuery.data
+
+  const handleBack = () => {
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back()
+      return
+    }
+    router.push("/games")
+  }
 
   useEffect(() => {
     if (userQuery.isFetched && !user) router.replace("/auth/login")
@@ -178,11 +187,9 @@ export default function GameDetailPage() {
     <div className="space-y-6 pb-20 md:pb-0 max-w-2xl mx-auto">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Link href="/games">
-            <Button variant="ghost" size="icon">
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-          </Link>
+          <Button type="button" variant="ghost" size="icon" onClick={handleBack}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
           <div>
             <h1 className="text-2xl font-bold text-foreground">対局詳細</h1>
             <p className="text-muted-foreground">
@@ -227,6 +234,41 @@ export default function GameDetailPage() {
               {appliedRuleSummary && <p className="text-xs text-muted-foreground mt-0.5">持ち点/返し・ウマ: {appliedRuleSummary}</p>}
             </div>
             {sortedResults.map((result, index) => (
+              (() => {
+                const displayName = result.player_name || result.profiles?.display_name || "Unknown"
+                const playerCore = (
+                  <div className="flex items-center gap-2">
+                    <Avatar className="h-8.5 w-8.5 shrink-0">
+                      <AvatarImage src={getOptimizedAvatarUrl(result.profiles?.avatar_url, { size: 72, quality: 50 })} />
+                      <AvatarFallback>{displayName.charAt(0).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0">
+                      <p className="font-semibold truncate leading-tight" title={displayName}>
+                        {displayName}
+                      </p>
+                      <p className="text-xs text-muted-foreground">席{result.seat_index ?? "-"}</p>
+                      <p className="text-sm text-muted-foreground font-bold">{result.raw_score.toLocaleString()}点</p>
+                      {Number(result.bonus_points) !== 0 && (
+                        <p className="text-xs text-muted-foreground">
+                          <span
+                            className={cn(
+                              "inline-flex items-center justify-center rounded-full border px-2 py-0.5 text-[10px] font-semibold leading-none whitespace-nowrap",
+                              Number(result.bonus_points) > 0
+                                ? "border-chart-1/40 bg-chart-1/10 text-chart-1"
+                                : "border-destructive/40 bg-destructive/10 text-destructive",
+                            )}
+                          >
+                            {Number(result.bonus_points) > 0 ? "飛び賞" : "飛び"}{" "}
+                            {Number(result.bonus_points) > 0 ? "+" : ""}
+                            {Number(result.bonus_points).toFixed(2)}pt
+                          </span>
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )
+
+                return (
               <div
                 key={result.id}
                 className={cn(
@@ -246,35 +288,13 @@ export default function GameDetailPage() {
                   >
                     {result.rank === 1 ? <Trophy className="h-5 w-5" /> : `${result.rank}位`}
                   </div>
-                  <Avatar className="h-8.5 w-8.5 shrink-0">
-                    <AvatarImage src={result.profiles?.avatar_url || undefined} />
-                    <AvatarFallback>
-                      {(result.player_name || result.profiles?.display_name || "?").charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="min-w-0">
-                    <p className="font-semibold truncate leading-tight" title={result.player_name || result.profiles?.display_name || "Unknown"}>
-                      {result.player_name || result.profiles?.display_name || "Unknown"}
-                    </p>
-                    <p className="text-xs text-muted-foreground">席{result.seat_index ?? "-"}</p>
-                    <p className="text-sm text-muted-foreground font-bold">{result.raw_score.toLocaleString()}点</p>
-                    {Number(result.bonus_points) !== 0 && (
-                      <p className="text-xs text-muted-foreground">
-                        <span
-                          className={cn(
-                            "inline-flex items-center justify-center rounded-full border px-2 py-0.5 text-[10px] font-semibold leading-none whitespace-nowrap",
-                            Number(result.bonus_points) > 0
-                              ? "border-chart-1/40 bg-chart-1/10 text-chart-1"
-                              : "border-destructive/40 bg-destructive/10 text-destructive",
-                          )}
-                        >
-                          {Number(result.bonus_points) > 0 ? "飛び賞" : "飛び"}{" "}
-                          {Number(result.bonus_points) > 0 ? "+" : ""}
-                          {Number(result.bonus_points).toFixed(2)}pt
-                        </span>
-                      </p>
-                    )}
-                  </div>
+                  {result.user_id ? (
+                    <Link href={`/users/${result.user_id}`} className="min-w-0 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                      {playerCore}
+                    </Link>
+                  ) : (
+                    playerCore
+                  )}
                 </div>
                 <div className="text-right shrink-0 w-[85px]">
                   <p
@@ -286,6 +306,8 @@ export default function GameDetailPage() {
                   <p className="text-xs text-muted-foreground">ポイント</p>
                 </div>
               </div>
+                )
+              })()
             ))}
           </div>
         </CardContent>

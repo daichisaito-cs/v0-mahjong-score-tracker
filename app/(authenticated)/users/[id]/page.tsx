@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useEffect, useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { useQuery } from "@tanstack/react-query"
@@ -15,6 +15,8 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { PointsHistoryChart } from "@/components/points-history-chart"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
+import { getOptimizedAvatarUrl } from "@/lib/avatar"
 
 export default function UserProfilePage() {
   const router = useRouter()
@@ -27,11 +29,25 @@ export default function UserProfilePage() {
     return Array.isArray(raw) ? raw[0] : raw
   }, [params])
   const fromFriendsTab = searchParams.get("from") === "friends"
-  const backHref = fromFriendsTab ? "/mypage?tab=friends" : "/mypage"
+  const backFallback = fromFriendsTab ? "/mypage?tab=friends" : "/mypage"
 
   const userQuery = useAuthUser()
+  const [isAvatarPreviewOpen, setIsAvatarPreviewOpen] = useState(false)
 
   const user = userQuery.data
+
+  const handleBack = () => {
+    if (fromFriendsTab) {
+      router.push("/mypage?tab=friends")
+      return
+    }
+
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back()
+      return
+    }
+    router.push(backFallback)
+  }
 
   useEffect(() => {
     if (userQuery.isFetched && !user) router.replace("/auth/login")
@@ -236,22 +252,41 @@ export default function UserProfilePage() {
     <div className="space-y-6 pb-20 md:pb-0">
       <div className="space-y-3">
         <Button variant="outline" size="sm" className="gap-1.5 bg-transparent" asChild>
-          <Link href={backHref}>
+          <button type="button" onClick={handleBack}>
             <ArrowLeft className="w-4 h-4 mr-0" />
             {fromFriendsTab ? "戻る" : "戻る"}
-          </Link>
+          </button>
         </Button>
         <div className="flex items-center gap-4 px-2">
-          <Avatar className="h-12 w-12 shrink-0">
-            <AvatarImage src={profile.avatar_url || undefined} />
-            <AvatarFallback>{profile.display_name?.charAt(0).toUpperCase() || "?"}</AvatarFallback>
-          </Avatar>
+          <button
+            type="button"
+            className="shrink-0 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            onClick={() => setIsAvatarPreviewOpen(true)}
+            aria-label="プロフィール画像を拡大表示"
+          >
+            <Avatar className="h-12 w-12">
+              <AvatarImage src={getOptimizedAvatarUrl(profile.avatar_url, { size: 96, quality: 55 })} />
+              <AvatarFallback>{profile.display_name?.charAt(0).toUpperCase() || "?"}</AvatarFallback>
+            </Avatar>
+          </button>
           <div>
             <h1 className="text-2xl font-bold text-foreground">{profile.display_name}さんの成績</h1>
             <p className="text-muted-foreground">フレンドの麻雀成績</p>
           </div>
         </div>
       </div>
+
+      <Dialog open={isAvatarPreviewOpen} onOpenChange={setIsAvatarPreviewOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogTitle className="sr-only">プロフィール画像</DialogTitle>
+          <div className="flex items-center justify-center py-2">
+            <Avatar className="h-56 w-56">
+              <AvatarImage src={profile.avatar_url || undefined} />
+              <AvatarFallback className="text-4xl">{profile.display_name?.charAt(0).toUpperCase() || "?"}</AvatarFallback>
+            </Avatar>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Tabs defaultValue="four_player" className="space-y-6">
         <TabsList className="grid w-full max-w-md grid-cols-2">

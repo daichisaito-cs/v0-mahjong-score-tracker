@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { ArrowLeft, Plus, Trophy, Settings } from "lucide-react"
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from "recharts"
 import { cn } from "@/lib/utils"
+import { getOptimizedAvatarUrl } from "@/lib/avatar"
 import { LeagueCreateForm } from "@/components/league-create-form"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { LeagueMemberAdd } from "@/components/league-member-add"
@@ -55,6 +56,14 @@ export default function LeagueDetailPage() {
   const userQuery = useAuthUser()
 
   const user = userQuery.data
+
+  const handleBack = () => {
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back()
+      return
+    }
+    router.push("/leagues")
+  }
 
   useEffect(() => {
     if (userQuery.isFetched && !user) router.replace("/auth/login")
@@ -471,11 +480,9 @@ export default function LeagueDetailPage() {
     <div className="space-y-6 pb-20 md:pb-0">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="flex items-start gap-3 min-w-0">
-          <Link href="/leagues">
-            <Button variant="ghost" size="icon">
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-          </Link>
+          <Button type="button" variant="ghost" size="icon" onClick={handleBack}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-2xl font-bold text-foreground break-words">{league.name}</h1>
@@ -544,15 +551,24 @@ export default function LeagueDetailPage() {
                         >
                           {rankLabel}
                         </div>
+                        <Link
+                          href={`/users/${player.odIndex}`}
+                          className="rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        >
                         <Avatar className="h-9 w-9">
-                          <AvatarImage src={player.avatarUrl || undefined} />
+                          <AvatarImage src={getOptimizedAvatarUrl(player.avatarUrl, { size: 72, quality: 50 })} />
                           <AvatarFallback>{player.name.charAt(0).toUpperCase()}</AvatarFallback>
                         </Avatar>
+                        </Link>
                       </div>
                       <div className="min-w-0">
-                        <p className="font-semibold truncate" title={player.name}>
+                        <Link
+                          href={`/users/${player.odIndex}`}
+                          className="font-semibold truncate block hover:underline"
+                          title={player.name}
+                        >
                           {player.name}
-                        </p>
+                        </Link>
                         <p className="text-xs text-muted-foreground">
                           {player.gameCount}戦 / 平均{avgRank !== null ? `${avgRank.toFixed(1)}位` : "-"}
                         </p>
@@ -602,13 +618,18 @@ export default function LeagueDetailPage() {
                   <tr key={player.odIndex} className="border-b last:border-0">
                     <td className="py-2 pr-3">
                       <div className="flex items-center gap-2">
-                        <Avatar className="h-7 w-7">
-                          <AvatarImage src={player.avatarUrl || undefined} />
-                          <AvatarFallback>{player.name.charAt(0).toUpperCase()}</AvatarFallback>
-                        </Avatar>
-                        <span className="font-semibold inline-block max-w-[180px] truncate align-middle" title={player.name}>
-                          {player.name}
-                        </span>
+                        <Link
+                          href={`/users/${player.odIndex}`}
+                          className="flex items-center gap-2 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        >
+                          <Avatar className="h-7 w-7">
+                            <AvatarImage src={getOptimizedAvatarUrl(player.avatarUrl, { size: 56, quality: 50 })} />
+                            <AvatarFallback>{player.name.charAt(0).toUpperCase()}</AvatarFallback>
+                          </Avatar>
+                          <span className="font-semibold inline-block max-w-[180px] truncate align-middle" title={player.name}>
+                            {player.name}
+                          </span>
+                        </Link>
                       </div>
                     </td>
                     {rankLabels.map((_, index) => (
@@ -730,14 +751,19 @@ export default function LeagueDetailPage() {
                 >
                   <div className="flex items-center gap-3 flex-1 min-w-0 pr-3">
                     <span className="text-sm font-semibold text-muted-foreground">#{player.rankLabel}</span>
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={player.avatarUrl || undefined} />
-                      <AvatarFallback>{player.name.charAt(0).toUpperCase()}</AvatarFallback>
-                    </Avatar>
+                    <Link
+                      href={`/users/${player.odIndex}`}
+                      className="rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={getOptimizedAvatarUrl(player.avatarUrl, { size: 64, quality: 50 })} />
+                        <AvatarFallback>{player.name.charAt(0).toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                    </Link>
                     <div className="min-w-0">
-                      <p className="font-semibold text-sm truncate" title={player.name}>
+                      <Link href={`/users/${player.odIndex}`} className="font-semibold text-sm truncate block hover:underline" title={player.name}>
                         {player.name}
-                      </p>
+                      </Link>
                       <p className="text-xs text-muted-foreground">{player.gameCount}戦</p>
                     </div>
                   </div>
@@ -765,14 +791,19 @@ export default function LeagueDetailPage() {
                 >
                   <div className="flex items-center gap-3 flex-1 min-w-0 pr-3">
                     <span className="text-sm font-semibold text-muted-foreground">#{player.rankLabel}</span>
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={player.avatarUrl || undefined} />
-                      <AvatarFallback>{player.name.charAt(0).toUpperCase()}</AvatarFallback>
-                    </Avatar>
+                    <Link
+                      href={`/users/${player.odIndex}`}
+                      className="rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={getOptimizedAvatarUrl(player.avatarUrl, { size: 64, quality: 50 })} />
+                        <AvatarFallback>{player.name.charAt(0).toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                    </Link>
                     <div className="min-w-0">
-                      <p className="font-semibold text-sm truncate" title={player.name}>
+                      <Link href={`/users/${player.odIndex}`} className="font-semibold text-sm truncate block hover:underline" title={player.name}>
                         {player.name}
-                      </p>
+                      </Link>
                       <p className="text-xs text-muted-foreground">{player.gameCount}戦</p>
                     </div>
                   </div>
@@ -846,7 +877,14 @@ export default function LeagueDetailPage() {
                             <div className="flex flex-col items-center gap-1">
                               <Avatar className="h-10 w-10">
                                 <AvatarImage
-                                  src={seat.first?.user_id ? profileMap.get(seat.first.user_id)?.avatarUrl || undefined : undefined}
+                                  src={
+                                    seat.first?.user_id
+                                      ? getOptimizedAvatarUrl(profileMap.get(seat.first.user_id)?.avatarUrl, {
+                                          size: 80,
+                                          quality: 50,
+                                        })
+                                      : undefined
+                                  }
                                 />
                                 <AvatarFallback>
                                   {(seat.first?.player_name || seat.first?.profiles?.display_name || "?")

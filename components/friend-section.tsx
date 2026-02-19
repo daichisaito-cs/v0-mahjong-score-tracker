@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Users, Search, UserPlus, Check, X, Copy, Clock, TrendingUp, Mail } from "lucide-react"
 import Link from "next/link"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { getOptimizedAvatarUrl } from "@/lib/avatar"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 
 type Friend = {
@@ -293,7 +294,7 @@ export function FriendSection({ currentUserId, friendCode, friends, pendingReque
           <div className="flex items-center justify-between p-3 bg-accent/20 rounded-lg">
               <div className="flex items-center gap-3">
                 <Avatar className="h-9 w-9">
-                  <AvatarImage src={searchResult.avatar_url || undefined} />
+                  <AvatarImage src={getOptimizedAvatarUrl(searchResult.avatar_url, { size: 72, quality: 50 })} />
                   <AvatarFallback>
                     {searchResult.display_name ? searchResult.display_name.charAt(0).toUpperCase() : "?"}
                   </AvatarFallback>
@@ -323,7 +324,7 @@ export function FriendSection({ currentUserId, friendCode, friends, pendingReque
                 <div key={request.id} className="flex items-center justify-between p-3 border border-border rounded-lg">
                   <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10">
-                      <AvatarImage src={request.requester.avatar_url || undefined} />
+                      <AvatarImage src={getOptimizedAvatarUrl(request.requester.avatar_url, { size: 80, quality: 50 })} />
                       <AvatarFallback>
                         {request.requester.display_name.charAt(0).toUpperCase()}
                       </AvatarFallback>
@@ -369,7 +370,7 @@ export function FriendSection({ currentUserId, friendCode, friends, pendingReque
                 >
                   <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10">
-                      <AvatarImage src={request.addressee.avatar_url || undefined} />
+                      <AvatarImage src={getOptimizedAvatarUrl(request.addressee.avatar_url, { size: 80, quality: 50 })} />
                       <AvatarFallback>
                         {request.addressee.display_name.charAt(0).toUpperCase()}
                       </AvatarFallback>
@@ -403,7 +404,7 @@ export function FriendSection({ currentUserId, friendCode, friends, pendingReque
                   <Link href={`/users/${friend.id}?from=friends`} className="flex-1">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10">
-                        <AvatarImage src={friend.avatar_url || undefined} />
+                        <AvatarImage src={getOptimizedAvatarUrl(friend.avatar_url, { size: 80, quality: 50 })} />
                         <AvatarFallback>{friend.display_name.charAt(0).toUpperCase()}</AvatarFallback>
                       </Avatar>
                       <div>

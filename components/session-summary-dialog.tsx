@@ -15,6 +15,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Trophy } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { getOptimizedAvatarUrl } from "@/lib/avatar"
 
 export type SessionPlayer = {
   name: string
@@ -91,7 +92,6 @@ export function SessionSummaryDialog({ open, sessionResults, leagueName, onClose
       link.download = `session-total.png`
       link.click()
     } catch (error) {
-      // eslint-disable-next-line no-console
       console.warn("[v0] failed to export session summary image:", error)
     } finally {
       setIsCapturing(false)
@@ -137,7 +137,7 @@ export function SessionSummaryDialog({ open, sessionResults, leagueName, onClose
                     <div className="flex items-center gap-2">
                       {player.avatarUrl && (
                         <Avatar className="h-9 w-9">
-                          <AvatarImage src={player.avatarUrl} />
+                          <AvatarImage src={getOptimizedAvatarUrl(player.avatarUrl, { size: 72, quality: 50 })} />
                           <AvatarFallback>{player.name.charAt(0).toUpperCase()}</AvatarFallback>
                         </Avatar>
                       )}

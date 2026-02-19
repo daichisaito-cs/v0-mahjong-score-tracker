@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Calculator, Trophy } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { getOptimizedAvatarUrl } from "@/lib/avatar"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { toPng } from "html-to-image"
 import { createClient } from "@/lib/supabase/client"
@@ -278,7 +279,7 @@ export function GamesList({ games }: GamesListProps) {
                       </div>
                       <div className="flex items-center gap-2">
                         <Avatar className="h-9 w-9">
-                          <AvatarImage src={player.avatarUrl || undefined} />
+                          <AvatarImage src={getOptimizedAvatarUrl(player.avatarUrl, { size: 72, quality: 50 })} />
                           <AvatarFallback>{player.name.charAt(0).toUpperCase()}</AvatarFallback>
                         </Avatar>
                         <div className="font-semibold text-sm">{player.name}</div>
