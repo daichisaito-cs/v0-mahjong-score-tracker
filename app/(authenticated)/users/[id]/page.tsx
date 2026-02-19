@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { PointsHistoryChart } from "@/components/points-history-chart"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 export default function UserProfilePage() {
   const router = useRouter()
@@ -41,7 +42,7 @@ export default function UserProfilePage() {
     enabled: Boolean(user?.id && userId),
     queryFn: async () => {
       const [profileRes, friendshipRes, resultsRes, rollupsRes] = await Promise.all([
-        supabase.from("profiles").select("id, display_name").eq("id", userId!).single(),
+        supabase.from("profiles").select("id, display_name, avatar_url").eq("id", userId!).single(),
         supabase
           .from("friendships")
           .select("id")
@@ -233,16 +234,22 @@ export default function UserProfilePage() {
 
   return (
     <div className="space-y-6 pb-20 md:pb-0">
-      <div className="flex items-start gap-3">
-        <Button variant="outline" size="sm" className="gap-1.5 shrink-0 mt-1 bg-transparent" asChild>
+      <div className="space-y-3">
+        <Button variant="outline" size="sm" className="gap-1.5 bg-transparent" asChild>
           <Link href={backHref}>
             <ArrowLeft className="w-4 h-4 mr-0" />
             {fromFriendsTab ? "戻る" : "戻る"}
           </Link>
         </Button>
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">{profile.display_name}さんの成績</h1>
-          <p className="text-muted-foreground">フレンドの麻雀成績</p>
+        <div className="flex items-center gap-4 px-2">
+          <Avatar className="h-12 w-12 shrink-0">
+            <AvatarImage src={profile.avatar_url || undefined} />
+            <AvatarFallback>{profile.display_name?.charAt(0).toUpperCase() || "?"}</AvatarFallback>
+          </Avatar>
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">{profile.display_name}さんの成績</h1>
+            <p className="text-muted-foreground">フレンドの麻雀成績</p>
+          </div>
         </div>
       </div>
 

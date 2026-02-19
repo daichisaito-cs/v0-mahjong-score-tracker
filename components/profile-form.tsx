@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -35,9 +35,10 @@ interface ProfileFormProps {
 
 const MAX_UPLOAD_FILE_SIZE = 10 * 1024 * 1024
 const MAX_AVATAR_SIDE_PX = 320
-const MAX_AVATAR_DATA_URL_LENGTH = 180_000
+const MAX_AVATAR_UPLOAD_BYTES = 220_000
+const AVATAR_BUCKET = "avatars"
 
-async function compressAvatarToDataUrl(file: File): Promise<string> {
+async function compressAvatarToJpegBlob(file: File): Promise<Blob> {
   const objectUrl = URL.createObjectURL(file)
   try {
     const image = await new Promise<HTMLImageElement>((resolve, reject) => {
@@ -63,18 +64,33 @@ async function compressAvatarToDataUrl(file: File): Promise<string> {
     context.fillRect(0, 0, targetWidth, targetHeight)
     context.drawImage(image, 0, 0, targetWidth, targetHeight)
 
+    const toBlob = (quality: number) =>
+      new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              reject(new Error("画像の変換に失敗しました"))
+              return
+            }
+            resolve(blob)
+          },
+          "image/jpeg",
+          quality,
+        )
+      })
+
     let quality = 0.85
-    let dataUrl = canvas.toDataURL("image/jpeg", quality)
-    while (dataUrl.length > MAX_AVATAR_DATA_URL_LENGTH && quality > 0.45) {
+    let blob = await toBlob(quality)
+    while (blob.size > MAX_AVATAR_UPLOAD_BYTES && quality > 0.45) {
       quality -= 0.1
-      dataUrl = canvas.toDataURL("image/jpeg", quality)
+      blob = await toBlob(quality)
     }
 
-    if (dataUrl.length > MAX_AVATAR_DATA_URL_LENGTH) {
+    if (blob.size > MAX_AVATAR_UPLOAD_BYTES) {
       throw new Error("画像サイズが大きすぎます。別の画像を選択してください")
     }
 
-    return dataUrl
+    return blob
   } finally {
     URL.revokeObjectURL(objectUrl)
   }
@@ -84,6 +100,7 @@ export function ProfileForm({ initialData, currentEmail }: ProfileFormProps) {
   const [displayName, setDisplayName] = useState(initialData.displayName)
   const [avatarUrl, setAvatarUrl] = useState(initialData.avatarUrl)
   const [tempAvatarUrl, setTempAvatarUrl] = useState<string | null>(null)
+  const [tempAvatarFile, setTempAvatarFile] = useState<File | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
@@ -109,6 +126,12 @@ export function ProfileForm({ initialData, currentEmail }: ProfileFormProps) {
   const queryClient = useQueryClient()
   const deleteKeyword = "DELETE"
 
+  useEffect(() => {
+    return () => {
+      if (tempAvatarUrl) URL.revokeObjectURL(tempAvatarUrl)
+    }
+  }, [tempAvatarUrl])
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -122,8 +145,14 @@ export function ProfileForm({ initialData, currentEmail }: ProfileFormProps) {
     setIsUploading(true)
     setMessage(null)
     try {
-      const compressedAvatar = await compressAvatarToDataUrl(file)
-      setTempAvatarUrl(compressedAvatar)
+      const compressedAvatar = await compressAvatarToJpegBlob(file)
+      const nextFile = new File([compressedAvatar], "avatar.jpg", { type: "image/jpeg" })
+      const previewUrl = URL.createObjectURL(nextFile)
+      setTempAvatarUrl((prev) => {
+        if (prev) URL.revokeObjectURL(prev)
+        return previewUrl
+      })
+      setTempAvatarFile(nextFile)
     } catch (error) {
       setMessage({
         type: "error",
@@ -154,8 +183,24 @@ export function ProfileForm({ initialData, currentEmail }: ProfileFormProps) {
       updated_at: new Date().toISOString(),
     }
 
-    if (tempAvatarUrl) {
-      updates.avatar_url = tempAvatarUrl
+    let nextAvatarUrl = avatarUrl
+    if (tempAvatarFile) {
+      const filePath = `${userData.user.id}/${Date.now()}-avatar.jpg`
+      const { error: uploadError } = await supabase.storage
+        .from(AVATAR_BUCKET)
+        .upload(filePath, tempAvatarFile, { cacheControl: "31536000", upsert: true, contentType: "image/jpeg" })
+      if (uploadError) {
+        setMessage({
+          type: "error",
+          text: "画像アップロードに失敗しました。Storage設定を確認してください",
+        })
+        setIsLoading(false)
+        return
+      }
+
+      const { data: publicData } = supabase.storage.from(AVATAR_BUCKET).getPublicUrl(filePath)
+      nextAvatarUrl = publicData.publicUrl
+      updates.avatar_url = nextAvatarUrl
     }
 
     const { error } = await supabase.from("profiles").update(updates).eq("id", userData.user.id)
@@ -164,14 +209,16 @@ export function ProfileForm({ initialData, currentEmail }: ProfileFormProps) {
       setMessage({ type: "error", text: "更新に失敗しました" })
     } else {
       setMessage({ type: "success", text: "プロフィールを更新しました" })
-      setAvatarUrl(tempAvatarUrl || avatarUrl)
+      setAvatarUrl(nextAvatarUrl)
+      if (tempAvatarUrl) URL.revokeObjectURL(tempAvatarUrl)
       setTempAvatarUrl(null)
+      setTempAvatarFile(null)
 
       window.dispatchEvent(
         new CustomEvent("profile-updated", {
           detail: {
             display_name: displayName,
-            avatar_url: tempAvatarUrl || avatarUrl,
+            avatar_url: nextAvatarUrl,
           },
         }),
       )

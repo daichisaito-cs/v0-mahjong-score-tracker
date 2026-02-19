@@ -79,7 +79,6 @@ export default function GameDetailPage() {
           .from("profiles")
           .select("id, avatar_url")
           .in("id", userIds)
-          .not("avatar_url", "like", "data:%")
         if (avatarError) throw avatarError
         ;(avatarRows || []).forEach((row: any) => {
           avatarMap.set(row.id, row.avatar_url || null)

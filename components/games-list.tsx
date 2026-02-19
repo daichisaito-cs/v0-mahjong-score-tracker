@@ -83,7 +83,6 @@ export function GamesList({ games }: GamesListProps) {
           .from("profiles")
           .select("id, avatar_url")
           .in("id", ids)
-          .not("avatar_url", "like", "data:%")
 
         if (error) continue
         ;(data || []).forEach((profile: { id: string; avatar_url: string | null }) => {

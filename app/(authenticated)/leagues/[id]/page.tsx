@@ -165,7 +165,6 @@ export default function LeagueDetailPage() {
           .from("profiles")
           .select("id, avatar_url")
           .in("id", seedIds)
-          .not("avatar_url", "like", "data:%")
         if (avatarError) {
           console.warn("[v0] failed to load avatars:", avatarError)
         } else {
