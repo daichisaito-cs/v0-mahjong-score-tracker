@@ -1,25 +1,87 @@
-import { Suspense } from "react"
-import { Card, CardContent } from "@/components/ui/card"
+import { redirect } from "next/navigation"
+import { createClient } from "@/lib/supabase/server"
 import { MyPageClient } from "./mypage-client"
 
-function MyPageFallback() {
-  return (
-    <div className="space-y-6 pb-20 md:pb-0 max-w-2xl mx-auto">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">マイページ</h1>
-        <p className="text-muted-foreground">プロフィールとフレンド管理</p>
-      </div>
-      <Card>
-        <CardContent className="py-12 text-center text-muted-foreground">読み込み中...</CardContent>
-      </Card>
-    </div>
-  )
-}
+export default async function MyPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string }>
+}) {
+  const { tab } = await searchParams
+  const initialTab = tab === "friends" ? "friends" : "profile"
 
-export default function MyPage() {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) redirect("/auth/login")
+
+  const userId = user.id
+
+  const [profileRes, friendshipsRes, pendingRes, sentRes] = await Promise.all([
+    supabase.from("profiles").select("*").eq("id", userId).single(),
+    supabase
+      .from("friendships")
+      .select(
+        `
+        id,
+        requester_id,
+        addressee_id,
+        status,
+        requester:profiles!friendships_requester_id_fkey(id, display_name, friend_code, avatar_url),
+        addressee:profiles!friendships_addressee_id_fkey(id, display_name, friend_code, avatar_url)
+      `,
+      )
+      .eq("status", "accepted")
+      .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`),
+    supabase
+      .from("friendships")
+      .select(
+        `
+        id,
+        requester_id,
+        requester:profiles!friendships_requester_id_fkey(id, display_name, friend_code, avatar_url)
+      `,
+      )
+      .eq("addressee_id", userId)
+      .eq("status", "pending"),
+    supabase
+      .from("friendships")
+      .select(
+        `
+        id,
+        addressee_id,
+        addressee:profiles!friendships_addressee_id_fkey(id, display_name, friend_code, avatar_url)
+      `,
+      )
+      .eq("requester_id", userId)
+      .eq("status", "pending"),
+  ])
+
+  if (profileRes.error) throw profileRes.error
+
+  const profile = profileRes.data
+  const friendships = (friendshipsRes.data || []) as any[]
+  const friends = friendships.map((f: any) => {
+    const friend = f.requester_id === userId ? f.addressee : f.requester
+    return {
+      id: friend.id,
+      display_name: friend.display_name,
+      friend_code: friend.friend_code,
+      avatar_url: friend.avatar_url || null,
+    }
+  })
+
   return (
-    <Suspense fallback={<MyPageFallback />}>
-      <MyPageClient />
-    </Suspense>
+    <MyPageClient
+      userId={userId}
+      userEmail={user.email || ""}
+      initialTab={initialTab}
+      profile={profile}
+      friends={friends}
+      pendingRequests={(pendingRes.data || []) as any[]}
+      sentRequests={(sentRes.data || []) as any[]}
+    />
   )
 }

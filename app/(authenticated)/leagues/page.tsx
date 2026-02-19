@@ -1,72 +1,61 @@
-"use client"
-
-import { useEffect } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { useQuery } from "@tanstack/react-query"
-import { createClient } from "@/lib/supabase/client"
-import { useAuthUser } from "@/lib/hooks/use-auth-user"
+import { redirect } from "next/navigation"
+import { createClient } from "@/lib/supabase/server"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Calendar, FileText, Plus, Users } from "lucide-react"
 
-export default function LeaguesPage() {
-  const router = useRouter()
-  const supabase = createClient()
+export default async function LeaguesPage() {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  const userQuery = useAuthUser()
+  if (!user) redirect("/auth/login")
 
-  const user = userQuery.data
+  const userId = user.id
 
-  useEffect(() => {
-    if (userQuery.isFetched && !user) router.replace("/auth/login")
-  }, [router, user, userQuery.isFetched])
+  const { data: memberships, error: membershipError } = await supabase
+    .from("league_members")
+    .select("league_id")
+    .eq("user_id", userId)
+  if (membershipError) throw membershipError
 
-  const leaguesQuery = useQuery({
-    queryKey: ["leagues", user?.id],
-    enabled: Boolean(user?.id),
-    queryFn: async () => {
-      const userId = user!.id
-      const { data: memberships, error: membershipError } = await supabase
-        .from("league_members")
-        .select("league_id")
-        .eq("user_id", userId)
-      if (membershipError) throw membershipError
+  const leagueIds = (memberships || []).map((m: any) => m.league_id).filter(Boolean)
 
-      const leagueIds = (memberships || []).map((m: any) => m.league_id).filter(Boolean)
-      const query = supabase
-        .from("leagues")
-        .select(
-          `
-          id,
-          name,
-          description,
-          game_type,
-          owner_id,
-          created_at,
-          league_members (count),
-          rules (name)
-        `,
-        )
-        .order("created_at", { ascending: false })
+  const query = supabase
+    .from("leagues")
+    .select(
+      `
+      id,
+      name,
+      description,
+      game_type,
+      owner_id,
+      created_at,
+      league_members (count),
+      rules (name)
+    `,
+    )
+    .order("created_at", { ascending: false })
 
-      const leaguesRes =
-        leagueIds.length > 0
-          ? await query.or(`owner_id.eq.${userId},id.in.(${leagueIds.join(",")})`)
-          : await query.eq("owner_id", userId)
-      if (leaguesRes.error) throw leaguesRes.error
-      const leagues = (leaguesRes.data as any[]) || []
+  const leaguesRes =
+    leagueIds.length > 0
+      ? await query.or(`owner_id.eq.${userId},id.in.(${leagueIds.join(",")})`)
+      : await query.eq("owner_id", userId)
+  if (leaguesRes.error) throw leaguesRes.error
+  const leaguesRaw = (leaguesRes.data as any[]) || []
 
-      if (leagues.length === 0) return []
+  let leagues: any[] = leaguesRaw
 
-      const leagueIdsForGames = leagues.map((league) => league.id)
-      const { data: gamesData, error: gamesError } = await supabase
-        .from("games")
-        .select("league_id, played_at")
-        .in("league_id", leagueIdsForGames)
+  if (leaguesRaw.length > 0) {
+    const leagueIdsForGames = leaguesRaw.map((league) => league.id)
+    const { data: gamesData, error: gamesError } = await supabase
+      .from("games")
+      .select("league_id, played_at")
+      .in("league_id", leagueIdsForGames)
 
-      if (gamesError) throw gamesError
-
+    if (!gamesError) {
       const statsMap = new Map<string, { count: number; start: string | null; end: string | null }>()
       ;(gamesData || []).forEach((game: any) => {
         if (!game.league_id) return
@@ -80,35 +69,13 @@ export default function LeaguesPage() {
         statsMap.set(game.league_id, current)
       })
 
-      return leagues.map((league) => {
+      leagues = leaguesRaw.map((league) => {
         const stats = statsMap.get(league.id) || { count: 0, start: null, end: null }
-        return {
-          ...league,
-          matchCount: stats.count,
-          periodStart: stats.start,
-          periodEnd: stats.end,
-        }
+        return { ...league, matchCount: stats.count, periodStart: stats.start, periodEnd: stats.end }
       })
-    },
-  })
-
-  if (userQuery.isLoading || (userQuery.isFetched && !user)) {
-    return (
-      <div className="space-y-6 pb-20 md:pb-0">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">リーグ</h1>
-            <p className="text-muted-foreground">参加中のリーグ一覧</p>
-          </div>
-        </div>
-        <Card>
-          <CardContent className="py-12 text-center text-muted-foreground">読み込み中...</CardContent>
-        </Card>
-      </div>
-    )
+    }
   }
 
-  const leagues = (leaguesQuery.data as any[]) || []
   const formatDate = (value?: string | null) => (value ? new Date(value).toLocaleDateString("ja-JP") : "")
   const formatPeriod = (start?: string | null, end?: string | null) => {
     if (!start && !end) return "期間未設定"
@@ -132,11 +99,7 @@ export default function LeaguesPage() {
         </Link>
       </div>
 
-      {leaguesQuery.isLoading ? (
-        <Card>
-          <CardContent className="py-12 text-center text-muted-foreground">読み込み中...</CardContent>
-        </Card>
-      ) : leagues.length > 0 ? (
+      {leagues.length > 0 ? (
         <div className="grid gap-4 md:grid-cols-2">
           {leagues.map((league) => (
             <Link key={league.id} href={`/leagues/${league.id}`}>
