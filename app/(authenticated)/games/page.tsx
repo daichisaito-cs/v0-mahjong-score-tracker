@@ -134,18 +134,18 @@ export default function GamesPage() {
 
       const gameResults = gameResultsResponses.flatMap((res) => (res.data as any[]) || [])
       const profileIds = Array.from(new Set(gameResults.map((row) => row.user_id).filter(Boolean)))
-      const profileMap = new Map<string, { display_name: string }>()
+      const profileMap = new Map<string, { display_name: string; avatar_url: string | null }>()
       if (profileIds.length > 0) {
         const profileChunks = chunk(profileIds, 100)
         const profileResponses = await Promise.all(
           profileChunks.map((ids) =>
-            supabase.from("profiles").select("id, display_name").in("id", ids as string[]),
+            supabase.from("profiles").select("id, display_name, avatar_url").in("id", ids as string[]),
           ),
         )
         for (const res of profileResponses) {
           if (res.error) throw res.error
           ;((res.data as any[]) || []).forEach((p) => {
-            profileMap.set(p.id, { display_name: p.display_name })
+            profileMap.set(p.id, { display_name: p.display_name, avatar_url: p.avatar_url || null })
           })
         }
       }

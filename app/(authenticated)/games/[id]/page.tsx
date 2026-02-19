@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Edit, Trophy } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 function isValidUUID(str: string): boolean {
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -62,7 +62,7 @@ export default function GameDetailPage() {
             point,
             bonus_points,
             created_at,
-            profiles (display_name)
+            profiles (display_name, avatar_url)
           )
         `,
         )
@@ -221,6 +221,7 @@ export default function GameDetailPage() {
                     {result.rank === 1 ? <Trophy className="h-5 w-5" /> : `${result.rank}位`}
                   </div>
                   <Avatar className="h-8.5 w-8.5 shrink-0">
+                    <AvatarImage src={result.profiles?.avatar_url || undefined} />
                     <AvatarFallback>
                       {(result.player_name || result.profiles?.display_name || "?").charAt(0).toUpperCase()}
                     </AvatarFallback>

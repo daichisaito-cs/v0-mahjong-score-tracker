@@ -223,12 +223,10 @@ export function GamesList({ games }: GamesListProps) {
                         {player.rankLabel === 1 ? <Trophy className="h-4 w-4" /> : player.rankLabel}
                       </div>
                       <div className="flex items-center gap-2">
-                        {player.avatarUrl && (
-                          <Avatar className="h-9 w-9">
-                            <AvatarImage src={player.avatarUrl} />
-                            <AvatarFallback>{player.name.charAt(0).toUpperCase()}</AvatarFallback>
-                          </Avatar>
-                        )}
+                        <Avatar className="h-9 w-9">
+                          <AvatarImage src={player.avatarUrl || undefined} />
+                          <AvatarFallback>{player.name.charAt(0).toUpperCase()}</AvatarFallback>
+                        </Avatar>
                         <div className="font-semibold text-sm">{player.name}</div>
                       </div>
                     </div>
