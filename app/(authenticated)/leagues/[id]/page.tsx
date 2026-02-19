@@ -67,22 +67,26 @@ export default function LeagueDetailPage() {
     queryKey: ["league-detail", leagueId, user?.id],
     enabled: Boolean(user?.id && isValidLeagueId),
     queryFn: async () => {
-      const { data: league, error: leagueError } = await supabase.from("leagues").select("*").eq("id", leagueId).single()
+      const { data: league, error: leagueError } = await supabase
+        .from("leagues")
+        .select("id, name, description, game_type, owner_id")
+        .eq("id", leagueId)
+        .single()
       if (leagueError) throw leagueError
       if (!league) return null
 
       const { data: members, error: membersError } = await supabase
         .from("league_members")
-        .select("user_id, profiles(id, display_name, friend_code, avatar_url)")
+        .select("user_id, profiles(id, display_name, friend_code)")
         .eq("league_id", leagueId)
       if (membersError) throw membersError
 
       const memberIds = (members || []).map((m: any) => m.user_id).filter(Boolean)
-      let ownerProfile: { id: string; display_name: string | null; avatar_url: string | null } | null = null
+      let ownerProfile: { id: string; display_name: string | null } | null = null
       if (!memberIds.includes(league.owner_id)) {
         const { data: profileRow } = await supabase
           .from("profiles")
-          .select("id, display_name, avatar_url")
+          .select("id, display_name")
           .eq("id", league.owner_id)
           .maybeSingle()
         ownerProfile = profileRow || null
@@ -90,44 +94,39 @@ export default function LeagueDetailPage() {
 
       const { data: games, error: gamesError } = await supabase
         .from("games")
-        .select("*")
+        .select("id, game_type, played_at, created_at")
         .eq("league_id", leagueId)
         .order("played_at", { ascending: false })
       if (gamesError) throw gamesError
 
       const gameIds = (games || []).map((g: any) => g.id).filter(Boolean)
       const gameResultsByGameId = new Map<string, any[]>()
+      const resultUserIds = new Set<string>()
       if (gameIds.length > 0) {
         const { data: gameResults, error: gameResultsError } = await supabase
           .from("game_results")
           .select(
             `
-            *
+            id,
+            game_id,
+            seat_index,
+            user_id,
+            player_name,
+            rank,
+            raw_score,
+            point,
+            bonus_points,
+            created_at,
+            profiles(display_name)
           `,
           )
           .in("game_id", gameIds)
         if (gameResultsError) throw gameResultsError
 
-        const profileIds = Array.from(new Set((gameResults || []).map((row: any) => row.user_id).filter(Boolean)))
-        const profileMap = new Map<string, { display_name: string; avatar_url: string | null }>()
-        if (profileIds.length > 0) {
-          const { data: profilesData, error: gameResultProfilesError } = await supabase
-            .from("profiles")
-            .select("id, display_name, avatar_url")
-            .in("id", profileIds)
-          if (gameResultProfilesError) throw gameResultProfilesError
-          ;(profilesData || []).forEach((p: any) => {
-            profileMap.set(p.id, { display_name: p.display_name, avatar_url: p.avatar_url })
-          })
-        }
-
         ;(gameResults || []).forEach((row: any) => {
-          const hydratedRow = {
-            ...row,
-            profiles: row.user_id ? profileMap.get(row.user_id) || null : null,
-          }
+          if (row.user_id) resultUserIds.add(row.user_id)
           const list = gameResultsByGameId.get(row.game_id) || []
-          list.push(hydratedRow)
+          list.push(row)
           gameResultsByGameId.set(row.game_id, list)
         })
       }
@@ -146,17 +145,33 @@ export default function LeagueDetailPage() {
       }
 
       const rollupUserIds = (leagueRollups || []).map((r: any) => r.user_id).filter(Boolean)
-      const seedIds = Array.from(new Set([...memberIds, league.owner_id, ...rollupUserIds]))
-      let extraProfiles: Array<{ id: string; display_name: string | null; avatar_url: string | null }> = []
+      const seedIds = Array.from(new Set([...memberIds, league.owner_id, ...rollupUserIds, ...resultUserIds]))
+      let extraProfiles: Array<{ id: string; display_name: string | null }> = []
       if (seedIds.length > 0) {
         const { data: profilesData, error: profilesError } = await supabase
           .from("profiles")
-          .select("id, display_name, avatar_url")
+          .select("id, display_name")
           .in("id", seedIds)
         if (profilesError) {
           console.warn("[v0] failed to load profiles:", profilesError)
         } else {
           extraProfiles = profilesData || []
+        }
+      }
+
+      const avatarMap: Record<string, string | null> = {}
+      if (seedIds.length > 0) {
+        const { data: avatarRows, error: avatarError } = await supabase
+          .from("profiles")
+          .select("id, avatar_url")
+          .in("id", seedIds)
+          .not("avatar_url", "like", "data:%")
+        if (avatarError) {
+          console.warn("[v0] failed to load avatars:", avatarError)
+        } else {
+          ;(avatarRows || []).forEach((row: any) => {
+            avatarMap[row.id] = row.avatar_url || null
+          })
         }
       }
 
@@ -167,6 +182,7 @@ export default function LeagueDetailPage() {
         games: gamesWithResults,
         leagueRollups: leagueRollups || [],
         extraProfiles,
+        avatarMap,
       }
     },
   })
@@ -224,13 +240,13 @@ export default function LeagueDetailPage() {
     )
   }
 
-  const { league, members, ownerProfile, games, leagueRollups, extraProfiles } = data
+  const { league, members, ownerProfile, games, leagueRollups, extraProfiles, avatarMap } = data
   const rankLabels = league.game_type === "four_player" ? ["1位", "2位", "3位", "4位"] : ["1位", "2位", "3位"]
 
   const profileMap = new Map<string, { name: string; avatarUrl?: string | null }>()
   extraProfiles?.forEach((p: any) => {
     if (!p?.id) return
-    profileMap.set(p.id, { name: p.display_name || "ユーザー", avatarUrl: p.avatar_url || null })
+    profileMap.set(p.id, { name: p.display_name || "ユーザー", avatarUrl: avatarMap?.[p.id] || null })
   })
 
   const playerStats: Record<
@@ -254,7 +270,7 @@ export default function LeagueDetailPage() {
       const odIndex = result.user_id
       const fallbackProfile = profileMap.get(odIndex)
       const name = result.profiles?.display_name || result.player_name || fallbackProfile?.name || "Unknown"
-      const avatarUrl = (result.profiles as any)?.avatar_url || fallbackProfile?.avatarUrl
+      const avatarUrl = fallbackProfile?.avatarUrl
 
       if (!playerStats[odIndex]) {
         playerStats[odIndex] = {
@@ -334,14 +350,14 @@ export default function LeagueDetailPage() {
     seedPlayers.push({
       id: member.user_id,
       name: (member.profiles as any)?.display_name || profileMap.get(member.user_id)?.name || "メンバー",
-      avatarUrl: (member.profiles as any)?.avatar_url || profileMap.get(member.user_id)?.avatarUrl,
+      avatarUrl: profileMap.get(member.user_id)?.avatarUrl,
     })
   })
   if (!members?.some((m: any) => m.user_id === league.owner_id)) {
     seedPlayers.push({
       id: league.owner_id,
       name: ownerProfile?.display_name || profileMap.get(league.owner_id)?.name || "オーナー",
-      avatarUrl: ownerProfile?.avatar_url || profileMap.get(league.owner_id)?.avatarUrl || null,
+      avatarUrl: profileMap.get(league.owner_id)?.avatarUrl || null,
     })
   }
 
@@ -830,7 +846,9 @@ export default function LeagueDetailPage() {
                           <div key={`${game.id}-seat-${seat.seat}`} className="text-center min-w-0">
                             <div className="flex flex-col items-center gap-1">
                               <Avatar className="h-10 w-10">
-                                <AvatarImage src={(seat.first?.profiles as any)?.avatar_url || undefined} />
+                                <AvatarImage
+                                  src={seat.first?.user_id ? profileMap.get(seat.first.user_id)?.avatarUrl || undefined : undefined}
+                                />
                                 <AvatarFallback>
                                   {(seat.first?.player_name || seat.first?.profiles?.display_name || "?")
                                     .charAt(0)

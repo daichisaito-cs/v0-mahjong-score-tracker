@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -10,6 +10,7 @@ import { Calculator, Trophy } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { toPng } from "html-to-image"
+import { createClient } from "@/lib/supabase/client"
 
 interface Game {
   id: string
@@ -40,16 +41,71 @@ interface GamesListProps {
 }
 
 export function GamesList({ games }: GamesListProps) {
+  const supabase = createClient()
   const [selectedGames, setSelectedGames] = useState<string[]>([])
   const [isTotalOpen, setIsTotalOpen] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [isCapturing, setIsCapturing] = useState(false)
+  const [avatarByUserId, setAvatarByUserId] = useState<Record<string, string | null>>({})
   const captureRef = useRef<HTMLDivElement | null>(null)
   const dateStr = new Date().toISOString().slice(0, 10)
 
   const toggleGameSelection = (gameId: string) => {
     setSelectedGames((prev) => (prev.includes(gameId) ? prev.filter((id) => id !== gameId) : [...prev, gameId]))
   }
+
+  const selectedUserIds = useMemo(() => {
+    const ids = new Set<string>()
+    selectedGames.forEach((gameId) => {
+      const game = games.find((g) => g.id === gameId)
+      if (!game) return
+      game.game_results.forEach((result) => {
+        if (result.user_id) ids.add(result.user_id)
+      })
+    })
+    return Array.from(ids)
+  }, [games, selectedGames])
+
+  useEffect(() => {
+    if (!isTotalOpen || selectedUserIds.length === 0) return
+    const unresolvedIds = selectedUserIds.filter((id) => avatarByUserId[id] === undefined)
+    if (unresolvedIds.length === 0) return
+
+    let cancelled = false
+
+    const fetchAvatars = async () => {
+      const chunks: string[][] = []
+      for (let i = 0; i < unresolvedIds.length; i += 100) chunks.push(unresolvedIds.slice(i, i + 100))
+      const nextMap: Record<string, string | null> = {}
+
+      for (const ids of chunks) {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("id, avatar_url")
+          .in("id", ids)
+          .not("avatar_url", "like", "data:%")
+
+        if (error) continue
+        ;(data || []).forEach((profile: { id: string; avatar_url: string | null }) => {
+          nextMap[profile.id] = profile.avatar_url || null
+        })
+      }
+
+      unresolvedIds.forEach((id) => {
+        if (!(id in nextMap)) nextMap[id] = null
+      })
+
+      if (!cancelled) {
+        setAvatarByUserId((prev) => ({ ...prev, ...nextMap }))
+      }
+    }
+
+    fetchAvatars()
+
+    return () => {
+      cancelled = true
+    }
+  }, [avatarByUserId, isTotalOpen, selectedUserIds, supabase])
 
   // 選択した対局の合計ポイントを計算
   const calculateTotalPoints = () => {
@@ -63,7 +119,7 @@ export function GamesList({ games }: GamesListProps) {
         // user_idがある場合はそれをキーに、ない場合は名前をキーにする
         const key = result.user_id || `name_${result.player_name}`
         const displayName = result.player_name || result.profiles?.display_name || "Unknown"
-        const avatarUrl = result.profiles?.avatar_url || null
+        const avatarUrl = result.profiles?.avatar_url || (result.user_id ? avatarByUserId[result.user_id] || null : null)
 
         if (!playerTotals[key]) {
           playerTotals[key] = { name: displayName, total: 0, avatarUrl }
@@ -106,7 +162,6 @@ export function GamesList({ games }: GamesListProps) {
       link.download = `total-points.png`
       link.click()
     } catch (error) {
-      // eslint-disable-next-line no-console
       console.warn("[v0] failed to export total points image:", error)
     } finally {
       setIsCapturing(false)

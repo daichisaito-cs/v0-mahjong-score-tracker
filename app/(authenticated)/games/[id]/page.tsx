@@ -62,7 +62,7 @@ export default function GameDetailPage() {
             point,
             bonus_points,
             created_at,
-            profiles (display_name, avatar_url)
+            profiles (display_name)
           )
         `,
         )
@@ -70,7 +70,34 @@ export default function GameDetailPage() {
         .single()
 
       if (error) throw error
-      return data || null
+      if (!data) return null
+
+      const userIds = Array.from(new Set((data.game_results || []).map((row: any) => row.user_id).filter(Boolean)))
+      const avatarMap = new Map<string, string | null>()
+      if (userIds.length > 0) {
+        const { data: avatarRows, error: avatarError } = await supabase
+          .from("profiles")
+          .select("id, avatar_url")
+          .in("id", userIds)
+          .not("avatar_url", "like", "data:%")
+        if (avatarError) throw avatarError
+        ;(avatarRows || []).forEach((row: any) => {
+          avatarMap.set(row.id, row.avatar_url || null)
+        })
+      }
+
+      const gameResults = (data.game_results || []).map((row: any) => ({
+        ...row,
+        profiles: {
+          ...(row.profiles || {}),
+          avatar_url: row.user_id ? avatarMap.get(row.user_id) || null : null,
+        },
+      }))
+
+      return {
+        ...data,
+        game_results: gameResults,
+      }
     },
   })
 

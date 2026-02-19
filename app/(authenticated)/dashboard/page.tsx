@@ -31,19 +31,23 @@ export default function DashboardPage() {
     queryFn: async () => {
       const userId = user!.id
       const [profileRes, resultsRes, rollupsRes] = await Promise.all([
-        supabase.from("profiles").select("*").eq("id", userId).single(),
+        supabase.from("profiles").select("id, display_name").eq("id", userId).single(),
         supabase
           .from("game_results")
-          .select("*, games(game_type, played_at, created_at)")
+          .select("id, rank, raw_score, point, created_at, games(game_type, played_at, created_at)")
           .eq("user_id", userId)
           .order("created_at", { ascending: true }),
-        supabase.from("user_game_rollups").select("*").eq("user_id", userId),
+        supabase
+          .from("user_game_rollups")
+          .select(
+            "game_type, rolled_game_count, rolled_total_points, rolled_rank1_count, rolled_rank2_count, rolled_rank3_count, rolled_rank4_count, rolled_best_raw_score, rolled_low_raw_score",
+          )
+          .eq("user_id", userId),
       ])
 
       if (profileRes.error) throw profileRes.error
       if (resultsRes.error) throw resultsRes.error
       if (rollupsRes.error) {
-        // eslint-disable-next-line no-console
         console.warn("[v0] failed to load user_game_rollups:", rollupsRes.error)
       }
 

@@ -41,10 +41,10 @@ export default function UserProfilePage() {
     enabled: Boolean(user?.id && userId),
     queryFn: async () => {
       const [profileRes, friendshipRes, resultsRes, rollupsRes] = await Promise.all([
-        supabase.from("profiles").select("*").eq("id", userId!).single(),
+        supabase.from("profiles").select("id, display_name").eq("id", userId!).single(),
         supabase
           .from("friendships")
-          .select("*")
+          .select("id")
           .eq("status", "accepted")
           .or(
             `and(requester_id.eq.${user!.id},addressee_id.eq.${userId}),and(requester_id.eq.${userId},addressee_id.eq.${user!.id})`,
@@ -52,10 +52,15 @@ export default function UserProfilePage() {
           .maybeSingle(),
         supabase
           .from("game_results")
-          .select("*, games(game_type, created_at)")
+          .select("id, rank, raw_score, point, created_at, games(game_type, created_at)")
           .eq("user_id", userId!)
           .order("created_at", { ascending: false }),
-        supabase.from("user_game_rollups").select("*").eq("user_id", userId!),
+        supabase
+          .from("user_game_rollups")
+          .select(
+            "game_type, rolled_game_count, rolled_total_points, rolled_rank1_count, rolled_rank2_count, rolled_rank3_count, rolled_rank4_count, rolled_best_raw_score, rolled_low_raw_score",
+          )
+          .eq("user_id", userId!),
       ])
 
       if (profileRes.error) throw profileRes.error
@@ -63,7 +68,6 @@ export default function UserProfilePage() {
       if (resultsRes.error) throw resultsRes.error
       if (rollupsRes.error) {
         // rollups がまだ導入されていない環境でもページが落ちないようにする
-        // eslint-disable-next-line no-console
         console.warn("[v0] failed to load user_game_rollups:", rollupsRes.error)
       }
 

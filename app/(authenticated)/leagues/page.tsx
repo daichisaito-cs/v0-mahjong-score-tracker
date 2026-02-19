@@ -38,7 +38,12 @@ export default function LeaguesPage() {
         .from("leagues")
         .select(
           `
-          *,
+          id,
+          name,
+          description,
+          game_type,
+          owner_id,
+          created_at,
           league_members (count),
           rules (name)
         `,
