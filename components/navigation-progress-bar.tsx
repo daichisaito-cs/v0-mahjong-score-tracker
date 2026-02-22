@@ -13,6 +13,13 @@ export function NavigationProgressBar() {
   const [progress, setProgress] = useState(0)
   const timerRef = useRef<number | null>(null)
   const completeTimeoutRef = useRef<number | null>(null)
+  // start()時点のReact pathnameをrefで記録。
+  // pathname変化との比較で完了を判定（isVisible stateに依存しない）
+  const startKeyRef = useRef<string | null>(null)
+  const pathnameRef = useRef(pathname)
+  const searchParamsRef = useRef(searchParams?.toString() ?? "")
+  pathnameRef.current = pathname
+  searchParamsRef.current = searchParams?.toString() ?? ""
 
   const clearTimers = () => {
     if (timerRef.current !== null) {
@@ -25,22 +32,8 @@ export function NavigationProgressBar() {
     }
   }
 
-  const start = () => {
-    setIsVisible(true)
-    setProgress((current) => (current > 0 ? Math.max(current, START_PROGRESS) : START_PROGRESS))
-    if (timerRef.current !== null) return
-
-    timerRef.current = window.setInterval(() => {
-      setProgress((current) => {
-        if (current >= MAX_PROGRESS_BEFORE_COMPLETE) return current
-        const next = current + Math.max(1, (MAX_PROGRESS_BEFORE_COMPLETE - current) * 0.12)
-        return Math.min(next, MAX_PROGRESS_BEFORE_COMPLETE)
-      })
-    }, 160)
-  }
-
-  const complete = () => {
-    if (!isVisible) return
+  const finishProgress = () => {
+    startKeyRef.current = null
     clearTimers()
     setProgress(100)
     completeTimeoutRef.current = window.setTimeout(() => {
@@ -51,6 +44,22 @@ export function NavigationProgressBar() {
   }
 
   useEffect(() => {
+    const start = () => {
+      // start()時点のReact pathnameを記録（refなのでclosure問題なし）
+      startKeyRef.current = `${pathnameRef.current}?${searchParamsRef.current}`
+      clearTimers()
+      setIsVisible(true)
+      setProgress(START_PROGRESS)
+
+      timerRef.current = window.setInterval(() => {
+        setProgress((current) => {
+          if (current >= MAX_PROGRESS_BEFORE_COMPLETE) return current
+          const next = current + Math.max(1, (MAX_PROGRESS_BEFORE_COMPLETE - current) * 0.12)
+          return Math.min(next, MAX_PROGRESS_BEFORE_COMPLETE)
+        })
+      }, 160)
+    }
+
     const onClick = (event: MouseEvent) => {
       if (event.defaultPrevented || event.button !== 0) return
       if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
@@ -81,8 +90,13 @@ export function NavigationProgressBar() {
     }
   }, [])
 
+  // pathnameまたはsearchParamsが変化したら、ナビゲーション完了を判定
   useEffect(() => {
-    complete()
+    if (startKeyRef.current === null) return
+    const currentKey = `${pathname}?${searchParams?.toString() ?? ""}`
+    if (currentKey !== startKeyRef.current) {
+      finishProgress()
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname, searchParams?.toString()])
 
