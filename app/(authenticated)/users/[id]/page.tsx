@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { notFound, redirect } from "next/navigation"
-import { createClient } from "@/lib/supabase/server"
+import { createClientWithUser } from "@/lib/supabase/server"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { UserProfileContent } from "@/components/user-profile-content"
@@ -17,10 +17,7 @@ export default async function UserProfilePage({
 
   if (!userId) notFound()
 
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { supabase, user } = await createClientWithUser()
 
   if (!user) redirect("/auth/login")
 

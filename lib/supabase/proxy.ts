@@ -29,9 +29,12 @@ export async function updateSession(request: NextRequest) {
     },
   })
 
+  // getSession() はcookieから読むだけ（ネットワーク通信なし、トークン期限切れ時のみリフレッシュ）
+  // getUser() は毎回Supabase Authへ通信するためmiddlewareでは使わない
   const {
-    data: { user },
-  } = await supabase.auth.getUser()
+    data: { session },
+  } = await supabase.auth.getSession()
+  const user = session?.user ?? null
 
   const needsPassword = Boolean(user?.user_metadata?.needs_password)
   const isInviteCompletePath = request.nextUrl.pathname.startsWith("/auth/invite-complete")
@@ -43,7 +46,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   // 認証が必要なページへのアクセス制御
-  const protectedPaths = ["/dashboard", "/games", "/leagues", "/mypage"]
+  const protectedPaths = ["/dashboard", "/games", "/leagues", "/mypage", "/users"]
   const isProtectedPath = protectedPaths.some((path) => request.nextUrl.pathname.startsWith(path))
 
   if (isProtectedPath && !user) {

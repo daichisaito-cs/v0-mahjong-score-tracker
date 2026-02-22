@@ -1,15 +1,12 @@
 import Link from "next/link"
 import { redirect } from "next/navigation"
-import { createClient } from "@/lib/supabase/server"
+import { createClientWithUser } from "@/lib/supabase/server"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import { GamesList } from "@/components/games-list"
 
 export default async function GamesPage() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { supabase, user } = await createClientWithUser()
 
   if (!user) redirect("/auth/login")
 

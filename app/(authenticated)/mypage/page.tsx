@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation"
-import { createClient } from "@/lib/supabase/server"
+import { createClientWithUser } from "@/lib/supabase/server"
 import { MyPageClient } from "./mypage-client"
 
 export default async function MyPage({
@@ -10,10 +10,7 @@ export default async function MyPage({
   const { tab } = await searchParams
   const initialTab = tab === "friends" ? "friends" : "profile"
 
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { supabase, user } = await createClientWithUser()
 
   if (!user) redirect("/auth/login")
 

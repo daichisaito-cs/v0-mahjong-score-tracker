@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { notFound, redirect } from "next/navigation"
-import { createClient } from "@/lib/supabase/server"
+import { createClientWithUser } from "@/lib/supabase/server"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Plus, Trophy, Settings } from "lucide-react"
@@ -48,10 +48,7 @@ export default async function LeagueDetailPage({
     notFound()
   }
 
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { supabase, user } = await createClientWithUser()
 
   if (!user) redirect("/auth/login")
 
