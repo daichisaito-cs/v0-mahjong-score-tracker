@@ -1,119 +1,23 @@
-"use client"
-
-import { useEffect, useMemo } from "react"
 import Link from "next/link"
-import { useParams, useRouter } from "next/navigation"
-import { useQuery } from "@tanstack/react-query"
-import { createClient } from "@/lib/supabase/client"
-import { useAuthUser } from "@/lib/hooks/use-auth-user"
+import { redirect } from "next/navigation"
+import { createClientWithUser } from "@/lib/supabase/server"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Edit, Trophy } from "lucide-react"
+import { Edit, Trophy } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getOptimizedAvatarUrl } from "@/lib/avatar"
+import { BackButton } from "@/components/back-button"
 
-function isValidUUID(str: string): boolean {
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-  return uuidRegex.test(str)
-}
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
-export default function GameDetailPage() {
-  const router = useRouter()
-  const params = useParams()
-  const supabase = createClient()
+export default async function GameDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id: gameId } = await params
+  const { supabase, user } = await createClientWithUser()
 
-  const gameId = useMemo(() => {
-    const raw = params?.id
-    return Array.isArray(raw) ? raw[0] : raw
-  }, [params])
+  if (!user) redirect("/auth/login")
 
-  const userQuery = useAuthUser()
-
-  const user = userQuery.data
-
-  const handleBack = () => {
-    if (typeof window !== "undefined" && window.history.length > 1) {
-      router.back()
-      return
-    }
-    router.push("/games")
-  }
-
-  useEffect(() => {
-    if (userQuery.isFetched && !user) router.replace("/auth/login")
-  }, [router, user, userQuery.isFetched])
-
-  const gameQuery = useQuery({
-    queryKey: ["game", gameId, user?.id],
-    enabled: Boolean(user?.id && gameId && isValidUUID(gameId)),
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("games")
-        .select(
-          `
-          *,
-          creator:profiles!games_created_by_fkey (
-            display_name
-          ),
-          leagues (
-            name,
-            rules (name)
-          ),
-          game_results (
-            id,
-            game_id,
-            seat_index,
-            user_id,
-            player_name,
-            rank,
-            raw_score,
-            point,
-            bonus_points,
-            created_at,
-            profiles (display_name)
-          )
-        `,
-        )
-        .eq("id", gameId!)
-        .single()
-
-      if (error) throw error
-      if (!data) return null
-
-      const userIds = Array.from(new Set((data.game_results || []).map((row: any) => row.user_id).filter(Boolean)))
-      const avatarMap = new Map<string, string | null>()
-      if (userIds.length > 0) {
-        const { data: avatarRows, error: avatarError } = await supabase
-          .from("profiles")
-          .select("id, avatar_url")
-          .in("id", userIds)
-        if (avatarError) throw avatarError
-        ;(avatarRows || []).forEach((row: any) => {
-          avatarMap.set(row.id, row.avatar_url || null)
-        })
-      }
-
-      const gameResults = (data.game_results || []).map((row: any) => ({
-        ...row,
-        profiles: {
-          ...(row.profiles || {}),
-          avatar_url: row.user_id ? avatarMap.get(row.user_id) || null : null,
-        },
-      }))
-
-      return {
-        ...data,
-        game_results: gameResults,
-      }
-    },
-  })
-
-  if (userQuery.isLoading || (userQuery.isFetched && !user)) {
-    return <div className="pb-20 md:pb-0" />
-  }
-
-  if (!gameId || !isValidUUID(gameId)) {
+  if (!gameId || !UUID_RE.test(gameId)) {
     return (
       <div className="space-y-6 pb-20 md:pb-0 max-w-2xl mx-auto">
         <Card>
@@ -128,12 +32,37 @@ export default function GameDetailPage() {
     )
   }
 
-  if (gameQuery.isLoading) {
-    return <div className="pb-20 md:pb-0" />
-  }
+  const { data, error } = await supabase
+    .from("games")
+    .select(
+      `
+      *,
+      creator:profiles!games_created_by_fkey (
+        display_name
+      ),
+      leagues (
+        name,
+        rules (name)
+      ),
+      game_results (
+        id,
+        game_id,
+        seat_index,
+        user_id,
+        player_name,
+        rank,
+        raw_score,
+        point,
+        bonus_points,
+        created_at,
+        profiles (display_name)
+      )
+    `,
+    )
+    .eq("id", gameId)
+    .single()
 
-  const game = gameQuery.data as any
-  if (!game) {
+  if (error || !data) {
     return (
       <div className="space-y-6 pb-20 md:pb-0 max-w-2xl mx-auto">
         <Card>
@@ -148,7 +77,31 @@ export default function GameDetailPage() {
     )
   }
 
-  const sortedResults = [...(game.game_results || [])].sort((a, b) => {
+  // Fetch avatar URLs for players
+  const userIds = Array.from(new Set((data.game_results || []).map((row: any) => row.user_id).filter(Boolean)))
+  const avatarMap = new Map<string, string | null>()
+  if (userIds.length > 0) {
+    const { data: avatarRows } = await supabase
+      .from("profiles")
+      .select("id, avatar_url")
+      .in("id", userIds)
+    ;(avatarRows || []).forEach((row: any) => {
+      avatarMap.set(row.id, row.avatar_url || null)
+    })
+  }
+
+  const game = {
+    ...data,
+    game_results: (data.game_results || []).map((row: any) => ({
+      ...row,
+      profiles: {
+        ...(row.profiles || {}),
+        avatar_url: row.user_id ? avatarMap.get(row.user_id) || null : null,
+      },
+    })),
+  } as any
+
+  const sortedResults = [...(game.game_results || [])].sort((a: any, b: any) => {
     if (a.rank !== b.rank) return a.rank - b.rank
     const seatA = Number(a.seat_index ?? 999)
     const seatB = Number(b.seat_index ?? 999)
@@ -156,7 +109,7 @@ export default function GameDetailPage() {
     return 0
   })
   const creatorName = game.creator?.display_name || "不明"
-  const isOwner = game.created_by === user?.id
+  const isOwner = game.created_by === user.id
   const appliedRuleName = game.applied_rule_name || game.leagues?.rules?.name || "（未保存）"
   const appliedRuleSummary =
     game.applied_starting_points != null &&
@@ -175,9 +128,7 @@ export default function GameDetailPage() {
     <div className="space-y-6 pb-20 md:pb-0 max-w-2xl mx-auto">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Button type="button" variant="ghost" size="icon" onClick={handleBack}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
+          <BackButton fallbackPath="/games" />
           <div>
             <h1 className="text-2xl font-bold text-foreground">対局詳細</h1>
             <p className="text-muted-foreground">
@@ -221,86 +172,83 @@ export default function GameDetailPage() {
               <p className="text-sm font-medium">{appliedRuleName}</p>
               {appliedRuleSummary && <p className="text-xs text-muted-foreground mt-0.5">持ち点/返し・ウマ: {appliedRuleSummary}</p>}
             </div>
-            {sortedResults.map((result, index) => (
-              (() => {
-                const displayName = result.player_name || result.profiles?.display_name || "Unknown"
-                const playerCore = (
-                  <div className="flex items-center gap-2">
-                    <Avatar className="h-8.5 w-8.5 shrink-0">
-                      <AvatarImage src={getOptimizedAvatarUrl(result.profiles?.avatar_url, { size: 72, quality: 50 })} />
-                      <AvatarFallback>{displayName.charAt(0).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                    <div className="min-w-0">
-                      <p className="font-semibold truncate leading-tight" title={displayName}>
-                        {displayName}
+            {sortedResults.map((result: any, index: number) => {
+              const displayName = result.player_name || result.profiles?.display_name || "Unknown"
+              const playerCore = (
+                <div className="flex items-center gap-2">
+                  <Avatar className="h-8.5 w-8.5 shrink-0">
+                    <AvatarImage src={getOptimizedAvatarUrl(result.profiles?.avatar_url, { size: 72, quality: 50 })} />
+                    <AvatarFallback>{displayName.charAt(0).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0">
+                    <p className="font-semibold truncate leading-tight" title={displayName}>
+                      {displayName}
+                    </p>
+                    <p className="text-xs text-muted-foreground">席{result.seat_index ?? "-"}</p>
+                    <p className="text-sm text-muted-foreground font-bold">{result.raw_score.toLocaleString()}点</p>
+                    {Number(result.bonus_points) !== 0 && (
+                      <p className="text-xs text-muted-foreground">
+                        <span
+                          className={cn(
+                            "inline-flex items-center justify-center rounded-full border px-2 py-0.5 text-[10px] font-semibold leading-none whitespace-nowrap",
+                            Number(result.bonus_points) > 0
+                              ? "border-chart-1/40 bg-chart-1/10 text-chart-1"
+                              : "border-destructive/40 bg-destructive/10 text-destructive",
+                          )}
+                        >
+                          {Number(result.bonus_points) > 0 ? "飛び賞" : "飛び"}{" "}
+                          {Number(result.bonus_points) > 0 ? "+" : ""}
+                          {Number(result.bonus_points).toFixed(2)}pt
+                        </span>
                       </p>
-                      <p className="text-xs text-muted-foreground">席{result.seat_index ?? "-"}</p>
-                      <p className="text-sm text-muted-foreground font-bold">{result.raw_score.toLocaleString()}点</p>
-                      {Number(result.bonus_points) !== 0 && (
-                        <p className="text-xs text-muted-foreground">
-                          <span
-                            className={cn(
-                              "inline-flex items-center justify-center rounded-full border px-2 py-0.5 text-[10px] font-semibold leading-none whitespace-nowrap",
-                              Number(result.bonus_points) > 0
-                                ? "border-chart-1/40 bg-chart-1/10 text-chart-1"
-                                : "border-destructive/40 bg-destructive/10 text-destructive",
-                            )}
-                          >
-                            {Number(result.bonus_points) > 0 ? "飛び賞" : "飛び"}{" "}
-                            {Number(result.bonus_points) > 0 ? "+" : ""}
-                            {Number(result.bonus_points).toFixed(2)}pt
-                          </span>
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                )
-
-                return (
-              <div
-                key={result.id}
-                className={cn(
-                  "flex items-center gap-1 py-4 px-3 rounded-lg",
-                  index === 0 ? "bg-accent/20" : "bg-muted/50",
-                )}
-              >
-                <div className="flex min-w-0 flex-1 items-center gap-2">
-                  <div
-                    className={cn(
-                      "w-10 h-10 shrink-0 rounded-full flex items-center justify-center font-bold",
-                      result.rank === 1 && "bg-accent text-accent-foreground",
-                      result.rank === 2 && "bg-secondary text-secondary-foreground",
-                      result.rank === 3 && "bg-muted text-muted-foreground",
-                      result.rank === 4 && "bg-destructive/10 text-destructive",
                     )}
-                  >
-                    {result.rank === 1 ? <Trophy className="h-5 w-5" /> : `${result.rank}位`}
                   </div>
-                  {result.user_id ? (
-                    <Link href={`/users/${result.user_id}`} className="min-w-0 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                      {playerCore}
-                    </Link>
-                  ) : (
-                    playerCore
+                </div>
+              )
+
+              return (
+                <div
+                  key={result.id}
+                  className={cn(
+                    "flex items-center gap-1 py-4 px-3 rounded-lg",
+                    index === 0 ? "bg-accent/20" : "bg-muted/50",
                   )}
+                >
+                  <div className="flex min-w-0 flex-1 items-center gap-2">
+                    <div
+                      className={cn(
+                        "w-10 h-10 shrink-0 rounded-full flex items-center justify-center font-bold",
+                        result.rank === 1 && "bg-accent text-accent-foreground",
+                        result.rank === 2 && "bg-secondary text-secondary-foreground",
+                        result.rank === 3 && "bg-muted text-muted-foreground",
+                        result.rank === 4 && "bg-destructive/10 text-destructive",
+                      )}
+                    >
+                      {result.rank === 1 ? <Trophy className="h-5 w-5" /> : `${result.rank}位`}
+                    </div>
+                    {result.user_id ? (
+                      <Link href={`/users/${result.user_id}`} className="min-w-0 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                        {playerCore}
+                      </Link>
+                    ) : (
+                      playerCore
+                    )}
+                  </div>
+                  <div className="text-right shrink-0 w-[85px]">
+                    <p
+                      className={cn("text-xl font-bold", Number(result.point) >= 0 ? "text-chart-1" : "text-destructive")}
+                    >
+                      {Number(result.point) >= 0 ? "+" : ""}
+                      {Number(result.point).toFixed(2)}
+                    </p>
+                    <p className="text-xs text-muted-foreground">ポイント</p>
+                  </div>
                 </div>
-                <div className="text-right shrink-0 w-[85px]">
-                  <p
-                    className={cn("text-xl font-bold", Number(result.point) >= 0 ? "text-chart-1" : "text-destructive")}
-                  >
-                    {Number(result.point) >= 0 ? "+" : ""}
-                    {Number(result.point).toFixed(2)}
-                  </p>
-                  <p className="text-xs text-muted-foreground">ポイント</p>
-                </div>
-              </div>
-                )
-              })()
-            ))}
+              )
+            })}
           </div>
         </CardContent>
       </Card>
-
     </div>
   )
 }
