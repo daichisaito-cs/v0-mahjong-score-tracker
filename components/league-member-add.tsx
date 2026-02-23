@@ -160,9 +160,7 @@ export function LeagueMemberAdd({ leagueId, userId, existingMemberIds, onMembers
           <DialogTitle>フレンドをリーグに追加</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-          {loadingFriends ? (
-            <p className="text-muted-foreground text-sm">読み込み中...</p>
-          ) : friends.length > 0 ? (
+          {loadingFriends ? null : friends.length > 0 ? (
             <>
               <div className="grid gap-2 max-h-64 overflow-y-auto">
                 {friends.map((friend) => (

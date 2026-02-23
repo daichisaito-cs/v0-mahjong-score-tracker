@@ -110,13 +110,7 @@ export default function GameDetailPage() {
   })
 
   if (userQuery.isLoading || (userQuery.isFetched && !user)) {
-    return (
-      <div className="space-y-6 pb-20 md:pb-0 max-w-2xl mx-auto">
-        <Card>
-          <CardContent className="py-12 text-center text-muted-foreground">読み込み中...</CardContent>
-        </Card>
-      </div>
-    )
+    return <div className="pb-20 md:pb-0" />
   }
 
   if (!gameId || !isValidUUID(gameId)) {
@@ -135,13 +129,7 @@ export default function GameDetailPage() {
   }
 
   if (gameQuery.isLoading) {
-    return (
-      <div className="space-y-6 pb-20 md:pb-0 max-w-2xl mx-auto">
-        <Card>
-          <CardContent className="py-12 text-center text-muted-foreground">読み込み中...</CardContent>
-        </Card>
-      </div>
-    )
+    return <div className="pb-20 md:pb-0" />
   }
 
   const game = gameQuery.data as any

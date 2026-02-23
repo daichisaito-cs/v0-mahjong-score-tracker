@@ -208,7 +208,7 @@ export function LeagueCreateForm({ userId }: LeagueCreateFormProps) {
   }
 
   if (loadingRules) {
-    return <p className="text-muted-foreground">読み込み中...</p>
+    return null
   }
 
   if (rules.length === 0) {
@@ -310,9 +310,7 @@ export function LeagueCreateForm({ userId }: LeagueCreateFormProps) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {loadingFriends ? (
-            <p className="text-muted-foreground text-sm">読み込み中...</p>
-          ) : friends.length > 0 ? (
+          {loadingFriends ? null : friends.length > 0 ? (
             <div className="space-y-3">
               <p className="text-sm text-muted-foreground">
                 フレンドを選択してリーグに参加させることができます（あなたは自動で参加します）

@@ -42,11 +42,7 @@ export default function RulesPage() {
             <p className="text-muted-foreground mt-1">麻雀のルール設定を管理します</p>
           </div>
         </div>
-        <Card>
-          <CardHeader>
-            <CardTitle>読み込み中...</CardTitle>
-          </CardHeader>
-        </Card>
+        <div />
       </div>
     )
   }
@@ -68,13 +64,7 @@ export default function RulesPage() {
         </Link>
       </div>
 
-      {rulesQuery.isLoading ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>読み込み中...</CardTitle>
-          </CardHeader>
-        </Card>
-      ) : rules.length > 0 ? (
+      {rulesQuery.isLoading ? null : rules.length > 0 ? (
         <RuleList rules={rules as any} currentUserId={user!.id} />
       ) : (
         <Card>
