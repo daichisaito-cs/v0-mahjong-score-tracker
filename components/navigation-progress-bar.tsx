@@ -6,29 +6,6 @@ import { usePathname, useSearchParams } from "next/navigation"
 const MAX_PROGRESS_BEFORE_COMPLETE = 92
 const START_PROGRESS = 8
 
-// --- デバッグ用ログ送信 ---
-const logBuffer: Array<{ event: string; data: Record<string, unknown> }> = []
-let flushTimer: ReturnType<typeof setTimeout> | null = null
-
-function sendLog(event: string, data: Record<string, unknown> = {}) {
-  const entry = { event, data: { ...data, _t: Date.now() } }
-  logBuffer.push(entry)
-  // 500msごとにバッチ送信
-  if (!flushTimer) {
-    flushTimer = setTimeout(() => {
-      const batch = logBuffer.splice(0)
-      flushTimer = null
-      if (batch.length > 0) {
-        fetch("/api/debug-log", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(batch),
-        }).catch(() => {})
-      }
-    }, 500)
-  }
-}
-
 export function NavigationProgressBar() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -55,11 +32,6 @@ export function NavigationProgressBar() {
   }
 
   const finishProgress = () => {
-    sendLog("finish", {
-      startKey: startKeyRef.current,
-      pathname,
-      hadTimer: timerRef.current !== null,
-    })
     startKeyRef.current = null
     clearTimers()
     setProgress(100)
@@ -71,16 +43,8 @@ export function NavigationProgressBar() {
   }
 
   useEffect(() => {
-    const start = (trigger: string) => {
-      const key = `${pathnameRef.current}?${searchParamsRef.current}`
-      sendLog("start", {
-        trigger,
-        startKey: key,
-        windowPath: window.location.pathname,
-        reactPath: pathnameRef.current,
-        windowEqualsReact: window.location.pathname === pathnameRef.current,
-      })
-      startKeyRef.current = key
+    const startForClick = () => {
+      startKeyRef.current = `${pathnameRef.current}?${searchParamsRef.current}`
       clearTimers()
       setIsVisible(true)
       setProgress(START_PROGRESS)
@@ -108,37 +72,24 @@ export function NavigationProgressBar() {
       const currentUrl = new URL(window.location.href)
       if (nextUrl.origin !== currentUrl.origin) return
       if (nextUrl.href === currentUrl.href) return
-      start("click")
+      startForClick()
     }
 
-    const onPopState = () => {
-      sendLog("popstate", {
-        windowPath: window.location.pathname,
-        reactPath: pathnameRef.current,
-      })
-      start("popstate")
-    }
-
+    // popstateではReactのpathnameが先に更新されるため、
+    // pathname比較による完了検知が機能しない。
+    // loading.tsxのスピナーがフィードバックを担うので、
+    // 進捗バーは表示しない。
     document.addEventListener("click", onClick, true)
-    window.addEventListener("popstate", onPopState)
 
     return () => {
       document.removeEventListener("click", onClick, true)
-      window.removeEventListener("popstate", onPopState)
     }
   }, [])
 
-  // pathnameまたはsearchParamsが変化したら、ナビゲーション完了を判定
+  // pathname変化で完了判定（clickナビゲーション用）
   useEffect(() => {
-    const currentKey = `${pathname}?${searchParams?.toString() ?? ""}`
-    sendLog("effect", {
-      currentKey,
-      startKey: startKeyRef.current,
-      keysMatch: currentKey === startKeyRef.current,
-      isVisible,
-      hasTimer: timerRef.current !== null,
-    })
     if (startKeyRef.current === null) return
+    const currentKey = `${pathname}?${searchParams?.toString() ?? ""}`
     if (currentKey !== startKeyRef.current) {
       finishProgress()
     }
