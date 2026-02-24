@@ -170,33 +170,8 @@ export function LeagueCreateForm({ userId }: LeagueCreateFormProps) {
         throw memberError
       }
 
-      if (selectedFriends.length > 0) {
-        const allMemberIds = [userId, ...selectedFriends]
-        const friendPairs: { requester_id: string; addressee_id: string; status: string }[] = []
-
-        // すべてのメンバーペアを作成
-        for (let i = 0; i < allMemberIds.length; i++) {
-          for (let j = i + 1; j < allMemberIds.length; j++) {
-            const [smaller, larger] =
-              allMemberIds[i] < allMemberIds[j]
-                ? [allMemberIds[i], allMemberIds[j]]
-                : [allMemberIds[j], allMemberIds[i]]
-
-            friendPairs.push({
-              requester_id: smaller,
-              addressee_id: larger,
-              status: "accepted",
-            })
-          }
-        }
-
-        if (friendPairs.length > 0) {
-          await supabase.from("friendships").upsert(friendPairs, {
-            onConflict: "requester_id,addressee_id",
-            ignoreDuplicates: true,
-          })
-        }
-      }
+      // SECURITY DEFINER関数でRLSをバイパスし、全メンバー間のフレンド関係を作成
+      await supabase.rpc("ensure_league_friendships", { p_league_id: league.id })
 
       setIsSubmitted(true)
       window.location.href = `/leagues/${league.id}`

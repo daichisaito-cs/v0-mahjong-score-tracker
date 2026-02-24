@@ -1,4 +1,5 @@
 -- 招待メール経由のフレンド追加に対応するため、handle_new_userを更新
+-- v2: 招待者が所属する全リーグのメンバーとも自動フレンドになる
 
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER
@@ -9,6 +10,7 @@ AS $$
 DECLARE
   inviter_text TEXT;
   inviter_uuid UUID;
+  member_id UUID;
 BEGIN
   INSERT INTO public.profiles (id, display_name, email)
   VALUES (
@@ -32,9 +34,18 @@ BEGIN
   IF inviter_uuid IS NOT NULL THEN
     BEGIN
       IF EXISTS (SELECT 1 FROM public.profiles WHERE id = inviter_uuid) THEN
-        INSERT INTO public.friendships (requester_id, addressee_id, status)
-        VALUES (inviter_uuid, new.id, 'accepted')
-        ON CONFLICT DO NOTHING;
+        -- 招待者が所属する全リーグのメンバーとフレンド関係を作成
+        FOR member_id IN
+          SELECT DISTINCT lm2.user_id
+          FROM public.league_members lm1
+          JOIN public.league_members lm2 ON lm1.league_id = lm2.league_id
+          WHERE lm1.user_id = inviter_uuid
+            AND lm2.user_id <> new.id
+        LOOP
+          INSERT INTO public.friendships (requester_id, addressee_id, status)
+          VALUES (LEAST(member_id, new.id), GREATEST(member_id, new.id), 'accepted')
+          ON CONFLICT DO NOTHING;
+        END LOOP;
       ELSE
         RAISE LOG 'handle_new_user: inviter profile missing (id=%)', inviter_uuid;
       END IF;
