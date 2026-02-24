@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils"
 import { getOptimizedAvatarUrl } from "@/lib/avatar"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { LeagueMemberAdd } from "@/components/league-member-add"
+import { LeagueMemberRemove } from "@/components/league-member-remove"
 import { BackButton } from "@/components/back-button"
 import { LeagueDetailChart } from "@/components/league-detail-chart"
 
@@ -396,7 +397,7 @@ export default async function LeagueDetailPage({
                   <div
                     key={player.odIndex}
                     className={cn(
-                      "flex items-center justify-between p-3 rounded-lg",
+                      "flex items-center justify-between p-3 rounded-lg group",
                       rankNumber === 1 && "bg-accent/20",
                       rankNumber === 2 && "bg-secondary/50",
                       rankNumber === 3 && "bg-muted/50",
@@ -405,6 +406,15 @@ export default async function LeagueDetailPage({
                   >
                     <div className="flex items-center gap-3 flex-1 min-w-0 pr-3">
                       <div className="flex items-center gap-2">
+                        {isOwner && (
+                          <LeagueMemberRemove
+                            leagueId={leagueId}
+                            memberId={player.odIndex}
+                            memberName={player.name}
+                            currentUserId={user.id}
+                            isOwner={player.odIndex === league.owner_id}
+                          />
+                        )}
                         <div
                           className={cn(
                             "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold",
