@@ -21,7 +21,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Trash2 } from "lucide-react"
+import { Trash2, UserMinus, Users } from "lucide-react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { getOptimizedAvatarUrl } from "@/lib/avatar"
 
 interface League {
   id: string
@@ -33,18 +35,28 @@ interface League {
   uma_third: number
   uma_fourth: number | null
   starting_points: number
+  owner_id: string
+}
+
+interface Member {
+  userId: string
+  displayName: string
+  avatarUrl: string | null
 }
 
 interface LeagueSettingsFormProps {
   league: League
+  members: Member[]
 }
 
-export function LeagueSettingsForm({ league }: LeagueSettingsFormProps) {
+export function LeagueSettingsForm({ league, members }: LeagueSettingsFormProps) {
   const router = useRouter()
   const [name, setName] = useState(league.name)
   const [description, setDescription] = useState(league.description || "")
+  const [localMembers, setLocalMembers] = useState(members)
   const [isLoading, setIsLoading] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [removingMemberId, setRemovingMemberId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
 
@@ -76,6 +88,27 @@ export function LeagueSettingsForm({ league }: LeagueSettingsFormProps) {
     } catch (err) {
       setError(err instanceof Error ? err.message : "更新に失敗しました")
       setIsLoading(false)
+    }
+  }
+
+  const handleRemoveMember = async (userId: string) => {
+    setRemovingMemberId(userId)
+    const supabase = createClient()
+
+    try {
+      const { error } = await supabase
+        .from("league_members")
+        .delete()
+        .eq("league_id", league.id)
+        .eq("user_id", userId)
+
+      if (error) throw error
+
+      setLocalMembers((prev) => prev.filter((m) => m.userId !== userId))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "メンバーの削除に失敗しました")
+    } finally {
+      setRemovingMemberId(null)
     }
   }
 
@@ -147,6 +180,75 @@ export function LeagueSettingsForm({ league }: LeagueSettingsFormProps) {
             />
           </div>
           <p className="text-xs text-muted-foreground">ルール設定は対局結果の整合性のため変更できません</p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            メンバー管理
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {localMembers.length === 0 ? (
+            <p className="text-sm text-muted-foreground">メンバーがいません</p>
+          ) : (
+            localMembers.map((member) => {
+              const isMemberOwner = member.userId === league.owner_id
+              return (
+                <div
+                  key={member.userId}
+                  className="flex items-center justify-between p-3 rounded-lg border border-border"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Avatar className="h-9 w-9">
+                      <AvatarImage src={getOptimizedAvatarUrl(member.avatarUrl, { size: 72, quality: 50 })} />
+                      <AvatarFallback>{member.displayName.charAt(0).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0">
+                      <p className="font-medium text-sm truncate">{member.displayName}</p>
+                      {isMemberOwner && (
+                        <p className="text-xs text-muted-foreground">オーナー</p>
+                      )}
+                    </div>
+                  </div>
+                  {!isMemberOwner && (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                          disabled={removingMemberId === member.userId}
+                        >
+                          <UserMinus className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>メンバーを削除</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            {member.displayName}をこのリーグから削除しますか？この操作は取り消せません。
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>キャンセル</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleRemoveMember(member.userId)}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            削除
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  )}
+                </div>
+              )
+            })
+          )}
         </CardContent>
       </Card>
 

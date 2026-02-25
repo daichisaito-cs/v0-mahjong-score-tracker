@@ -39,7 +39,14 @@ export function MyPageClient({
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "profile" | "friends")} className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="profile">プロフィール</TabsTrigger>
-          <TabsTrigger value="friends">フレンド</TabsTrigger>
+          <TabsTrigger value="friends" className="relative">
+            フレンド
+            {pendingRequests.length > 0 && (
+              <span className="ml-1.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-white text-[10px]">
+                {pendingRequests.length}
+              </span>
+            )}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile" className="space-y-6">

@@ -157,11 +157,19 @@ export function GamesList({ games }: GamesListProps) {
         pixelRatio: 2,
         filter: (node) => !(node instanceof HTMLElement && node.dataset?.ignore === "true"),
       })
-      const link = document.createElement("a")
-      link.href = dataUrl
-      link.download = `total-points.png`
-      link.click()
+      const res = await fetch(dataUrl)
+      const blob = await res.blob()
+      const file = new File([blob], "total-points.png", { type: "image/png" })
+      if (navigator.share && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file] })
+      } else {
+        const link = document.createElement("a")
+        link.href = dataUrl
+        link.download = "total-points.png"
+        link.click()
+      }
     } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") return
       console.warn("[v0] failed to export total points image:", error)
     } finally {
       setIsCapturing(false)

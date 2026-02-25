@@ -87,11 +87,19 @@ export function SessionSummaryDialog({ open, sessionResults, leagueName, onClose
         pixelRatio: 2,
         filter: (node) => !(node instanceof HTMLElement && node.dataset?.ignore === "true"),
       })
-      const link = document.createElement("a")
-      link.href = dataUrl
-      link.download = `session-total.png`
-      link.click()
+      const res = await fetch(dataUrl)
+      const blob = await res.blob()
+      const file = new File([blob], "session-total.png", { type: "image/png" })
+      if (navigator.share && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file] })
+      } else {
+        const link = document.createElement("a")
+        link.href = dataUrl
+        link.download = "session-total.png"
+        link.click()
+      }
     } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") return
       console.warn("[v0] failed to export session summary image:", error)
     } finally {
       setIsCapturing(false)

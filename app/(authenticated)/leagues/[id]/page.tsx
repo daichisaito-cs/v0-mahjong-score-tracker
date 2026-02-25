@@ -8,7 +8,6 @@ import { cn } from "@/lib/utils"
 import { getOptimizedAvatarUrl } from "@/lib/avatar"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { LeagueMemberAdd } from "@/components/league-member-add"
-import { LeagueMemberRemove } from "@/components/league-member-remove"
 import { BackButton } from "@/components/back-button"
 import { LeagueDetailChart } from "@/components/league-detail-chart"
 
@@ -406,15 +405,6 @@ export default async function LeagueDetailPage({
                   >
                     <div className="flex items-center gap-3 flex-1 min-w-0 pr-3">
                       <div className="flex items-center gap-2">
-                        {isOwner && (
-                          <LeagueMemberRemove
-                            leagueId={leagueId}
-                            memberId={player.odIndex}
-                            memberName={player.name}
-                            currentUserId={user.id}
-                            isOwner={player.odIndex === league.owner_id}
-                          />
-                        )}
                         <div
                           className={cn(
                             "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold",
@@ -623,120 +613,6 @@ export default async function LeagueDetailPage({
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">対局履歴</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {gamesWithResults && gamesWithResults.length > 0 ? (
-            <div className="space-y-3">
-              {gamesWithResults.map((game: any) => {
-                const seatCount = game.game_type === "four_player" ? 4 : 3
-                const seatBuckets = new Map<number, any[]>()
-                ;(game.game_results || []).forEach((result: any) => {
-                  const seat = Number(result.seat_index ?? result.rank)
-                  if (!Number.isFinite(seat) || seat < 1 || seat > seatCount) return
-                  if (!seatBuckets.has(seat)) seatBuckets.set(seat, [])
-                  seatBuckets.get(seat)!.push(result)
-                })
-                const seatSummaries = Array.from({ length: seatCount }, (_, idx) => {
-                  const seat = idx + 1
-                  const seatMembers = (seatBuckets.get(seat) || []).slice().sort((a, b) => a.rank - b.rank)
-                  const first = seatMembers[0]
-                  const names = seatMembers
-                    .map((m) => m.player_name || m.profiles?.display_name || "Unknown")
-                    .join(" / ")
-                  const pointBase = Number(first?.point ?? 0)
-                  const allSamePoint = seatMembers.every((m) => Math.abs(Number(m.point) - pointBase) < 0.01)
-                  const pointText =
-                    seatMembers.length === 0
-                      ? "-"
-                      : seatMembers.length === 1
-                        ? `${pointBase >= 0 ? "+" : ""}${pointBase.toFixed(2)}`
-                        : allSamePoint
-                          ? `${pointBase >= 0 ? "+" : ""}${pointBase.toFixed(2)}ずつ`
-                          : seatMembers
-                              .map((m) => {
-                                const p = Number(m.point)
-                                return `${p >= 0 ? "+" : ""}${p.toFixed(2)}`
-                              })
-                              .join(" / ")
-                  return {
-                    seat,
-                    first,
-                    names,
-                    pointText,
-                    hasData: seatMembers.length > 0,
-                    isPositive: pointBase >= 0,
-                  }
-                }).sort((a, b) => {
-                  if (!a.hasData && !b.hasData) return a.seat - b.seat
-                  if (!a.hasData) return 1
-                  if (!b.hasData) return -1
-                  if ((a.first?.rank ?? 999) !== (b.first?.rank ?? 999))
-                    return (a.first?.rank ?? 999) - (b.first?.rank ?? 999)
-                  return a.seat - b.seat
-                })
-                return (
-                  <Link key={game.id} href={`/games/${game.id}`} className="block">
-                    <div className="p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-muted-foreground">
-                          {new Date(game.played_at).toLocaleDateString("ja-JP")}
-                        </span>
-                      </div>
-                      <div className={cn("gap-2", seatCount === 4 ? "grid grid-cols-4" : "grid grid-cols-3")}>
-                        {seatSummaries.map((seat: any) => (
-                          <div key={`${game.id}-seat-${seat.seat}`} className="text-center min-w-0">
-                            <div className="flex flex-col items-center gap-1">
-                              <Avatar className="h-10 w-10">
-                                <AvatarImage
-                                  src={
-                                    seat.first?.user_id
-                                      ? getOptimizedAvatarUrl(profileMap.get(seat.first.user_id)?.avatarUrl, {
-                                          size: 80,
-                                          quality: 50,
-                                        })
-                                      : undefined
-                                  }
-                                />
-                                <AvatarFallback>
-                                  {(seat.first?.player_name || seat.first?.profiles?.display_name || "?")
-                                    .charAt(0)
-                                    .toUpperCase()}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div className="text-xs text-muted-foreground">
-                                {seat.hasData ? `${seat.first?.rank}位` : "-"}
-                              </div>
-                              <div
-                                className="text-sm font-medium truncate w-full"
-                                title={seat.hasData ? seat.names : "-"}
-                              >
-                                {seat.hasData ? seat.names : "-"}
-                              </div>
-                            </div>
-                            <div className={cn("text-xs", seat.isPositive ? "text-chart-1" : "text-destructive")}>
-                              {seat.pointText}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </Link>
-                )
-              })}
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <p className="text-muted-foreground mb-4">まだ対局がありません</p>
-              <Link href={`/games/new?league=${leagueId}`}>
-                <Button>最初の対局を記録</Button>
-              </Link>
-            </div>
-          )}
-        </CardContent>
-      </Card>
     </div>
   )
 }

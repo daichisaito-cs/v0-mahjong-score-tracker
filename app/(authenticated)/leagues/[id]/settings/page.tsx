@@ -29,7 +29,15 @@ export default async function LeagueSettingsPage({
     redirect("/auth/login")
   }
 
-  const { data: league } = await supabase.from("leagues").select("*").eq("id", id).single()
+  const [leagueRes, membersRes] = await Promise.all([
+    supabase.from("leagues").select("*").eq("id", id).single(),
+    supabase
+      .from("league_members")
+      .select("user_id, profiles(id, display_name, avatar_url)")
+      .eq("league_id", id),
+  ])
+
+  const league = leagueRes.data
 
   if (!league) {
     notFound()
@@ -40,6 +48,12 @@ export default async function LeagueSettingsPage({
     redirect(`/leagues/${id}`)
   }
 
+  const members = (membersRes.data || []).map((m: any) => ({
+    userId: m.user_id as string,
+    displayName: (m.profiles as any)?.display_name || "メンバー",
+    avatarUrl: (m.profiles as any)?.avatar_url || null,
+  }))
+
   return (
     <div className="space-y-6 pb-20 md:pb-0 max-w-xl mx-auto">
       <div>
@@ -47,7 +61,7 @@ export default async function LeagueSettingsPage({
         <p className="text-muted-foreground">{league.name}</p>
       </div>
 
-      <LeagueSettingsForm league={league} />
+      <LeagueSettingsForm league={league} members={members} />
     </div>
   )
 }
