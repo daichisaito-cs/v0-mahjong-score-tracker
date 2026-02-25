@@ -25,57 +25,35 @@ export default async function GamesPage() {
       return acc
     }, [])
 
-  const [myResultsRes, memberLeaguesRes, ownedLeaguesRes] = await Promise.all([
+  const [myResultsRes, createdGamesRes] = await Promise.all([
     supabase.from("game_results").select("game_id").eq("user_id", userId),
-    supabase.from("league_members").select("league_id").eq("user_id", userId),
-    supabase.from("leagues").select("id").eq("owner_id", userId),
+    supabase
+      .from("games")
+      .select(gameSelect)
+      .eq("created_by", userId)
+      .order("played_at", { ascending: false })
+      .limit(50),
   ])
 
   if (myResultsRes.error) throw myResultsRes.error
-  if (memberLeaguesRes.error) throw memberLeaguesRes.error
-  if (ownedLeaguesRes.error) throw ownedLeaguesRes.error
+  if (createdGamesRes.error) throw createdGamesRes.error
 
   const gameIds = (myResultsRes.data || []).map((r: any) => r.game_id).filter(Boolean)
-  const leagueIds = Array.from(
-    new Set([
-      ...(memberLeaguesRes.data || []).map((m: any) => m.league_id),
-      ...(ownedLeaguesRes.data || []).map((l: any) => l.id),
-    ]),
-  ).filter(Boolean)
   const uniqueGameIds = Array.from(new Set(gameIds))
-  const uniqueLeagueIds = Array.from(new Set(leagueIds))
-
-  const createdGamesPromise = supabase
-    .from("games")
-    .select(gameSelect)
-    .eq("created_by", userId)
-    .order("played_at", { ascending: false })
-    .limit(50)
 
   const participantGamePromises = chunk(uniqueGameIds, 20).map((ids) =>
     supabase.from("games").select(gameSelect).in("id", ids).order("played_at", { ascending: false }).limit(50),
   )
 
-  const leagueGamePromises = chunk(uniqueLeagueIds, 20).map((ids) =>
-    supabase
-      .from("games")
-      .select(gameSelect)
-      .in("league_id", ids)
-      .order("played_at", { ascending: false })
-      .limit(50),
-  )
-
-  const [createdGamesRes, ...rest] = await Promise.all([
-    createdGamesPromise,
-    ...participantGamePromises,
-    ...leagueGamePromises,
-  ])
-  if (createdGamesRes.error) throw createdGamesRes.error
-  for (const res of rest) {
+  const participantResults = await Promise.all(participantGamePromises)
+  for (const res of participantResults) {
     if (res.error) throw res.error
   }
 
-  const allGames = [...((createdGamesRes.data as any[]) || []), ...rest.flatMap((res) => (res.data as any[]) || [])]
+  const allGames = [
+    ...((createdGamesRes.data as any[]) || []),
+    ...participantResults.flatMap((res) => (res.data as any[]) || []),
+  ]
 
   const deduped = new Map<string, any>()
   for (const game of allGames) {

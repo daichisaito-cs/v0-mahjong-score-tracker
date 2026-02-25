@@ -110,7 +110,7 @@ export function SessionSummaryDialog({ open, sessionResults, leagueName, onClose
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
-        <div ref={captureRef} className="space-y-3">
+        <div ref={captureRef} className="space-y-3 p-4">
           <DialogHeader>
             <DialogTitle>セッション合計結果</DialogTitle>
             <DialogDescription>{sessionResults.length}回の対局の合計ポイントです</DialogDescription>

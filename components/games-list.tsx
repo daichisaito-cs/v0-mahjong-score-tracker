@@ -258,7 +258,7 @@ export function GamesList({ games }: GamesListProps) {
 
       <Dialog open={isTotalOpen} onOpenChange={setIsTotalOpen}>
         <DialogContent className="max-w-md">
-          <div ref={captureRef} className="space-y-3">
+          <div ref={captureRef} className="space-y-3 p-4">
             <DialogHeader>
               <DialogTitle>合計ポイント</DialogTitle>
               <DialogDescription>選択した{selectedGames.length}戦の合計ポイントです</DialogDescription>
