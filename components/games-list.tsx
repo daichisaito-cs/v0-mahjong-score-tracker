@@ -4,9 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Calculator, Trophy } from "lucide-react"
+import { Calculator, Check, Trophy, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { getOptimizedAvatarUrl } from "@/lib/avatar"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -43,6 +42,7 @@ interface GamesListProps {
 
 export function GamesList({ games }: GamesListProps) {
   const supabase = createClient()
+  const [isSelectMode, setIsSelectMode] = useState(false)
   const [selectedGames, setSelectedGames] = useState<string[]>([])
   const [isTotalOpen, setIsTotalOpen] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -237,22 +237,38 @@ export function GamesList({ games }: GamesListProps) {
     )
   }
 
+  const exitSelectMode = () => {
+    setIsSelectMode(false)
+    setSelectedGames([])
+  }
+
   return (
     <div className="space-y-3">
-      {selectedGames.length > 0 && (
-        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2">
+      {isSelectMode ? (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2">
           <div className="flex items-center gap-2 text-sm">
             <Calculator className="h-4 w-4 text-primary" />
-            <span className="font-semibold">選択中: {selectedGames.length}戦</span>
+            <span className="font-semibold">
+              {selectedGames.length > 0 ? `${selectedGames.length}戦 選択中` : "対局をタップして選択"}
+            </span>
           </div>
           <div className="flex items-center gap-2">
-            <Button size="sm" onClick={() => setIsTotalOpen(true)}>
-              合計を見る
-            </Button>
-            <Button variant="outline" size="sm" className="bg-transparent" onClick={() => setSelectedGames([])}>
-              選択をクリア
+            {selectedGames.length > 0 && (
+              <Button size="sm" onClick={() => setIsTotalOpen(true)}>
+                合計を見る
+              </Button>
+            )}
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={exitSelectMode}>
+              <X className="h-4 w-4" />
             </Button>
           </div>
+        </div>
+      ) : (
+        <div className="flex justify-end">
+          <Button variant="outline" size="sm" className="gap-2" onClick={() => setIsSelectMode(true)}>
+            <Calculator className="h-4 w-4" />
+            合計計算
+          </Button>
         </div>
       )}
 
@@ -332,45 +348,60 @@ export function GamesList({ games }: GamesListProps) {
         const seatCount = game.game_type === "four_player" ? 4 : 3
         const isSelected = selectedGames.includes(game.id)
 
-        return (
-          <div key={game.id} className="flex gap-3 items-center">
-            <div className="self-start pt-2">
-              <Checkbox checked={isSelected} onCheckedChange={() => toggleGameSelection(game.id)} />
-            </div>
-            <Link href={`/games/${game.id}`} className="flex-1">
-              <Card className="hover:bg-muted/40 transition-colors cursor-pointer py-4 gap-3 border-border/70">
-                <CardContent className="px-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-[11px] px-2 py-1 rounded-full bg-secondary text-secondary-foreground">
-                        {game.game_type === "four_player" ? "四麻" : "三麻"}
-                      </span>
-                      {game.league_id && (
-                        <span className="text-[11px] px-2 py-1 rounded-full bg-primary/10 text-primary">リーグ戦</span>
-                      )}
+        const cardContent = (
+          <Card
+            className={cn(
+              "transition-colors cursor-pointer py-4 gap-3",
+              isSelectMode && isSelected
+                ? "border-primary bg-primary/5"
+                : "border-border/70 hover:bg-muted/40",
+            )}
+          >
+            <CardContent className="px-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-[11px] px-2 py-1 rounded-full bg-secondary text-secondary-foreground">
+                    {game.game_type === "four_player" ? "四麻" : "三麻"}
+                  </span>
+                  {game.league_id && (
+                    <span className="text-[11px] px-2 py-1 rounded-full bg-primary/10 text-primary">リーグ戦</span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  {isSelectMode && isSelected && (
+                    <div className="h-5 w-5 rounded-full bg-primary flex items-center justify-center">
+                      <Check className="h-3 w-3 text-primary-foreground" />
                     </div>
-                    <div className="text-right text-xs text-muted-foreground leading-tight">
-                      <div>
-                        {new Date(game.played_at).toLocaleDateString("ja-JP")}
-                      </div>
-                      <div>作成者: {game.creator?.display_name || "不明"}</div>
+                  )}
+                  <div className="text-right text-xs text-muted-foreground leading-tight">
+                    <div>{new Date(game.played_at).toLocaleDateString("ja-JP")}</div>
+                    <div>作成者: {game.creator?.display_name || "不明"}</div>
+                  </div>
+                </div>
+              </div>
+              <div className={cn("mt-3 gap-3", seatCount === 4 ? "grid grid-cols-4" : "grid grid-cols-3")}>
+                {seatSummaries.map((seat) => (
+                  <div key={`${game.id}-seat-${seat.seat}`} className="text-center min-w-0">
+                    <div className="text-[11px] text-muted-foreground">{seat.hasData ? `${seat.rank}位` : "-"}</div>
+                    <div className="text-sm font-semibold truncate w-full">{seat.hasData ? seat.nameText : "-"}</div>
+                    <div className={cn("text-xs", seat.isPositive ? "text-chart-1" : "text-destructive")}>
+                      {seat.pointText}
                     </div>
                   </div>
-                  <div className={cn("mt-3 gap-3", seatCount === 4 ? "grid grid-cols-4" : "grid grid-cols-3")}>
-                    {seatSummaries.map((seat) => (
-                      <div key={`${game.id}-seat-${seat.seat}`} className="text-center min-w-0">
-                        <div className="text-[11px] text-muted-foreground">{seat.hasData ? `${seat.rank}位` : "-"}</div>
-                        <div className="text-sm font-semibold truncate w-full">{seat.hasData ? seat.nameText : "-"}</div>
-                        <div className={cn("text-xs", seat.isPositive ? "text-chart-1" : "text-destructive")}>
-                          {seat.pointText}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )
+
+        return isSelectMode ? (
+          <div key={game.id} onClick={() => toggleGameSelection(game.id)}>
+            {cardContent}
           </div>
+        ) : (
+          <Link key={game.id} href={`/games/${game.id}`} className="block">
+            {cardContent}
+          </Link>
         )
       })}
     </div>
