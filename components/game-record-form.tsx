@@ -218,7 +218,9 @@ export function GameRecordForm({
     (sessionData?.gameType as "four_player" | "three_player") || "four_player",
   )
   const [leagueId, setLeagueId] = useState<string>(sessionData?.leagueId || defaultLeagueId || "none")
-  const [ruleId, setRuleId] = useState<string>(sessionData?.ruleId || "")
+  const initialLeagueId = sessionData?.leagueId || defaultLeagueId
+  const initialLeagueRuleId = initialLeagueId ? leagues.find((l) => l.id === initialLeagueId)?.rule_id : null
+  const [ruleId, setRuleId] = useState<string>(sessionData?.ruleId || initialLeagueRuleId || "")
   const [isLoading, setIsLoading] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [error, setError] = useState<string | null>(null)
