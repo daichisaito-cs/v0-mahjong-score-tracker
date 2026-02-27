@@ -71,7 +71,7 @@ export function FriendSection({ currentUserId, friendCode, friends, pendingReque
   const [friendToRemove, setFriendToRemove] = useState<Friend | null>(null)
   const [isRemovingFriend, setIsRemovingFriend] = useState(false)
 
-  const isComposingRef = useRef(false)
+
   const supabase = createClient()
   const notifyPendingUpdate = () => {
     window.dispatchEvent(new Event("friend-requests-updated"))
@@ -282,16 +282,13 @@ export function FriendSection({ currentUserId, friendCode, friends, pendingReque
             <Input
               placeholder="フレンドIDを入力"
               value={searchCode}
-              onCompositionStart={() => { isComposingRef.current = true }}
-              onCompositionEnd={(e) => {
-                isComposingRef.current = false
-                setSearchCode(e.currentTarget.value.toUpperCase())
-              }}
               onChange={(e) => {
-                if (!isComposingRef.current) {
-                  setSearchCode(e.target.value.toUpperCase())
-                }
+                setSearchCode(e.target.value.toUpperCase())
               }}
+              inputMode="latin"
+              autoCapitalize="characters"
+              autoCorrect="off"
+              autoComplete="off"
               className="font-mono tracking-widest"
               maxLength={8}
             />
