@@ -283,12 +283,14 @@ export function FriendSection({ currentUserId, friendCode, friends, pendingReque
               placeholder="フレンドIDを入力"
               value={searchCode}
               onChange={(e) => {
-                setSearchCode(e.target.value.toUpperCase())
+                const raw = e.target.value
+                const cleaned = raw.replace(/[^A-Za-z0-9]/g, "").toUpperCase().slice(0, 8)
+                setSearchCode(cleaned)
               }}
-              inputMode="latin"
               autoCapitalize="characters"
               autoCorrect="off"
               autoComplete="off"
+              spellCheck={false}
               className="font-mono tracking-widest"
               maxLength={8}
             />
