@@ -50,7 +50,7 @@ type Props = {
 }
 
 export function FriendSection({ currentUserId, friendCode, friends, pendingRequests, sentRequests }: Props) {
-  const [searchCode, setSearchCode] = useState("")
+  const searchInputRef = useRef<HTMLInputElement>(null)
   const [searchResult, setSearchResult] = useState<{
     id: string
     display_name: string
@@ -84,7 +84,12 @@ export function FriendSection({ currentUserId, friendCode, friends, pendingReque
   }
 
   const handleSearch = async () => {
-    if (!searchCode.trim()) return
+    const rawValue = searchInputRef.current?.value || ""
+    const searchCode = rawValue.replace(/[^A-Za-z0-9]/g, "").toUpperCase().trim()
+    if (!searchCode) return
+
+    // 入力欄をクリーンな値に更新
+    if (searchInputRef.current) searchInputRef.current.value = searchCode
 
     setIsSearching(true)
     setSearchError("")
@@ -93,7 +98,7 @@ export function FriendSection({ currentUserId, friendCode, friends, pendingReque
     const { data, error } = await supabase
       .from("profiles")
       .select("id, display_name, friend_code, avatar_url")
-      .eq("friend_code", searchCode.toUpperCase().trim())
+      .eq("friend_code", searchCode)
       .single()
 
     if (error || !data) {
@@ -280,13 +285,8 @@ export function FriendSection({ currentUserId, friendCode, friends, pendingReque
           <Label>フレンドID検索</Label>
           <div className="flex gap-2">
             <Input
+              ref={searchInputRef}
               placeholder="フレンドIDを入力"
-              value={searchCode}
-              onChange={(e) => {
-                const raw = e.target.value
-                const cleaned = raw.replace(/[^A-Za-z0-9]/g, "").toUpperCase().slice(0, 8)
-                setSearchCode(cleaned)
-              }}
               autoCapitalize="characters"
               autoCorrect="off"
               autoComplete="off"
@@ -294,7 +294,7 @@ export function FriendSection({ currentUserId, friendCode, friends, pendingReque
               className="font-mono tracking-widest"
               maxLength={8}
             />
-            <Button onClick={handleSearch} disabled={isSearching || !searchCode.trim()}>
+            <Button onClick={handleSearch} disabled={isSearching}>
               <Search className="w-4 h-4" />
             </Button>
           </div>
