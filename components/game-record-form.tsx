@@ -638,7 +638,7 @@ export function GameRecordForm({
       const { error: resultsError } = await supabase.from("game_results").insert(gameResults)
       if (resultsError) throw resultsError
 
-      const { error: pruneError } = await supabase.rpc("rollup_and_prune_games_for_user", { p_keep: 30 })
+      const { error: pruneError } = await supabase.rpc("rollup_and_prune_games_for_user", { p_keep: 5000 })
       if (pruneError) {
         console.warn("[v0] rollup_and_prune_games_for_user failed:", pruneError)
       }

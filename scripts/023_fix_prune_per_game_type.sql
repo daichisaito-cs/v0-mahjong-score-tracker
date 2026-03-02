@@ -1,7 +1,7 @@
 -- game_typeをまたいで直近N件を保持していたバグを修正
 -- 修正後: game_typeごとに直近N件を保持する
 
-CREATE OR REPLACE FUNCTION public.rollup_and_prune_games_for_user(p_keep INTEGER DEFAULT 30)
+CREATE OR REPLACE FUNCTION public.rollup_and_prune_games_for_user(p_keep INTEGER DEFAULT 5000)
 RETURNS INTEGER
 LANGUAGE plpgsql
 SECURITY DEFINER

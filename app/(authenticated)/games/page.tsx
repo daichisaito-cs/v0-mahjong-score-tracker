@@ -32,7 +32,7 @@ export default async function GamesPage() {
       .select(gameSelect)
       .eq("created_by", userId)
       .order("played_at", { ascending: false })
-      .limit(50),
+      .limit(30),
   ])
 
   if (myResultsRes.error) throw myResultsRes.error
@@ -42,7 +42,7 @@ export default async function GamesPage() {
   const uniqueGameIds = Array.from(new Set(gameIds))
 
   const participantGamePromises = chunk(uniqueGameIds, 20).map((ids) =>
-    supabase.from("games").select(gameSelect).in("id", ids).order("played_at", { ascending: false }).limit(50),
+    supabase.from("games").select(gameSelect).in("id", ids).order("played_at", { ascending: false }).limit(30),
   )
 
   const participantResults = await Promise.all(participantGamePromises)
@@ -64,7 +64,7 @@ export default async function GamesPage() {
 
   const sortedGames = Array.from(deduped.values())
     .sort((a, b) => new Date(b.played_at).getTime() - new Date(a.played_at).getTime())
-    .slice(0, 50)
+    .slice(0, 30)
 
   let gamesWithResults: any[] = []
 
