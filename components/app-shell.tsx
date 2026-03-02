@@ -212,10 +212,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 container mx-auto px-4 pt-4 pb-24 md:pb-6">{children}</main>
+      <main className="flex-1 container mx-auto px-4 pt-4 pb-[calc(6rem+env(safe-area-inset-bottom))] md:pb-6">{children}</main>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 border-t border-border bg-card">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 border-t border-border bg-card pb-[env(safe-area-inset-bottom)]">
         <div className="flex items-center justify-around h-16">
           {navigation.map((item) => {
             const isActive = pathname.startsWith(item.href)
