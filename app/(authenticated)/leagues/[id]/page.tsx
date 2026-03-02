@@ -436,7 +436,7 @@ export default async function LeagueDetailPage({
                           {player.name}
                         </Link>
                         <p className="text-xs text-muted-foreground">
-                          {player.gameCount}戦 / 平均{avgRank !== null ? `${avgRank.toFixed(1)}位` : "-"}
+                          {player.gameCount}戦 / 平均{avgRank !== null ? `${avgRank.toFixed(2)}位` : "-"}
                         </p>
                       </div>
                     </div>
