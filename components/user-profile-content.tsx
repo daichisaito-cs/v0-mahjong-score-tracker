@@ -19,7 +19,7 @@ interface GameResult {
   raw_score: number
   point: number
   created_at: string
-  games: { game_type: string; created_at: string } | null
+  games: { game_type: string; played_at: string; created_at: string } | null
 }
 
 interface Rollup {
@@ -63,13 +63,17 @@ export function UserProfileContent({
     let cumulativePoints = basePoints
     return gameResults
       .slice()
-      .sort((a, b) => new Date(a.games!.created_at).getTime() - new Date(b.games!.created_at).getTime())
+      .sort((a, b) => {
+        const aTime = new Date(a.games!.played_at || a.games!.created_at).getTime()
+        const bTime = new Date(b.games!.played_at || b.games!.created_at).getTime()
+        return aTime - bTime
+      })
       .map((result, index) => {
         cumulativePoints += Number(result.point)
         return {
           game: baseGames + index + 1,
           points: cumulativePoints,
-          date: new Date(result.games!.created_at).toLocaleDateString("ja-JP", {
+          date: new Date(result.games!.played_at || result.games!.created_at).toLocaleDateString("ja-JP", {
             month: "short",
             day: "numeric",
           }),

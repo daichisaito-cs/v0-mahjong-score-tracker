@@ -26,7 +26,7 @@ export default async function UserProfilePage({
     supabase.from("profiles").select("id, display_name, avatar_url").eq("id", userId).single(),
     supabase
       .from("game_results")
-      .select("id, rank, raw_score, point, created_at, games(game_type, created_at)")
+      .select("id, rank, raw_score, point, created_at, games(game_type, played_at, created_at)")
       .eq("user_id", userId)
       .order("created_at", { ascending: false }),
     supabase

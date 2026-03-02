@@ -38,7 +38,13 @@ interface DashboardContentProps {
 export function DashboardContent({ displayName, results, rollups }: DashboardContentProps) {
   const [gameType, setGameType] = useState<"four_player" | "three_player">("four_player")
 
-  const filteredResults = results.filter((r) => r.games?.game_type === gameType)
+  const filteredResults = results
+    .filter((r) => r.games?.game_type === gameType)
+    .sort((a, b) => {
+      const aTime = new Date(a.games?.played_at || a.created_at).getTime()
+      const bTime = new Date(b.games?.played_at || b.created_at).getTime()
+      return aTime - bTime
+    })
   const rankLimit = gameType === "four_player" ? 4 : 3
 
   const rollup = rollups.find((r) => r.game_type === gameType) || null
