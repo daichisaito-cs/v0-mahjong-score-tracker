@@ -28,6 +28,7 @@ interface GameEditFormProps {
   gameId: string
   gameType: string
   appliedRule?: {
+    startingPoints: number
     returnPoints: number
     uma: number[]
   }
@@ -44,9 +45,11 @@ function calculatePoints(
   scores: string[],
   gameType: string,
   uma: number[],
+  startingPoints: number,
   returnPoints: number,
 ) {
   const playerCount = gameType === "four_player" ? 4 : 3
+  const okaPoints = ((returnPoints - startingPoints) * playerCount) / 1000
 
   const sorted = scores
     .slice(0, playerCount)
@@ -80,12 +83,13 @@ function calculatePoints(
       totalUma += uma[rank - 1] || 0
     }
     const avgUma = totalUma / group.length
+    const avgOka = rankStart === 1 ? okaPoints / group.length : 0
 
     group.forEach((player) => {
       const basePoint = (player.score - returnPoints) / 1000
       resolved[player.originalIndex] = {
         rank: rankStart,
-        point: Number((basePoint + avgUma).toFixed(2)),
+        point: Number((basePoint + avgUma + avgOka).toFixed(2)),
       }
     })
 
@@ -117,10 +121,11 @@ export function GameEditForm({ gameId, gameType, appliedRule, results }: GameEdi
       : gameType === "four_player"
         ? [30, 10, -10, -30]
         : [30, 0, -30, 0]
+  const startingPoints = appliedRule?.startingPoints ?? 25000
   const returnPoints = appliedRule?.returnPoints ?? 30000
 
   const previewResults =
-    scores.every((s) => s) ? calculatePoints(scores, gameType, uma, returnPoints) : null
+    scores.every((s) => s) ? calculatePoints(scores, gameType, uma, startingPoints, returnPoints) : null
 
   const updateBonusPoint = (index: number, value: string) => {
     const numValue = Number.parseFloat(value) || 0
@@ -142,7 +147,7 @@ export function GameEditForm({ gameId, gameType, appliedRule, results }: GameEdi
     const supabase = createClient()
 
     try {
-      const calculatedResults = calculatePoints(scores, gameType, uma, returnPoints)
+      const calculatedResults = calculatePoints(scores, gameType, uma, startingPoints, returnPoints)
 
       for (let i = 0; i < results.length && i < playerCount; i++) {
         const { error: updateError } = await supabase

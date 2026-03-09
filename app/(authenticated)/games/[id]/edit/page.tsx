@@ -93,6 +93,7 @@ export default async function GameEditPage({
           gameId={game.id}
           gameType={game.game_type}
           appliedRule={{
+            startingPoints: Number(game.applied_starting_points ?? 25000),
             returnPoints: Number(game.applied_return_points ?? 30000),
             uma: [
               Number(game.applied_uma_first ?? 30),

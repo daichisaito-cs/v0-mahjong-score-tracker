@@ -1,5 +1,4 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { BrandLogo } from "@/components/brand-logo"
 import Link from "next/link"
 
@@ -21,11 +20,6 @@ export default function SignUpSuccessPage() {
                 ご登録いただいたメールアドレスに確認メールを送信しました。
                 メール内のリンクをクリックして、アカウントを有効化してください。
               </p>
-              <Link href="/auth/login" className="block">
-                <Button variant="outline" className="w-full bg-transparent">
-                  ログイン画面へ
-                </Button>
-              </Link>
             </CardContent>
           </Card>
         </div>
