@@ -641,6 +641,24 @@ export function GameRecordForm({
       const { error: resultsError } = await supabase.from("game_results").insert(gameResults)
       if (resultsError) throw resultsError
 
+      // リーグ対局の場合、参加者を自動的にleague_membersに追加
+      if (leagueId !== "none") {
+        const participantUserIds = activeSeats
+          .flatMap((seat) => seat.members.map((m) => m.userId))
+          .filter((id): id is string => !!id)
+        const uniqueUserIds = Array.from(new Set(participantUserIds))
+        if (uniqueUserIds.length > 0) {
+          const newMembers = uniqueUserIds.map((uid) => ({
+            league_id: leagueId,
+            user_id: uid,
+          }))
+          // 既存メンバーは unique constraint で弾かれるので upsert で無視
+          await supabase
+            .from("league_members")
+            .upsert(newMembers, { onConflict: "league_id,user_id", ignoreDuplicates: true })
+        }
+      }
+
       const { error: pruneError } = await supabase.rpc("rollup_and_prune_games_for_user", { p_keep: 5000 })
       if (pruneError) {
         console.warn("[v0] rollup_and_prune_games_for_user failed:", pruneError)

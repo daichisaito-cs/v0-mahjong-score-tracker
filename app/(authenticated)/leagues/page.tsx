@@ -12,13 +12,22 @@ export default async function LeaguesPage() {
 
   const userId = user.id
 
-  const { data: memberships, error: membershipError } = await supabase
-    .from("league_members")
-    .select("league_id")
-    .eq("user_id", userId)
-  if (membershipError) throw membershipError
+  // league_members と対局参加の両方からリーグIDを取得
+  const [membershipRes, gameLeagueRes] = await Promise.all([
+    supabase.from("league_members").select("league_id").eq("user_id", userId),
+    supabase
+      .from("game_results")
+      .select("games(league_id)")
+      .eq("user_id", userId)
+      .not("games.league_id", "is", null),
+  ])
+  if (membershipRes.error) throw membershipRes.error
 
-  const leagueIds = (memberships || []).map((m: any) => m.league_id).filter(Boolean)
+  const memberLeagueIds = (membershipRes.data || []).map((m: any) => m.league_id).filter(Boolean)
+  const gameLeagueIds = (gameLeagueRes.data || [])
+    .map((r: any) => r.games?.league_id)
+    .filter(Boolean)
+  const leagueIds = Array.from(new Set([...memberLeagueIds, ...gameLeagueIds]))
 
   const query = supabase
     .from("leagues")
