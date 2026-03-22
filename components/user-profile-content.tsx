@@ -4,7 +4,7 @@ import type React from "react"
 import { useState } from "react"
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { TrendingUp, Target, Award, Percent } from "lucide-react"
+import { TrendingUp, Target, Award, Percent, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
@@ -34,10 +34,17 @@ interface Rollup {
   rolled_low_raw_score: number | null
 }
 
+interface YakumanRecord {
+  name: string
+  playedAt: string | null
+  gameType: string | null
+}
+
 interface UserProfileContentProps {
   profile: { id: string; display_name: string | null; avatar_url: string | null }
   results: GameResult[]
   rollups: Rollup[]
+  yakumanRecords?: YakumanRecord[]
   backFallback: string
   backLabel?: string
 }
@@ -46,6 +53,7 @@ export function UserProfileContent({
   profile,
   results,
   rollups,
+  yakumanRecords = [],
   backFallback,
 }: UserProfileContentProps) {
   const [isAvatarPreviewOpen, setIsAvatarPreviewOpen] = useState(false)
@@ -141,10 +149,14 @@ export function UserProfileContent({
   const fourPlayerStats = calculateStats(fourPlayerResults, "four_player")
   const threePlayerStats = calculateStats(threePlayerResults, "three_player")
 
+  const fourPlayerYakuman = yakumanRecords.filter((r) => r.gameType === "four_player")
+  const threePlayerYakuman = yakumanRecords.filter((r) => r.gameType === "three_player")
+
   const renderStats = (
     stats: ReturnType<typeof calculateStats>,
     pointsHistory: ReturnType<typeof createPointsHistory>,
     rankLimit: number,
+    yakumanForType: YakumanRecord[],
   ) => (
     <div className="space-y-6">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -247,6 +259,38 @@ export function UserProfileContent({
           </CardContent>
         </Card>
       )}
+
+      {yakumanForType.length > 0 && (
+        <Card className="border border-amber-200 shadow-sm bg-amber-50/30">
+          <CardHeader className="pb-2 px-4">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-amber-500" />
+              役満
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0 px-4">
+            <div className="space-y-2">
+              {yakumanForType.map((record, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between rounded-lg border border-amber-200/70 bg-white px-3 py-2"
+                >
+                  <span className="font-bold text-amber-800">{record.name}</span>
+                  {record.playedAt && (
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(record.playedAt).toLocaleDateString("ja-JP", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 
@@ -290,8 +334,8 @@ export function UserProfileContent({
           <TabsTrigger value="four_player">四人麻雀</TabsTrigger>
           <TabsTrigger value="three_player">三人麻雀</TabsTrigger>
         </TabsList>
-        <TabsContent value="four_player">{renderStats(fourPlayerStats, fourPlayerPointsHistory, 4)}</TabsContent>
-        <TabsContent value="three_player">{renderStats(threePlayerStats, threePlayerPointsHistory, 3)}</TabsContent>
+        <TabsContent value="four_player">{renderStats(fourPlayerStats, fourPlayerPointsHistory, 4, fourPlayerYakuman)}</TabsContent>
+        <TabsContent value="three_player">{renderStats(threePlayerStats, threePlayerPointsHistory, 3, threePlayerYakuman)}</TabsContent>
       </Tabs>
     </div>
   )

@@ -108,6 +108,7 @@ export default async function GameEditPage({
             score: r.raw_score.toString(),
             userId: r.user_id,
             bonusPoints: Number(r.bonus_points || 0),
+            yakuman: Array.isArray(r.yakuman) ? r.yakuman : [],
           }))}
         />
       )}

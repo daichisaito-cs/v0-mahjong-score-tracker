@@ -23,6 +23,8 @@ import {
 import { cn } from "@/lib/utils"
 import { Trash2 } from "lucide-react"
 import { useQueryClient } from "@tanstack/react-query"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { YAKUMAN_LIST } from "@/lib/yakuman"
 
 interface GameEditFormProps {
   gameId: string
@@ -38,6 +40,7 @@ interface GameEditFormProps {
     score: string
     userId: string
     bonusPoints: number
+    yakuman: string[]
   }[]
 }
 
@@ -109,6 +112,7 @@ export function GameEditForm({ gameId, gameType, appliedRule, results }: GameEdi
   const queryClient = useQueryClient()
   const [scores, setScores] = useState(results.map((r) => r.score))
   const [bonusPoints, setBonusPoints] = useState(results.map((r) => r.bonusPoints || 0))
+  const [yakumanList, setYakumanList] = useState(results.map((r) => r.yakuman || []))
   const [isLoading, setIsLoading] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
@@ -157,6 +161,7 @@ export function GameEditForm({ gameId, gameType, appliedRule, results }: GameEdi
             rank: calculatedResults[i].rank,
             point: calculatedResults[i].point + bonusPoints[i],
             bonus_points: Number(bonusPoints[i].toFixed(2)),
+            yakuman: yakumanList[i].length > 0 ? yakumanList[i] : null,
           })
           .eq("id", results[i].id)
 
@@ -211,7 +216,8 @@ export function GameEditForm({ gameId, gameType, appliedRule, results }: GameEdi
         </CardHeader>
         <CardContent className="space-y-4">
           {results.slice(0, playerCount).map((result, index) => (
-            <div key={result.id} className="flex gap-3 items-end">
+            <div key={result.id} className="space-y-1">
+            <div className="flex gap-3 items-end">
               <div className="flex-1">
                 <Label className="text-sm">プレイヤー{index + 1}</Label>
                 <Input value={result.name} disabled className="bg-muted" />
@@ -253,6 +259,62 @@ export function GameEditForm({ gameId, gameType, appliedRule, results }: GameEdi
                   </div>
                 </div>
               )}
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <Label className="text-xs text-muted-foreground whitespace-nowrap">役満</Label>
+                <Select
+                  value="_none"
+                  onValueChange={(value) => {
+                    if (value === "_none") return
+                    setYakumanList((prev) => {
+                      const updated = [...prev]
+                      if (!updated[index].includes(value)) {
+                        updated[index] = [...updated[index], value]
+                      }
+                      return updated
+                    })
+                  }}
+                  disabled={isDisabled}
+                >
+                  <SelectTrigger className="h-7 text-xs w-32">
+                    <SelectValue placeholder="追加" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="_none">なし</SelectItem>
+                    {YAKUMAN_LIST.filter((y) => !yakumanList[index].includes(y)).map((y) => (
+                      <SelectItem key={y} value={y}>{y}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {yakumanList[index].length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {yakumanList[index].map((y) => (
+                    <span
+                      key={y}
+                      className="inline-flex items-center gap-1 rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 text-xs font-semibold"
+                    >
+                      {y}
+                      <button
+                        type="button"
+                        className="hover:text-amber-600"
+                        disabled={isDisabled}
+                        onClick={() => {
+                          setYakumanList((prev) => {
+                            const updated = [...prev]
+                            updated[index] = updated[index].filter((v) => v !== y)
+                            return updated
+                          })
+                        }}
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
             </div>
           ))}
         </CardContent>

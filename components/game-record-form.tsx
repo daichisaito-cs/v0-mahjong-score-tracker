@@ -15,6 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { SessionSummaryDialog, type SessionResult } from "@/components/session-summary-dialog"
 import { getOptimizedAvatarUrl } from "@/lib/avatar"
 import { cn } from "@/lib/utils"
+import { YAKUMAN_LIST } from "@/lib/yakuman"
 
 interface League {
   id: string
@@ -53,6 +54,7 @@ interface SeatMemberInput {
   userId?: string
   avatarUrl?: string | null
   isManual?: boolean
+  yakuman?: string[]
 }
 
 interface SeatInput {
@@ -632,6 +634,7 @@ export function GameRecordForm({
           raw_score: rawScore,
           point: round2(splitSeatPoint + splitBonus),
           bonus_points: round2(splitBonus),
+          yakuman: member.yakuman && member.yakuman.length > 0 ? member.yakuman : null,
         }))
       })
 
@@ -918,6 +921,51 @@ export function GameRecordForm({
                                 value={member.name}
                                 onChange={(e) => updateManualMemberName(seatIndex, memberIndex, e.target.value)}
                               />
+                            </div>
+                          )}
+
+                          {member.name && (
+                            <div className="space-y-1">
+                              <Label className="text-xs text-muted-foreground">役満</Label>
+                              <Select
+                                value="_none"
+                                onValueChange={(value) => {
+                                  if (value === "_none") return
+                                  const current = member.yakuman || []
+                                  if (!current.includes(value)) {
+                                    setMember(seatIndex, memberIndex, { ...member, yakuman: [...current, value] })
+                                  }
+                                }}
+                              >
+                                <SelectTrigger className="h-8 text-xs">
+                                  <SelectValue placeholder="役満を追加" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="_none">なし</SelectItem>
+                                  {YAKUMAN_LIST.filter((y) => !(member.yakuman || []).includes(y)).map((y) => (
+                                    <SelectItem key={y} value={y}>{y}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              {(member.yakuman || []).length > 0 && (
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                  {member.yakuman!.map((y) => (
+                                    <span
+                                      key={y}
+                                      className="inline-flex items-center gap-1 rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 text-xs font-semibold"
+                                    >
+                                      {y}
+                                      <button
+                                        type="button"
+                                        className="hover:text-amber-600"
+                                        onClick={() => setMember(seatIndex, memberIndex, { ...member, yakuman: member.yakuman!.filter((v) => v !== y) })}
+                                      >
+                                        ×
+                                      </button>
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
                             </div>
                           )}
 

@@ -9,7 +9,7 @@ export default async function DashboardPage() {
 
   const userId = user.id
 
-  const [profileRes, resultsRes, rollupsRes] = await Promise.all([
+  const [profileRes, resultsRes, rollupsRes, yakumanRes] = await Promise.all([
     supabase.from("profiles").select("id, display_name").eq("id", userId).single(),
     supabase
       .from("game_results")
@@ -22,16 +22,31 @@ export default async function DashboardPage() {
         "game_type, rolled_game_count, rolled_total_points, rolled_rank1_count, rolled_rank2_count, rolled_rank3_count, rolled_rank4_count, rolled_best_raw_score, rolled_low_raw_score",
       )
       .eq("user_id", userId),
+    supabase
+      .from("game_results")
+      .select("yakuman, games(played_at, game_type)")
+      .eq("user_id", userId)
+      .not("yakuman", "is", null)
+      .order("created_at", { ascending: false }),
   ])
 
   if (profileRes.error) throw profileRes.error
   if (resultsRes.error) throw resultsRes.error
+
+  const yakumanRecords = ((yakumanRes.data as any[]) || []).flatMap((r: any) =>
+    (r.yakuman || []).map((y: string) => ({
+      name: y,
+      playedAt: r.games?.played_at,
+      gameType: r.games?.game_type,
+    }))
+  )
 
   return (
     <DashboardContent
       displayName={profileRes.data?.display_name ?? null}
       results={(resultsRes.data as any[]) || []}
       rollups={(rollupsRes.data as any[]) || []}
+      yakumanRecords={yakumanRecords}
     />
   )
 }

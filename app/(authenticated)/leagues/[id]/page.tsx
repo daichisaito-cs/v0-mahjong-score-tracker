@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation"
 import { createClientWithUser } from "@/lib/supabase/server"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Plus, Trophy, Settings } from "lucide-react"
+import { Plus, Trophy, Settings, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { getOptimizedAvatarUrl } from "@/lib/avatar"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -84,7 +84,7 @@ export default async function LeagueDetailPage({
           .from("game_results")
           .select(
             `id, game_id, seat_index, user_id, player_name, rank,
-            raw_score, point, bonus_points, created_at, profiles(display_name)`,
+            raw_score, point, bonus_points, yakuman, created_at, profiles(display_name)`,
           )
           .in("game_id", gameIds)
       : Promise.resolve({ data: [] as any[], error: null })
@@ -339,6 +339,27 @@ export default async function LeagueDetailPage({
     })
     return entry
   })
+
+  // 役満データを収集
+  const yakumanRecords: Array<{ playerName: string; playerId: string | null; yakumanName: string; playedAt: string; avatarUrl?: string | null }> = []
+  gamesWithResults.forEach((game: any) => {
+    game.game_results?.forEach((result: any) => {
+      if (result.yakuman && Array.isArray(result.yakuman) && result.yakuman.length > 0) {
+        const name = result.profiles?.display_name || result.player_name || profileMap.get(result.user_id)?.name || "Unknown"
+        const avatar = result.user_id ? (profileMap.get(result.user_id)?.avatarUrl || null) : null
+        result.yakuman.forEach((y: string) => {
+          yakumanRecords.push({
+            playerName: name,
+            playerId: result.user_id || null,
+            yakumanName: y,
+            playedAt: game.played_at || game.created_at,
+            avatarUrl: avatar,
+          })
+        })
+      }
+    })
+  })
+  yakumanRecords.sort((a, b) => new Date(b.playedAt).getTime() - new Date(a.playedAt).getTime())
 
   const existingMemberIds = Array.from(new Set([...memberIds, league.owner_id]))
   const isOwner = league.owner_id === user.id
@@ -612,6 +633,55 @@ export default async function LeagueDetailPage({
           </CardContent>
         </Card>
       </div>
+
+      {yakumanRecords.length > 0 && (
+        <Card className="border-amber-200 bg-amber-50/30">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-amber-500" />
+              役満
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0 space-y-2">
+            {yakumanRecords.map((record, index) => (
+              <div
+                key={index}
+                className="flex items-center justify-between rounded-lg border border-amber-200/70 bg-white px-3 py-2"
+              >
+                <div className="flex items-center gap-2">
+                  {record.playerId ? (
+                    <Link
+                      href={`/users/${record.playerId}`}
+                      className="rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <Avatar className="h-7 w-7">
+                        <AvatarImage src={getOptimizedAvatarUrl(record.avatarUrl, { size: 56, quality: 50 })} />
+                        <AvatarFallback>{record.playerName.charAt(0).toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                    </Link>
+                  ) : (
+                    <Avatar className="h-7 w-7">
+                      <AvatarFallback>{record.playerName.charAt(0).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                  )}
+                  <div>
+                    <span className="font-semibold text-sm">{record.playerName}</span>
+                    <span className="mx-2 text-muted-foreground text-xs">-</span>
+                    <span className="font-bold text-amber-800 text-sm">{record.yakumanName}</span>
+                  </div>
+                </div>
+                <span className="text-xs text-muted-foreground">
+                  {new Date(record.playedAt).toLocaleDateString("ja-JP", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </span>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
 
     </div>
   )

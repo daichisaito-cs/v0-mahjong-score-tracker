@@ -4,7 +4,7 @@ import type React from "react"
 import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { TrendingUp, Target, Award, Percent } from "lucide-react"
+import { TrendingUp, Target, Award, Percent, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts"
 
@@ -29,13 +29,20 @@ interface Rollup {
   rolled_low_raw_score: number | null
 }
 
+interface YakumanRecord {
+  name: string
+  playedAt: string | null
+  gameType: string | null
+}
+
 interface DashboardContentProps {
   displayName: string | null
   results: GameResult[]
   rollups: Rollup[]
+  yakumanRecords?: YakumanRecord[]
 }
 
-export function DashboardContent({ displayName, results, rollups }: DashboardContentProps) {
+export function DashboardContent({ displayName, results, rollups, yakumanRecords = [] }: DashboardContentProps) {
   const [gameType, setGameType] = useState<"four_player" | "three_player">("four_player")
 
   const filteredResults = results
@@ -234,6 +241,40 @@ export function DashboardContent({ displayName, results, rollups }: DashboardCon
                 <p className="text-xs text-muted-foreground">最低得点</p>
                 <p className="text-xl font-bold text-rose-600 mt-1">{lowScore?.toLocaleString()}点</p>
               </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {yakumanRecords.filter((r) => r.gameType === gameType).length > 0 && (
+        <Card className="border-amber-200 shadow-sm bg-amber-50/30">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-amber-500" />
+              役満
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="space-y-2">
+              {yakumanRecords
+                .filter((r) => r.gameType === gameType)
+                .map((record, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between rounded-lg border border-amber-200/70 bg-white px-3 py-2"
+                  >
+                    <span className="font-bold text-amber-800">{record.name}</span>
+                    {record.playedAt && (
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(record.playedAt).toLocaleDateString("ja-JP", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </span>
+                    )}
+                  </div>
+                ))}
             </div>
           </CardContent>
         </Card>

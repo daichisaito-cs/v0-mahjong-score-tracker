@@ -54,6 +54,7 @@ export default async function GameDetailPage({ params }: { params: Promise<{ id:
         raw_score,
         point,
         bonus_points,
+        yakuman,
         created_at,
         profiles (display_name)
       )
@@ -201,6 +202,18 @@ export default async function GameDetailPage({ params }: { params: Promise<{ id:
                           {Number(result.bonus_points).toFixed(2)}pt
                         </span>
                       </p>
+                    )}
+                    {result.yakuman && Array.isArray(result.yakuman) && result.yakuman.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {result.yakuman.map((y: string) => (
+                          <span
+                            key={y}
+                            className="inline-flex items-center justify-center rounded-full border border-amber-400/40 bg-amber-100 text-amber-800 px-2 py-0.5 text-[10px] font-bold leading-none whitespace-nowrap"
+                          >
+                            {y}
+                          </span>
+                        ))}
+                      </div>
                     )}
                   </div>
                 </div>
