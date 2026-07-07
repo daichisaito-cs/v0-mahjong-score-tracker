@@ -96,6 +96,11 @@ export default function LoginPage() {
                   </Button>
                 </div>
                 <div className="mt-4 text-center text-sm">
+                  <Link href="/auth/forgot-password" className="underline underline-offset-4 text-primary">
+                    パスワードをお忘れですか？
+                  </Link>
+                </div>
+                <div className="mt-2 text-center text-sm">
                   アカウントをお持ちでない方は{" "}
                   <Link href="/auth/sign-up" className="underline underline-offset-4 text-primary">
                     新規登録
