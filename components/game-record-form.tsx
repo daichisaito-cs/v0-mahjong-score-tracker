@@ -13,6 +13,12 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { SessionSummaryDialog, type SessionResult } from "@/components/session-summary-dialog"
+import { SessionCarryoverDialog } from "@/components/session-carryover-dialog"
+import {
+  buildSeatsFromGame,
+  buildSessionResultFromGame,
+  type CarryoverGame,
+} from "@/lib/session-carryover"
 import { getOptimizedAvatarUrl } from "@/lib/avatar"
 import { cn } from "@/lib/utils"
 import { YAKUMAN_LIST } from "@/lib/yakuman"
@@ -88,6 +94,10 @@ interface GameRecordFormProps {
   friends: Friend[]
   defaultLeagueId?: string
   sessionData?: SessionData
+  /** 引き継ぎ選択ダイアログに出す、自分が参加した直近の対局 */
+  recentGames?: CarryoverGame[]
+  /** ?carry= で指定され、このセッションに引き継がれる過去の対局（古い順） */
+  carriedGames?: CarryoverGame[]
 }
 
 type SeatCalcResult = {
@@ -212,17 +222,33 @@ export function GameRecordForm({
   friends,
   defaultLeagueId,
   sessionData,
+  recentGames = [],
+  carriedGames = [],
 }: GameRecordFormProps) {
   const router = useRouter()
   const queryClient = useQueryClient()
 
-  const [gameType, setGameType] = useState<"four_player" | "three_player">(
-    (sessionData?.gameType as "four_player" | "three_player") || "four_player",
+  // 引き継ぎ対象の過去対局（古い順）。最後の1局から対局タイプ・リーグ・メンバーを引き継ぐ
+  const carriedGameIds = useMemo(() => carriedGames.map((game) => game.id), [carriedGames])
+  const carriedSessionResults = useMemo(
+    () => carriedGames.map((game) => buildSessionResultFromGame(game)),
+    [carriedGames],
   )
-  const [leagueId, setLeagueId] = useState<string>(sessionData?.leagueId || defaultLeagueId || "none")
-  const initialLeagueId = sessionData?.leagueId || defaultLeagueId
+  const lastCarriedGame = carriedGames.length > 0 ? carriedGames[carriedGames.length - 1] : null
+
+  const [gameType, setGameType] = useState<"four_player" | "three_player">(
+    (sessionData?.gameType as "four_player" | "three_player") ||
+      (lastCarriedGame?.game_type as "four_player" | "three_player") ||
+      "four_player",
+  )
+  const [leagueId, setLeagueId] = useState<string>(
+    sessionData?.leagueId || defaultLeagueId || lastCarriedGame?.league_id || "none",
+  )
+  const initialLeagueId = sessionData?.leagueId || defaultLeagueId || lastCarriedGame?.league_id || undefined
   const initialLeagueRuleId = initialLeagueId ? leagues.find((l) => l.id === initialLeagueId)?.rule_id : null
-  const [ruleId, setRuleId] = useState<string>(sessionData?.ruleId || initialLeagueRuleId || "")
+  const [ruleId, setRuleId] = useState<string>(
+    sessionData?.ruleId || initialLeagueRuleId || lastCarriedGame?.applied_rule_id || "",
+  )
   const [isLoading, setIsLoading] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -230,6 +256,7 @@ export function GameRecordForm({
 
   const [sessionResults, setSessionResults] = useState<SessionResult[]>(normalizeSessionResults(sessionData?.sessionResults))
   const [showSummaryDialog, setShowSummaryDialog] = useState(false)
+  const [showCarryoverDialog, setShowCarryoverDialog] = useState(false)
   const [finalSessionResults, setFinalSessionResults] = useState<SessionResult[]>([])
 
   const playerCount = gameType === "four_player" ? 4 : 3
@@ -252,6 +279,10 @@ export function GameRecordForm({
       }))
     }
 
+    if (lastCarriedGame) {
+      return buildSeatsFromGame(lastCarriedGame)
+    }
+
     if (sessionData?.players && sessionData.players.length > 0) {
       return sessionData.players.map((p, index) => ({
         seatIndex: index + 1,
@@ -269,7 +300,7 @@ export function GameRecordForm({
     }
 
     return createDefaultSeats(playerCount)
-  }, [sessionData, playerCount])
+  }, [sessionData, lastCarriedGame, playerCount])
 
   const [seats, setSeats] = useState<SeatInput[]>(() => {
     const normalized = initialSeats
@@ -494,12 +525,18 @@ export function GameRecordForm({
     })
   }
 
+  // 引き継いだ過去の対局 + このセッションで記録した対局
+  const combinedSessionResults = useMemo(
+    () => [...carriedSessionResults, ...sessionResults],
+    [carriedSessionResults, sessionResults],
+  )
+
   const calculateSessionTotals = () => {
-    if (sessionResults.length === 0) return []
+    if (combinedSessionResults.length === 0) return []
 
     const totals: Record<string, { name: string; total: number; avatarUrl?: string | null }> = {}
 
-    sessionResults.forEach((result) => {
+    combinedSessionResults.forEach((result) => {
       result.players.forEach((player, index) => {
         const key = player.userId || player.name
         if (!totals[key]) {
@@ -532,7 +569,22 @@ export function GameRecordForm({
       .sort((a, b) => b.total - a.total)
   }
 
-  const sessionTotals = sessionResults.length > 0 ? calculateSessionTotals() : []
+  const sessionTotals = combinedSessionResults.length > 0 ? calculateSessionTotals() : []
+
+  const openCarryoverDialog = () => {
+    // 引き継ぎの読み込みはページ遷移を伴うため、入力中の内容があれば確認する
+    const hasInput = activeSeats.some((seat) => seat.score !== "" || (seat.bonusPoints || 0) !== 0)
+    if (hasInput && !window.confirm("入力中の内容は破棄されます。よろしいですか？")) return
+    setShowCarryoverDialog(true)
+  }
+
+  const handleCarryoverConfirm = (gameIds: string[]) => {
+    setShowCarryoverDialog(false)
+    const params = new URLSearchParams()
+    if (gameIds.length > 0) params.set("carry", gameIds.join(","))
+    const query = params.toString()
+    window.location.href = query ? `/games/new?${query}` : "/games/new"
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -676,6 +728,8 @@ export function GameRecordForm({
       }
       const allSessionResults = [...sessionResults, newSessionResult]
 
+      const carryQuery = carriedGameIds.length > 0 ? `carry=${carriedGameIds.join(",")}&` : ""
+
       if (continueSession) {
         const sessionDataEncoded = encodeURIComponent(
           JSON.stringify({
@@ -705,11 +759,11 @@ export function GameRecordForm({
 
         setSessionResults(allSessionResults)
         setIsSubmitted(true)
-        window.location.href = `/games/new?session=${sessionDataEncoded}`
+        window.location.href = `/games/new?${carryQuery}session=${sessionDataEncoded}`
       } else {
         setIsSubmitted(true)
-        if (sessionResults.length > 0) {
-          setFinalSessionResults(allSessionResults)
+        if (combinedSessionResults.length > 0) {
+          setFinalSessionResults([...carriedSessionResults, ...allSessionResults])
           setShowSummaryDialog(true)
         } else {
           queryClient.invalidateQueries({ queryKey: ["games", currentUserId] })
@@ -737,10 +791,26 @@ export function GameRecordForm({
   return (
     <>
       <form onSubmit={handleSubmit} className="space-y-6">
-        {sessionResults.length > 0 && (
+        {combinedSessionResults.length > 0 ? (
           <Card className="bg-primary/5 border-primary">
             <CardHeader>
-              <CardTitle className="text-sm flex items-center gap-2">連続記録中（{sessionResults.length + 1}戦目） - 暫定合計</CardTitle>
+              <CardTitle className="text-sm flex items-center justify-between gap-2">
+                <span>
+                  連続記録中（{combinedSessionResults.length + 1}戦目） - 暫定合計
+                  {carriedSessionResults.length > 0 && `（引き継ぎ${carriedSessionResults.length}戦を含む）`}
+                </span>
+                {recentGames.length > 0 && sessionResults.length === 0 && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 shrink-0 text-xs"
+                    onClick={openCarryoverDialog}
+                  >
+                    選び直す
+                  </Button>
+                )}
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -756,6 +826,20 @@ export function GameRecordForm({
               </div>
             </CardContent>
           </Card>
+        ) : (
+          recentGames.length > 0 && (
+            <Card className="border-dashed">
+              <CardContent className="flex flex-wrap items-center justify-between gap-2 py-4">
+                <div>
+                  <p className="text-sm font-medium">過去の対局の続きから記録する</p>
+                  <p className="text-xs text-muted-foreground">選んだ対局の合計ポイントとメンバーを引き継ぎます</p>
+                </div>
+                <Button type="button" variant="outline" size="sm" onClick={openCarryoverDialog}>
+                  対局を選ぶ
+                </Button>
+              </CardContent>
+            </Card>
+          )
         )}
 
         <Card>
@@ -1069,7 +1153,7 @@ export function GameRecordForm({
             variant="outline"
             className="flex-1 bg-transparent"
             onClick={() => {
-              if (sessionResults.length > 0) {
+              if (combinedSessionResults.length > 0) {
                 window.location.href = "/games"
               } else {
                 router.back()
@@ -1115,10 +1199,18 @@ export function GameRecordForm({
             }
             onClick={() => setContinueSession(false)}
           >
-            {isLoading || isSubmitted ? "保存中..." : sessionResults.length > 0 ? "記録を終了する" : "記録する"}
+            {isLoading || isSubmitted ? "保存中..." : combinedSessionResults.length > 0 ? "記録を終了する" : "記録する"}
           </Button>
         </div>
       </form>
+
+      <SessionCarryoverDialog
+        open={showCarryoverDialog}
+        games={recentGames}
+        selectedIds={carriedGameIds}
+        onOpenChange={setShowCarryoverDialog}
+        onConfirm={handleCarryoverConfirm}
+      />
 
       <SessionSummaryDialog
         open={showSummaryDialog}
