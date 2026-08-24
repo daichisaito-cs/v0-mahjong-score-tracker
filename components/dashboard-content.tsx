@@ -4,7 +4,8 @@ import type React from "react"
 import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { TrendingUp, Target, Award, Percent, Sparkles } from "lucide-react"
+import { TrendingUp, Target, Award, Percent } from "lucide-react"
+import { YakumanCard } from "@/components/yakuman-card"
 import { cn } from "@/lib/utils"
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts"
 
@@ -246,39 +247,7 @@ export function DashboardContent({ displayName, results, rollups, yakumanRecords
         </Card>
       )}
 
-      {yakumanRecords.filter((r) => r.gameType === gameType).length > 0 && (
-        <Card className="border-amber-200 shadow-sm bg-amber-50/30">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-amber-500" />
-              役満
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div className="space-y-2">
-              {yakumanRecords
-                .filter((r) => r.gameType === gameType)
-                .map((record, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between rounded-lg border border-amber-200/70 bg-white px-3 py-2"
-                  >
-                    <span className="font-bold text-amber-800">{record.name}</span>
-                    {record.playedAt && (
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(record.playedAt).toLocaleDateString("ja-JP", {
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
-                        })}
-                      </span>
-                    )}
-                  </div>
-                ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      <YakumanCard records={yakumanRecords.filter((r) => r.gameType === gameType)} />
     </div>
   )
 }

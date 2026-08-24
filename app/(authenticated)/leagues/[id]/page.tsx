@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { LeagueMemberAdd } from "@/components/league-member-add"
 import { BackButton } from "@/components/back-button"
 import { LeagueDetailChart } from "@/components/league-detail-chart"
+import { formatYakumanDate, groupYakuman } from "@/lib/yakuman"
 
 function isValidUUID(str: string): boolean {
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -361,6 +362,34 @@ export default async function LeagueDetailPage({
   })
   yakumanRecords.sort((a, b) => new Date(b.playedAt).getTime() - new Date(a.playedAt).getTime())
 
+  // プレイヤー単位にまとめ、同じ役満は回数でまとめる
+  const yakumanByPlayer = Array.from(
+    yakumanRecords
+      .reduce((map, record) => {
+        const key = record.playerId || `name:${record.playerName}`
+        const entry = map.get(key) || {
+          key,
+          playerName: record.playerName,
+          playerId: record.playerId,
+          avatarUrl: record.avatarUrl ?? null,
+          total: 0,
+          latestAt: record.playedAt,
+          entries: [] as Array<{ name: string; playedAt: string | null }>,
+        }
+        entry.total += 1
+        entry.entries.push({ name: record.yakumanName, playedAt: record.playedAt })
+        if (new Date(record.playedAt).getTime() > new Date(entry.latestAt).getTime()) entry.latestAt = record.playedAt
+        map.set(key, entry)
+        return map
+      }, new Map<string, { key: string; playerName: string; playerId: string | null; avatarUrl: string | null; total: number; latestAt: string; entries: Array<{ name: string; playedAt: string | null }> }>())
+      .values(),
+  )
+    .map((entry) => ({ ...entry, groups: groupYakuman(entry.entries) }))
+    .sort((a, b) => {
+      if (b.total !== a.total) return b.total - a.total
+      return new Date(b.latestAt).getTime() - new Date(a.latestAt).getTime()
+    })
+
   const existingMemberIds = Array.from(new Set([...memberIds, league.owner_id]))
   const isOwner = league.owner_id === user.id
 
@@ -634,49 +663,63 @@ export default async function LeagueDetailPage({
         </Card>
       </div>
 
-      {yakumanRecords.length > 0 && (
+      {yakumanByPlayer.length > 0 && (
         <Card className="border-amber-200 bg-amber-50/30">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-amber-500" />
               役満
+              <span className="ml-auto text-sm font-semibold text-amber-700">計{yakumanRecords.length}回</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0 space-y-2">
-            {yakumanRecords.map((record, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between rounded-lg border border-amber-200/70 bg-white px-3 py-2"
-              >
+            {yakumanByPlayer.map((player) => (
+              <div key={player.key} className="rounded-lg border border-amber-200/70 bg-white px-3 py-2">
                 <div className="flex items-center gap-2">
-                  {record.playerId ? (
+                  {player.playerId ? (
                     <Link
-                      href={`/users/${record.playerId}`}
+                      href={`/users/${player.playerId}`}
                       className="rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
                       <Avatar className="h-7 w-7">
-                        <AvatarImage src={getOptimizedAvatarUrl(record.avatarUrl, { size: 56, quality: 50 })} />
-                        <AvatarFallback>{record.playerName.charAt(0).toUpperCase()}</AvatarFallback>
+                        <AvatarImage src={getOptimizedAvatarUrl(player.avatarUrl, { size: 56, quality: 50 })} />
+                        <AvatarFallback>{player.playerName.charAt(0).toUpperCase()}</AvatarFallback>
                       </Avatar>
                     </Link>
                   ) : (
                     <Avatar className="h-7 w-7">
-                      <AvatarFallback>{record.playerName.charAt(0).toUpperCase()}</AvatarFallback>
+                      <AvatarFallback>{player.playerName.charAt(0).toUpperCase()}</AvatarFallback>
                     </Avatar>
                   )}
-                  <div>
-                    <span className="font-semibold text-sm">{record.playerName}</span>
-                    <span className="mx-2 text-muted-foreground text-xs">-</span>
-                    <span className="font-bold text-amber-800 text-sm">{record.yakumanName}</span>
-                  </div>
+                  <span className="font-semibold text-sm truncate">{player.playerName}</span>
+                  {player.total > 1 && (
+                    <span className="ml-auto shrink-0 rounded-full bg-amber-100 px-1.5 py-0.5 text-[11px] font-bold text-amber-700">
+                      計{player.total}回
+                    </span>
+                  )}
                 </div>
-                <span className="text-xs text-muted-foreground">
-                  {new Date(record.playedAt).toLocaleDateString("ja-JP", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </span>
+                <div className="mt-1.5 space-y-1 pl-9">
+                  {player.groups.map((group) => (
+                    <div key={group.name} className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span className="font-bold text-amber-800 text-sm truncate">{group.name}</span>
+                        {group.count > 1 && (
+                          <span className="shrink-0 rounded-full bg-amber-100 px-1.5 py-0.5 text-[11px] font-bold text-amber-700">
+                            ×{group.count}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap justify-end gap-x-1.5 text-xs text-muted-foreground">
+                        {group.dates.map((date, index) => (
+                          <span key={`${date}-${index}`} className="whitespace-nowrap">
+                            {formatYakumanDate(date)}
+                            {index < group.dates.length - 1 && "、"}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </CardContent>
