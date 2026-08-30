@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Users, Search, UserPlus, Check, X, Copy, Clock, TrendingUp, Mail } from "lucide-react"
+import { Users, Search, UserPlus, Check, X, Copy, Clock, TrendingUp, Mail, Trophy } from "lucide-react"
 import Link from "next/link"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getOptimizedAvatarUrl } from "@/lib/avatar"
@@ -41,15 +41,30 @@ type SentRequest = {
   }
 }
 
+type GameTypeStats = { games: number; points: number }
+type UserStats = { four_player: GameTypeStats; three_player: GameTypeStats }
+
 type Props = {
   currentUserId: string
   friendCode: string
+  currentUserName: string
+  currentUserAvatarUrl?: string | null
+  friendStats: Record<string, UserStats>
   friends: Friend[]
   pendingRequests: PendingRequest[]
   sentRequests: SentRequest[]
 }
 
-export function FriendSection({ currentUserId, friendCode, friends, pendingRequests, sentRequests }: Props) {
+export function FriendSection({
+  currentUserId,
+  friendCode,
+  currentUserName,
+  currentUserAvatarUrl,
+  friendStats,
+  friends,
+  pendingRequests,
+  sentRequests,
+}: Props) {
   const searchInputRef = useRef<HTMLInputElement>(null)
   const [searchResult, setSearchResult] = useState<{
     id: string
@@ -69,6 +84,7 @@ export function FriendSection({ currentUserId, friendCode, friends, pendingReque
   const [isInviting, setIsInviting] = useState(false)
   const [inviteMessage, setInviteMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
   const [friendToRemove, setFriendToRemove] = useState<Friend | null>(null)
+  const [rankingGameType, setRankingGameType] = useState<"four_player" | "three_player">("four_player")
   const [isRemovingFriend, setIsRemovingFriend] = useState(false)
 
 
@@ -143,7 +159,7 @@ export function FriendSection({ currentUserId, friendCode, friends, pendingReque
         },
       ])
       setSearchResult(null)
-      setSearchCode("")
+      if (searchInputRef.current) searchInputRef.current.value = ""
     }
 
     setIsSending(false)
@@ -234,6 +250,46 @@ export function FriendSection({ currentUserId, friendCode, friends, pendingReque
       setIsInviting(false)
     }
   }
+
+  const ranking = (() => {
+    const entries = [
+      {
+        id: currentUserId,
+        display_name: currentUserName || "自分",
+        avatar_url: currentUserAvatarUrl ?? null,
+        isSelf: true,
+        friend: null as Friend | null,
+      },
+      ...localFriends.map((f) => ({
+        id: f.id,
+        display_name: f.display_name,
+        avatar_url: f.avatar_url ?? null,
+        isSelf: false,
+        friend: f,
+      })),
+    ].map((entry) => {
+      const stats = friendStats[entry.id]?.[rankingGameType] ?? { games: 0, points: 0 }
+      return { ...entry, games: stats.games, points: stats.points }
+    })
+
+    entries.sort((a, b) => {
+      if (a.games === 0 && b.games === 0) return a.display_name.localeCompare(b.display_name, "ja")
+      if (a.games === 0) return 1
+      if (b.games === 0) return -1
+      return b.points - a.points
+    })
+
+    // 同ポイントは同順位
+    let lastPoints: number | null = null
+    let lastRank = 0
+    return entries.map((entry, index) => {
+      if (entry.games === 0) return { ...entry, rank: null as number | null }
+      const rank = lastPoints !== null && entry.points === lastPoints ? lastRank : index + 1
+      lastPoints = entry.points
+      lastRank = rank
+      return { ...entry, rank }
+    })
+  })()
 
   return (
     <Card>
@@ -398,44 +454,107 @@ export function FriendSection({ currentUserId, friendCode, friends, pendingReque
           </div>
         )}
 
-        {/* フレンド一覧 */}
+        {/* ポイントランキング */}
         <div className="space-y-3">
-          <Label>フレンド一覧 ({localFriends.length})</Label>
-          {localFriends.length === 0 ? (
-            <p className="text-sm text-muted-foreground">まだフレンドがいません</p>
-          ) : (
-            <div className="space-y-2">
-              {localFriends.map((friend) => (
-                <div
-                  key={friend.id}
-                  className="flex items-center justify-between p-3 border border-border rounded-lg hover:bg-accent/5 transition-colors group"
+          <div className="flex items-center justify-between gap-2">
+            <Label className="flex items-center gap-2">
+              <Trophy className="w-4 h-4" />
+              ランキング ({localFriends.length + 1}人)
+            </Label>
+            <div className="flex rounded-md border border-border overflow-hidden text-xs">
+              {([
+                { value: "four_player", label: "四麻" },
+                { value: "three_player", label: "三麻" },
+              ] as const).map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setRankingGameType(option.value)}
+                  className={`px-3 py-1.5 transition-colors ${
+                    rankingGameType === option.value
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-transparent text-muted-foreground hover:bg-accent/20"
+                  }`}
                 >
-                  <Link href={`/users/${friend.id}?from=friends`} className="flex-1">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src={getOptimizedAvatarUrl(friend.avatar_url, { size: 80, quality: 50 })} />
-                        <AvatarFallback>{friend.display_name.charAt(0).toUpperCase()}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-medium group-hover:text-chart-1 transition-colors">{friend.display_name}</p>
-                        <p className="text-xs text-muted-foreground font-mono">{friend.friend_code}</p>
-                      </div>
-                      <TrendingUp className="w-4 h-4 text-muted-foreground group-hover:text-chart-1 transition-colors" />
-                    </div>
-                  </Link>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="text-destructive"
-                    onClick={() => setFriendToRemove(friend)}
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
-                </div>
+                  {option.label}
+                </button>
               ))}
             </div>
+          </div>
+
+          <div className="space-y-2">
+            {ranking.map((entry) => (
+              <div
+                key={entry.id}
+                className={`flex items-center justify-between p-3 border rounded-lg transition-colors group ${
+                  entry.isSelf ? "border-chart-1/60 bg-chart-1/5" : "border-border hover:bg-accent/5"
+                }`}
+              >
+                <Link href={entry.isSelf ? "/dashboard" : `/users/${entry.id}?from=friends`} className="flex-1 min-w-0">
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={`w-7 shrink-0 text-center font-bold tabular-nums ${
+                        entry.rank === 1
+                          ? "text-yellow-500"
+                          : entry.rank === 2
+                            ? "text-slate-400"
+                            : entry.rank === 3
+                              ? "text-amber-700"
+                              : "text-muted-foreground"
+                      }`}
+                    >
+                      {entry.rank ?? "-"}
+                    </span>
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={getOptimizedAvatarUrl(entry.avatar_url, { size: 80, quality: 50 })} />
+                      <AvatarFallback>{entry.display_name.charAt(0).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0">
+                      <p className="font-medium truncate group-hover:text-chart-1 transition-colors">
+                        {entry.display_name}
+                        {entry.isSelf && <span className="ml-1 text-xs text-muted-foreground">(自分)</span>}
+                      </p>
+                      <p className="text-xs text-muted-foreground">{entry.games}戦</p>
+                    </div>
+                  </div>
+                </Link>
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`font-bold tabular-nums ${
+                      entry.games === 0
+                        ? "text-muted-foreground"
+                        : entry.points >= 0
+                          ? "text-green-500"
+                          : "text-red-500"
+                    }`}
+                  >
+                    {entry.games === 0
+                      ? "—"
+                      : entry.points >= 0
+                        ? `+${entry.points.toFixed(1)}`
+                        : entry.points.toFixed(1)}
+                  </span>
+                  {entry.isSelf ? (
+                    <TrendingUp className="w-4 h-4 text-muted-foreground" />
+                  ) : (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-destructive"
+                      onClick={() => setFriendToRemove(entry.friend!)}
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+          {localFriends.length === 0 && (
+            <p className="text-sm text-muted-foreground">まだフレンドがいません</p>
           )}
         </div>
+
       </CardContent>
 
       <AlertDialog open={Boolean(friendToRemove)} onOpenChange={(open) => !open && setFriendToRemove(null)}>

@@ -70,6 +70,39 @@ export default async function MyPage({
     }
   })
 
+  // フレンド＋自分のポイントランキング用データ
+  const rankingIds = [userId, ...friends.map((f) => f.id)]
+
+  const [resultsRes, rollupsRes] = await Promise.all([
+    supabase.from("game_results").select("user_id, point, games!inner(game_type)").in("user_id", rankingIds),
+    supabase
+      .from("user_game_rollups")
+      .select("user_id, game_type, rolled_game_count, rolled_total_points")
+      .in("user_id", rankingIds),
+  ])
+
+  const emptyStats = () => ({
+    four_player: { games: 0, points: 0 },
+    three_player: { games: 0, points: 0 },
+  })
+  const statsByUser: Record<string, ReturnType<typeof emptyStats>> = {}
+  for (const id of rankingIds) statsByUser[id] = emptyStats()
+
+  for (const row of (resultsRes.data || []) as any[]) {
+    const gameType = row.games?.game_type as "four_player" | "three_player" | undefined
+    const entry = gameType ? statsByUser[row.user_id]?.[gameType] : undefined
+    if (!entry) continue
+    entry.games += 1
+    entry.points += Number(row.point ?? 0)
+  }
+
+  for (const row of (rollupsRes.data || []) as any[]) {
+    const entry = statsByUser[row.user_id]?.[row.game_type as "four_player" | "three_player"]
+    if (!entry) continue
+    entry.games += Number(row.rolled_game_count ?? 0)
+    entry.points += Number(row.rolled_total_points ?? 0)
+  }
+
   return (
     <MyPageClient
       userId={userId}
@@ -77,6 +110,7 @@ export default async function MyPage({
       initialTab={initialTab}
       profile={profile}
       friends={friends}
+      friendStats={statsByUser}
       pendingRequests={(pendingRes.data || []) as any[]}
       sentRequests={(sentRes.data || []) as any[]}
     />

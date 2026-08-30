@@ -12,6 +12,7 @@ interface MyPageClientProps {
   initialTab: "profile" | "friends"
   profile: any
   friends: any[]
+  friendStats: Record<string, { four_player: { games: number; points: number }; three_player: { games: number; points: number } }>
   pendingRequests: any[]
   sentRequests: any[]
 }
@@ -22,6 +23,7 @@ export function MyPageClient({
   initialTab,
   profile,
   friends,
+  friendStats,
   pendingRequests,
   sentRequests,
 }: MyPageClientProps) {
@@ -65,6 +67,9 @@ export function MyPageClient({
             currentUserId={userId}
             friendCode={profile?.friend_code || ""}
             friends={friends}
+            friendStats={friendStats}
+            currentUserName={profile?.display_name || ""}
+            currentUserAvatarUrl={profile?.avatar_url || null}
             pendingRequests={pendingRequests}
             sentRequests={sentRequests}
           />
