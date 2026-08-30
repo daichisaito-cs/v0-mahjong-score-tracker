@@ -10,6 +10,7 @@ import { Users, Search, UserPlus, Check, X, Copy, Clock, TrendingUp, Mail, Troph
 import Link from "next/link"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getOptimizedAvatarUrl } from "@/lib/avatar"
+import { cn } from "@/lib/utils"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 
 type Friend = {
@@ -486,25 +487,29 @@ export function FriendSection({
             {ranking.map((entry) => (
               <div
                 key={entry.id}
-                className={`flex items-center justify-between p-3 border rounded-lg transition-colors group ${
-                  entry.isSelf ? "border-chart-1/60 bg-chart-1/5" : "border-border hover:bg-accent/5"
-                }`}
+                className={cn(
+                  "flex items-center justify-between p-3 rounded-lg transition-colors group",
+                  entry.rank === 1 && "bg-accent/20",
+                  entry.rank === 2 && "bg-secondary/50",
+                  entry.rank === 3 && "bg-muted/50",
+                  (entry.rank === null || entry.rank > 3) && "border border-border hover:bg-accent/5",
+                  entry.isSelf && "ring-1 ring-chart-1/60",
+                )}
               >
                 <Link href={entry.isSelf ? "/dashboard" : `/users/${entry.id}?from=friends`} className="flex-1 min-w-0">
                   <div className="flex items-center gap-3">
-                    <span
-                      className={`w-7 shrink-0 text-center font-bold tabular-nums ${
-                        entry.rank === 1
-                          ? "text-yellow-500"
-                          : entry.rank === 2
-                            ? "text-slate-400"
-                            : entry.rank === 3
-                              ? "text-amber-700"
-                              : "text-muted-foreground"
-                      }`}
+                    <div
+                      className={cn(
+                        "w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-sm font-bold",
+                        entry.rank === 1 && "bg-accent text-accent-foreground",
+                        entry.rank === 2 && "bg-secondary text-secondary-foreground",
+                        entry.rank === 3 && "bg-muted text-muted-foreground",
+                        (entry.rank === null || entry.rank > 3) &&
+                          "bg-background text-foreground border border-border",
+                      )}
                     >
-                      {entry.rank ?? "-"}
-                    </span>
+                      {entry.rank ?? "—"}
+                    </div>
                     <Avatar className="h-10 w-10">
                       <AvatarImage src={getOptimizedAvatarUrl(entry.avatar_url, { size: 80, quality: 50 })} />
                       <AvatarFallback>{entry.display_name.charAt(0).toUpperCase()}</AvatarFallback>
