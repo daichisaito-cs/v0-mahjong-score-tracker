@@ -73,8 +73,27 @@ export default async function MyPage({
   // フレンド＋自分のポイントランキング用データ
   const rankingIds = [userId, ...friends.map((f) => f.id)]
 
-  const [resultsRes, rollupsRes] = await Promise.all([
-    supabase.from("game_results").select("user_id, point, games!inner(game_type)").in("user_id", rankingIds),
+  // PostgRESTは1リクエスト最大1000行なので、全件取れるまでページングする
+  const fetchAllResults = async () => {
+    const pageSize = 1000
+    const rows: any[] = []
+    for (let from = 0; ; from += pageSize) {
+      const { data, error } = await supabase
+        .from("game_results")
+        .select("user_id, point, games!inner(game_type)")
+        .in("user_id", rankingIds)
+        .order("id", { ascending: true })
+        .range(from, from + pageSize - 1)
+      if (error) throw error
+      const page = data || []
+      rows.push(...page)
+      if (page.length < pageSize) break
+    }
+    return rows
+  }
+
+  const [results, rollupsRes] = await Promise.all([
+    fetchAllResults(),
     supabase
       .from("user_game_rollups")
       .select("user_id, game_type, rolled_game_count, rolled_total_points")
@@ -88,7 +107,7 @@ export default async function MyPage({
   const statsByUser: Record<string, ReturnType<typeof emptyStats>> = {}
   for (const id of rankingIds) statsByUser[id] = emptyStats()
 
-  for (const row of (resultsRes.data || []) as any[]) {
+  for (const row of results as any[]) {
     const gameType = row.games?.game_type as "four_player" | "three_player" | undefined
     const entry = gameType ? statsByUser[row.user_id]?.[gameType] : undefined
     if (!entry) continue
