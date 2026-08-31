@@ -169,7 +169,7 @@ export function DashboardContent({ displayName, results, rollups, yakumanRecords
                   dataKey="points"
                   stroke="#3b82f6"
                   strokeWidth={2}
-                  dot={{ fill: "#3b82f6", r: 4, strokeWidth: 0 }}
+                  dot={false}
                   activeDot={{ r: 6, fill: "#3b82f6" }}
                   connectNulls
                 />

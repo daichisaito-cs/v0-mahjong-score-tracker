@@ -33,7 +33,7 @@ export function PointsHistoryChart({ data, stroke }: PointsHistoryChartProps) {
           dataKey="points"
           stroke={stroke}
           strokeWidth={2}
-          dot={{ r: 4, fill: stroke, strokeWidth: 0 }}
+          dot={false}
           activeDot={{ r: 6, fill: stroke }}
           connectNulls
         />
