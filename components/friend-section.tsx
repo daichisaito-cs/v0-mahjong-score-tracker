@@ -102,7 +102,7 @@ export function FriendSection({
 
   const handleSearch = async () => {
     const rawValue = searchInputRef.current?.value || ""
-    const searchCode = rawValue.replace(/[^A-Za-z0-9]/g, "").toUpperCase().trim()
+    const searchCode = rawValue.replace(/[^A-Za-z0-9]/g, "").toUpperCase().trim().slice(0, 4)
     if (!searchCode) return
 
     // 入力欄をクリーンな値に更新
@@ -349,7 +349,7 @@ export function FriendSection({
               autoComplete="off"
               spellCheck={false}
               className="font-mono tracking-widest"
-              maxLength={8}
+              maxLength={4}
             />
             <Button onClick={handleSearch} disabled={isSearching}>
               <Search className="w-4 h-4" />
