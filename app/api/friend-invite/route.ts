@@ -1,3 +1,4 @@
+import { inviteUser } from "@/lib/neon/invite"
 import { NextResponse } from "next/server"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { createClient as createServerClient } from "@/lib/supabase/server"
@@ -15,8 +16,8 @@ function resolveBaseUrl(req: Request) {
 
 type AdminUser = {
   id: string
-  email: string | null
-  email_confirmed_at: string | null
+  email?: string | null
+  email_confirmed_at?: string | null
   deleted_at?: string | null
 }
 
@@ -67,6 +68,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "認証情報が無効です" }, { status: 403 })
     }
 
+    if (process.env.NEXT_PUBLIC_BACKEND === "neon") {
+      const normalized = email.trim().toLowerCase()
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) return NextResponse.json({ error: "メールアドレスを確認してください" }, { status: 400 })
+      await inviteUser(normalized,user.id,process.env.BETTER_AUTH_URL || new URL(req.url).origin)
+      return NextResponse.json({ message: "招待メールを送信しました" })
+    }
     if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
       return NextResponse.json({ error: "サーバー設定が不足しています" }, { status: 500 })
     }

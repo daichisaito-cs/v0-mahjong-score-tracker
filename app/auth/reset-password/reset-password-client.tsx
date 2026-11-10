@@ -1,4 +1,5 @@
 "use client"
+import { resetNeonPassword } from "@/lib/neon/client"
 
 import type React from "react"
 
@@ -32,7 +33,10 @@ export default function ResetPasswordClient() {
     const refreshToken = searchParams.get("refresh_token") || hashParams?.get("refresh_token")
     const supabase = createClient()
 
-    if (accessToken && refreshToken) {
+    if (process.env.NEXT_PUBLIC_BACKEND === "neon" && searchParams.get("token")) {
+      setHasSession(true)
+      setIsSettingSession(false)
+    } else if (accessToken && refreshToken) {
       supabase.auth
         .setSession({ access_token: accessToken, refresh_token: refreshToken })
         .then(({ error }: any) => {
@@ -82,13 +86,13 @@ export default function ResetPasswordClient() {
 
     try {
       // needs_password を落とすことで、招待未完了ユーザーの復旧も兼ねる
-      const { error } = await supabase.auth.updateUser({
+      const { error } = process.env.NEXT_PUBLIC_BACKEND === "neon" && searchParams.get("token") ? await resetNeonPassword(searchParams.get("token")!,password) : await supabase.auth.updateUser({
         password,
         data: { needs_password: false },
       })
       if (error) throw error
       setMessage("パスワードを再設定しました。ダッシュボードへ移動します。")
-      router.push("/dashboard")
+      router.push(process.env.NEXT_PUBLIC_BACKEND === "neon" ? "/auth/login" : "/dashboard")
     } catch (error) {
       setError(error instanceof Error ? error.message : "パスワードの再設定に失敗しました")
     } finally {

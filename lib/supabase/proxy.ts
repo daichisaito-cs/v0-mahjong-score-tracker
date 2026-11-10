@@ -1,7 +1,17 @@
+import { auth } from "@/lib/neon/auth"
 import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
 
 export async function updateSession(request: NextRequest) {
+  if (process.env.NEXT_PUBLIC_BACKEND === "neon") {
+    const session = await auth.api.getSession({ headers: request.headers })
+    const path = request.nextUrl.pathname
+    if (["/dashboard", "/games", "/leagues", "/mypage", "/users", "/rules"].some(p => path.startsWith(p)) && !session) {
+      return NextResponse.redirect(new URL("/auth/login", request.url))
+    }
+    if (session && ["/auth/login", "/auth/sign-up"].includes(path)) return NextResponse.redirect(new URL("/dashboard", request.url))
+    return NextResponse.next({ request })
+  }
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 

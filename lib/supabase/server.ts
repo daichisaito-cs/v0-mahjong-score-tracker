@@ -1,10 +1,13 @@
+import type { SupabaseClient } from "@supabase/supabase-js"
+import { createNeonServer } from "@/lib/neon/server"
 import { createServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
 
-export async function createClient() {
+export async function createClient(): Promise<SupabaseClient<any>> {
+  if (process.env.NEXT_PUBLIC_BACKEND === "neon") return await createNeonServer() as unknown as SupabaseClient<any>
   const cookieStore = await cookies()
 
-  return createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+  return createServerClient<any>(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
     cookies: {
       getAll() {
         return cookieStore.getAll()

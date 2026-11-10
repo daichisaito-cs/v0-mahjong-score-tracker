@@ -6,3 +6,6 @@ node_modules/
 .pnpm-store/
 tsconfig.tsbuildinfo
 .vercel
+
+.env*
+!.env.example

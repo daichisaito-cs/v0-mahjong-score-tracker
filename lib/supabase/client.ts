@@ -1,13 +1,16 @@
+import type { SupabaseClient } from "@supabase/supabase-js"
+import { createNeonClient } from "@/lib/neon/client"
 import { createBrowserClient } from "@supabase/ssr"
 
-let client: ReturnType<typeof createBrowserClient> | null = null
+let client: SupabaseClient<any> | null = null
 
-export function createClient() {
+export function createClient(): SupabaseClient<any> {
+  if (process.env.NEXT_PUBLIC_BACKEND === "neon") return createNeonClient() as unknown as SupabaseClient<any>
   if (typeof window !== "undefined" && client) {
     return client
   }
 
-  const newClient = createBrowserClient(
+  const newClient = createBrowserClient<any>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {

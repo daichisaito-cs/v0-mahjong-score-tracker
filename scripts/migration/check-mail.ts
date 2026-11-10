@@ -1,0 +1,2 @@
+import {loadEnvFile} from 'node:process'
+async function main(){loadEnvFile('.env.local');const {sendAuthEmail}=await import('../../lib/neon/mail');await sendAuthEmail('delivered@resend.dev','Janki 移行テスト','https://v0-mahjong-score-tracker-phi.vercel.app/auth/login');console.log('PASS dedicated sending key and verified sender');process.exit(0)}main().catch(e=>{console.error(e.message);process.exit(1)})

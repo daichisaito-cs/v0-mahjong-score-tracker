@@ -1,8 +1,10 @@
-import { createClient } from "@supabase/supabase-js"
+import { createNeonAdmin } from "@/lib/neon/admin"
+import { createClient, type SupabaseClient } from "@supabase/supabase-js"
 
-let adminClient: ReturnType<typeof createClient> | null = null
+let adminClient: SupabaseClient<any> | null = null
 
-export function createAdminClient() {
+export function createAdminClient(): SupabaseClient<any> {
+  if (process.env.NEXT_PUBLIC_BACKEND === "neon") return createNeonAdmin() as unknown as SupabaseClient<any>
   if (adminClient) {
     return adminClient
   }
@@ -11,7 +13,7 @@ export function createAdminClient() {
     throw new Error("SUPABASE_SERVICE_ROLE_KEY is not set")
   }
 
-  adminClient = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY, {
+  adminClient = createClient<any>(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY, {
     auth: {
       persistSession: false,
       autoRefreshToken: false,
