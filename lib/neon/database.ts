@@ -54,9 +54,20 @@ export async function executeQuery(plan:QueryPlan,userId:string|null,admin=false
  statement=`SELECT ${select} AS row FROM public.${ident(plan.table)} t${where?' WHERE '+where:''}${order?' ORDER BY '+order:''} LIMIT ${bind(Math.min(plan.limit??10000,10000))} OFFSET ${bind(plan.offset??0)}`
  }else{
  const values=Array.isArray(plan.values)?plan.values:[plan.values]
- if(plan.action==='insert'){
+ if(plan.action==='insert'||plan.action==='upsert'){
  if(!values.length){await client.query('ROLLBACK');return {data:[],error:null}}
- const columns=Object.keys(values[0]);statement=`INSERT INTO public.${ident(plan.table)} (${columns.map(ident)}) VALUES ${values.map(v=>'('+columns.map(c=>bind(v[c]??null)).join(',')+')').join(',')} RETURNING to_jsonb(${ident(plan.table)}.*) AS row`
+ const columns = Object.keys(values[0])
+ let conflict = ''
+ if (plan.action === 'upsert') {
+  const options = plan.upsertOptions
+  if (options?.ignoreDuplicates !== true || typeof options.onConflict !== 'string') {
+   throw Error('Upsert requires a conflict target and ignoreDuplicates: true')
+  }
+  const conflictColumns = options.onConflict.split(',').map(column => ident(column.trim()))
+  conflict = ` ON CONFLICT (${conflictColumns.join(',')}) DO NOTHING`
+ }
+ const placeholders = values.map(row => '(' + columns.map(column => bind(row[column] ?? null)).join(',') + ')')
+ statement = `INSERT INTO public.${ident(plan.table)} (${columns.map(ident)}) VALUES ${placeholders.join(',')}${conflict} RETURNING to_jsonb(${ident(plan.table)}.*) AS row`
  }else if(plan.action==='update'){
  if(!where)throw Error('Update filter required')
  statement=`UPDATE public.${ident(plan.table)} t SET ${Object.keys(plan.values).map(k=>ident(k)+'='+bind(plan.values[k])).join(',')} WHERE ${where} RETURNING to_jsonb(t.*) AS row`

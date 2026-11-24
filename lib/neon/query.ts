@@ -1,9 +1,17 @@
-export type QueryPlan = { table: string; action: string; values?: any; select?: string; filters: any[]; orders: any[]; limit?: number; offset?: number; single?: string }
+type UpsertOptions = { onConflict: string; ignoreDuplicates: true }
+
+export type QueryPlan = { table: string; action: string; values?: any; upsertOptions?: UpsertOptions; select?: string; filters: any[]; orders: any[]; limit?: number; offset?: number; single?: string }
 export class Query implements PromiseLike<any> {
   plan: QueryPlan
   constructor(table: string, private execute: (plan: QueryPlan) => Promise<any>) { this.plan={table,action:'select',filters:[],orders:[]} }
   select(select='*') { this.plan.select=select; return this }
   insert(values:any) { this.plan.action='insert';this.plan.values=values;return this }
+  upsert(values: any, options: UpsertOptions) {
+    this.plan.action = 'upsert'
+    this.plan.values = values
+    this.plan.upsertOptions = options
+    return this
+  }
   update(values:any) { this.plan.action='update';this.plan.values=values;return this }
   delete() { this.plan.action='delete';return this }
   eq(key:string,value:any) { this.plan.filters.push({key,op:'eq',value});return this }
